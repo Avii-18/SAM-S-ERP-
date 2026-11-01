@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    border-color: rgba(226, 232, 240, 0.8);
+  }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.45);
+}
+
+/* Theme Utilities */
+:root {
+  --sand-primary: #F5F0E8;
+  --ivory-secondary: #F2EDE5;
+  --card-white: #FFFFFF;
+  --charcoal-primary: #27332F;
+  --bronze-secondary: #826B52;
+  --gold-accent: #B69A70;
+  --border-warm: #E2D8CB;
+  --text-primary: #27332F;
+  --text-secondary: #77746D;
+  --text-muted: #9A958C;
+  --func-success: #43856B;
+  --func-warning: #C18A43;
+  --func-danger: #B85C50;
+  --func-info: #66869A;
+}
+
+.theme-light {
+  --bg-main: #F5F0E8;
+  --bg-card: #FFFFFF;
+  --text-main: #27332F;
+  --text-muted: #77746D;
+  --border-card: #E2D8CB;
+  --sidebar-bg: #27332F;
+}
+
+.theme-dark {
+  --bg-main: #091217;
+  --bg-card: #0f1c24;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-card: #1e2f3b;
+  --sidebar-bg: #061c18;
+}
+
+.card-light {
+  background-color: #FFFFFF;
+  border: 1px solid #E2D8CB;
+  box-shadow: 0 1px 3px rgba(39, 51, 47, 0.04), 0 4px 12px rgba(130, 107, 82, 0.04);
+}
+
+.card-dark {
+  background-color: #0d1a22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Tree-line hierarchy styling for sidebar navigation */
+.tree-branch-container {
+  position: relative;
+}
+.tree-branch-container::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 0;
+  bottom: 12px;
+  width: 1px;
+  background-color: rgba(182, 154, 112, 0.35);
+}
+
+.tree-branch-item {
+  position: relative;
+}
+.tree-branch-item::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  width: 12px;
+  height: 1px;
+  background-color: rgba(182, 154, 112, 0.35);
+}
+
+/* Sidebar interactive hover transitions & subtle border animations */
+aside button {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+aside button:hover {
+  will-change: transform, border-color, box-shadow;
+}
+
+/* =========================================================================
+   COMPREHENSIVE WARM SANDSTONE + LUXURY CORPORATE THEME OVERRIDES
+   Applies to main content, submodules, cards, tables, inputs, and modals
+   ========================================================================= */
+
+.theme-light main,
+.theme-light .glass-panel,
+.theme-light .modal-panel {
+  color: #27332F;
+}
+
+/* Glass panel cards become crisp luxury white cards with warm borders */
+.theme-light .glass-panel {
+  background-color: #FFFFFF !important;
+  border-color: #E2D8CB !important;
+  box-shadow: 0 1px 3px rgba(39, 51, 47, 0.03), 0 4px 14px rgba(130, 107, 82, 0.04) !important;
+  color: #27332F;
+}
+
+/* Outer workspace background */
+.theme-light main .bg-slate-950 {
+  background-color: #F5F0E8 !important;
+  color: #27332F !important;
+}
+
+/* Card surfaces */
+.theme-light main .bg-slate-900,
+.theme-light main .bg-slate-900\/95,
+.theme-light main .bg-slate-900\/90,
+.theme-light main .bg-slate-900\/80,
+.theme-light main .bg-slate-900\/70 {
+  background-color: #FFFFFF !important;
+  border-color: #E2D8CB !important;
+  color: #27332F !important;
+}
+
+/* Inner cards, sub-panels, and scorecard boxes */
+.theme-light main .bg-slate-900\/60,
+.theme-light main .bg-slate-900\/50,
+.theme-light main .bg-slate-900\/40,
+.theme-light main .bg-slate-900\/30,
+.theme-light main .bg-slate-900\/20,
+.theme-light main .bg-slate-850,
+.theme-light main .bg-slate-800,
+.theme-light main .bg-slate-800\/80,
+.theme-light main .bg-slate-800\/70,
+.theme-light main .bg-slate-800\/60,
+.theme-light main .bg-slate-800\/50,
+.theme-light main .bg-slate-800\/40,
+.theme-light main .bg-slate-800\/30,
+.theme-light main .bg-slate-800\/20,
+.theme-light main .bg-slate-950\/80,
+.theme-light main .bg-slate-950\/70,
+.theme-light main .bg-slate-950\/60,
+.theme-light main .bg-slate-950\/50,
+.theme-light main .bg-slate-950\/40,
+.theme-light main .bg-slate-950\/30,
+.theme-light main .bg-slate-950\/20 {
+  background-color: #F2EDE5 !important;
+  border-color: #E2D8CB !important;
+  color: #27332F !important;
+}
+
+/* Dark hover states */
+.theme-light main .hover\:bg-slate-800:hover,
+.theme-light main .hover\:bg-slate-800\/60:hover,
+.theme-light main .hover\:bg-slate-800\/50:hover,
+.theme-light main .hover\:bg-slate-800\/40:hover,
+.theme-light main .hover\:bg-slate-900:hover,
+.theme-light main .hover\:bg-slate-900\/80:hover {
+  background-color: #EAE3D6 !important;
+}
+
+/* All borders */
+.theme-light main .border-slate-800,
+.theme-light main .border-slate-800\/80,
+.theme-light main .border-slate-800\/60,
+.theme-light main .border-slate-800\/40,
+.theme-light main .border-slate-800\/20,
+.theme-light main .border-slate-700,
+.theme-light main .border-slate-700\/60,
+.theme-light main .border-slate-700\/40,
+.theme-light main .border-slate-900,
+.theme-light main .border-slate-900\/60 {
+  border-color: #E2D8CB !important;
+}
+
+/* Typography mappings */
+.theme-light main .text-slate-100,
+.theme-light main .text-slate-200 {
+  color: #27332F !important;
+}
+
+/* Preserve crisp pure white text for hero banners, dark overlays, and dark buttons */
+.theme-light main .text-white,
+.theme-light main [data-theme-text="white"] {
+  color: #FFFFFF !important;
+}
+
+.theme-light main .text-slate-300,
+.theme-light main .text-slate-400 {
+  color: #77746D !important;
+}
+
+.theme-light main .text-slate-500,
+.theme-light main .text-slate-600 {
+  color: #9A958C !important;
+}
+
+/* Functional colors */
+.theme-light main .text-emerald-400,
+.theme-light main .text-emerald-500,
+.theme-light main .text-teal-400,
+.theme-light main .text-teal-500 {
+  color: #43856B !important;
+}
+
+.theme-light main .text-amber-400,
+.theme-light main .text-amber-500,
+.theme-light main .text-yellow-400 {
+  color: #C18A43 !important;
+}
+
+.theme-light main .text-rose-400,
+.theme-light main .text-rose-500,
+.theme-light main .text-red-400,
+.theme-light main .text-red-500 {
+  color: #B85C50 !important;
+}
+
+.theme-light main .text-blue-400,
+.theme-light main .text-blue-500,
+.theme-light main .text-indigo-400,
+.theme-light main .text-cyan-400 {
+  color: #66869A !important;
+}
+
+/* Form inputs, selects & textareas in light mode */
+.theme-light main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.theme-light main select,
+.theme-light main textarea {
+  background-color: #FFFFFF !important;
+  border-color: #E2D8CB !important;
+  color: #27332F !important;
+  box-shadow: 0 1px 2px rgba(39, 51, 47, 0.03) !important;
+}
+
+.theme-light main input::placeholder,
+.theme-light main textarea::placeholder {
+  color: #9A958C !important;
+}
+
+.theme-light main input:focus,
+.theme-light main select:focus,
+.theme-light main textarea:focus {
+  border-color: #B69A70 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(182, 154, 112, 0.25) !important;
+}
+
+/* Tables inside main */
+.theme-light main table thead tr,
+.theme-light main table thead th {
+  background-color: #F2EDE5 !important;
+  color: #77746D !important;
+  border-color: #E2D8CB !important;
+}
+
+.theme-light main table tbody tr {
+  border-color: #E2D8CB !important;
+}
+
+.theme-light main table tbody tr:hover {
+  background-color: #F9F6F0 !important;
+}
+
+/* Submodule horizontal tab strips */
+.theme-light main .overflow-x-auto.p-1.glass-panel,
+.theme-light main .overflow-x-auto.p-1.bg-slate-900,
+.theme-light main .overflow-x-auto.p-1.bg-slate-950 {
+  background-color: #F2EDE5 !important;
+  border-color: #E2D8CB !important;
+}
+
+/* Active tab button styling in light mode */
+.theme-light main .overflow-x-auto button.bg-blue-600,
+.theme-light main .overflow-x-auto button.bg-emerald-600,
+.theme-light main .overflow-x-auto button.bg-teal-600,
+.theme-light main .overflow-x-auto button.bg-indigo-600,
+.theme-light main .overflow-x-auto button.bg-cyan-600 {
+  background-color: #27332F !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 6px rgba(39, 51, 47, 0.15) !important;
+}
+
+.theme-light main .overflow-x-auto button:not(.bg-blue-600):not(.bg-emerald-600):not(.bg-teal-600):not(.bg-indigo-600):not(.bg-cyan-600) {
+  color: #77746D !important;
+}
+
+.theme-light main .overflow-x-auto button:not(.bg-blue-600):not(.bg-emerald-600):not(.bg-teal-600):not(.bg-indigo-600):not(.bg-cyan-600):hover {
+  background-color: #E6DFC5 !important;
+  color: #27332F !important;
+}
+
+/* Buttons in main */
+.theme-light main button.bg-teal-600,
+.theme-light main button.bg-teal-500,
+.theme-light main button.bg-blue-600,
+.theme-light main button.bg-emerald-600 {
+  background-color: #27332F !important;
+  color: #FFFFFF !important;
+  border: 1px solid #27332F !important;
+}
+
+.theme-light main button.bg-teal-600:hover,
+.theme-light main button.bg-teal-500:hover,
+.theme-light main button.bg-blue-600:hover,
+.theme-light main button.bg-emerald-600:hover {
+  background-color: #384842 !important;
+}
+
+/* Print styling */
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white !important; color: black !important; font-size: 10pt; }
+}
+.print-only { display: none; }
