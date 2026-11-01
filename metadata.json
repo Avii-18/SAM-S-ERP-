@@ -1,0 +1,8 @@
+{
+  "name": "Remix Dubai \u0026 UAE Comprehensive Construction ERP",
+  "description": "Unified enterprise construction ERP platform featuring Office Management, Site Management, CRM, and AI Tools with full UAE compliance, PMO controls, commercial QS, procurement, finance, and HR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
