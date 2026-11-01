@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharjah Construction HR, Admin & Labour Compliance Suite (200+ Enterprise Scale)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        hr: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            indigo: '#4f46e5',
+                            indigoHover: '#4338ca',
+                            emerald: '#059669',
+                            amber: '#d97706',
+                            rose: '#e11d48',
+                            blue: '#2563eb',
+                            teal: '#0d9488'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; font-size: 10pt; }
+        }
+        .print-only { display: none; }
+        .active-tab {
+            border-bottom: 3px solid #0d9488;
+            color: #0d9488;
+            font-weight: 700;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .modal-bg {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- HEADER BAR -->
+    <header class="bg-hr-900 text-white shadow-md no-print border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-600 to-emerald-500 p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-passport text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight leading-tight flex items-center gap-2">
+                        UAE HR, Admin & Labour Compliance Suite
+                        <span id="activeFormatBadge" class="bg-teal-900 text-teal-300 text-[10px] px-2.5 py-0.5 rounded-full font-semibold border border-teal-700">
+                            Sharjah Enterprise Framework (200+ Workforce)
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-400">MoHRE Quotas • Work Visas & EID • WPS SIF Payroll • Gratuity (EOSB) • Saja'a Labour Camp • Real-Time Monitoring</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center space-x-3 text-sm">
+                <!-- Active Project Selector -->
+                <div class="bg-hr-800 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center space-x-2">
+                    <i class="fa-solid fa-building text-hr-blue text-xs"></i>
+                    <span class="text-xs text-slate-300 font-medium">Project:</span>
+                    <select id="projectSelect" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer text-xs" onchange="switchProject(this.value)">
+                        <!-- Dynamic Options -->
+                    </select>
+                </div>
+
+                <button onclick="openNewProjectModal()" class="bg-hr-teal hover:bg-teal-700 text-white font-medium px-3 py-1.5 rounded-lg transition text-xs flex items-center gap-1.5 shadow">
+                    <i class="fa-solid fa-plus"></i> New Site
+                </button>
+
+                <!-- Data Backup & Restore -->
+                <div class="flex items-center space-x-1 border-l border-slate-700 pl-2">
+                    <button onclick="exportHRJSON()" title="Export Backup JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <label title="Import Backup JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2 rounded-lg text-xs cursor-pointer transition">
+                        <i class="fa-solid fa-upload"></i>
+                        <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importHRJSON(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white border-b border-slate-200 no-print sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-6 text-sm custom-scrollbar">
+            <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap active-tab">
+                <i class="fa-solid fa-chart-pie"></i> 1. Executive HR Dashboard
+            </button>
+            <button onclick="switchTab('tab-setup')" id="btn-tab-setup" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-sliders"></i> 2. Benchmark Coefficients
+            </button>
+            <button onclick="switchTab('tab-recruitment')" id="btn-tab-recruitment" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-user-plus"></i> 3. Recruitment & MoHRE Quotas
+            </button>
+            <button onclick="switchTab('tab-visas')" id="btn-tab-visas" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-id-card"></i> 4. Visas, EID, MoHRE & Passports
+            </button>
+            <button onclick="switchTab('tab-wps')" id="btn-tab-wps" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-money-check-dollar"></i> 5. WPS Payroll & EOSB Engine
+            </button>
+            <button onclick="switchTab('tab-welfare')" id="btn-tab-welfare" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-campground"></i> 6. Saja'a Labour Camp & Welfare
+            </button>
+            <button onclick="switchTab('tab-assets')" id="btn-tab-assets" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-laptop-house"></i> 7. Site Office Assets & Pickups
+            </button>
+            <button onclick="switchTab('tab-folders')" id="btn-tab-folders" class="nav-tab py-3 px-1 flex items-center gap-2 text-slate-600 hover:text-hr-teal whitespace-nowrap">
+                <i class="fa-solid fa-folder-tree"></i> 8. Directory Structure
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN WORKSPACE -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- 1. EXECUTIVE HR DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content block space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">Total Manpower</span>
+                    <span id="kpi-total-staff" class="text-2xl font-extrabold text-hr-900 block mt-1">215</span>
+                    <span id="kpi-staff-sub" class="text-[10px] text-slate-400 block mt-0.5">Direct & Indirect Staff</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">MoHRE Quota Approval</span>
+                    <span id="kpi-open-reqs" class="text-2xl font-extrabold text-hr-blue block mt-1">250</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Approved Work Permits</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">Visas Expiring (&lt;30d)</span>
+                    <span id="kpi-expiring-visas" class="text-2xl font-extrabold text-hr-amber block mt-1">4</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Renewal Priority</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">Expired Credentials</span>
+                    <span id="kpi-expired-visas" class="text-2xl font-extrabold text-hr-rose block mt-1">1</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">MoHRE Fine Risk</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">Saja'a Camp Occupancy</span>
+                    <span id="kpi-camp-occ" class="text-2xl font-extrabold text-hr-emerald block mt-1">82%</span>
+                    <span id="kpi-camp-sub" class="text-[10px] text-slate-400 block mt-0.5">205 / 250 Beds Occupied</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[11px] text-slate-500 block font-semibold uppercase tracking-wider">WPS Salary Compliance</span>
+                    <span id="kpi-wps-rate" class="text-2xl font-extrabold text-teal-700 block mt-1">100%</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Monthly MoHRE SIF Transfer</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-hr-teal"></i> Manpower Distribution vs Benchmark (200+ Enterprise Scale)
+                        </h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Site Headcount</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chart-dept-allocation"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-hr-amber"></i> MoHRE, Visa & Gate Pass Health
+                        </h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Compliance Log</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chart-visa-status"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SETUP & PARAMETRIC COEFFICIENTS -->
+        <section id="tab-setup" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">2. UAE Project Configuration & Staffing Parametric Engine</h2>
+                        <p class="text-xs text-slate-500">Configure site BUA, duration, and peak workforce (200+ scale) to calculate overhead requirements.</p>
+                    </div>
+                    <span class="bg-teal-50 text-teal-800 text-xs px-3 py-1 rounded-full font-semibold border border-teal-300">Framework: UAE Federal Decree-Law No. 33</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Project Name</label>
+                        <input type="text" id="cfg-name" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none" onchange="updateProjectConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Project Reference Code</label>
+                        <input type="text" id="cfg-code" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none" onchange="updateProjectConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Location / Zone</label>
+                        <input type="text" id="cfg-location" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none" onchange="updateProjectConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Built-Up Area (BUA Sq.Ft)</label>
+                        <input type="number" id="cfg-bua" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none font-bold" onchange="updateProjectConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Project Duration (Months)</label>
+                        <input type="number" id="cfg-duration" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none" onchange="updateProjectConfig()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Peak Workforce Headcount</label>
+                        <input type="number" id="cfg-peakLabour" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-hr-teal outline-none font-bold text-hr-blue" onchange="updateProjectConfig()">
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-bold text-hr-900 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-hr-amber"></i> Overhead Staff Benchmark Coefficients (200+ Manpower)
+                        </h3>
+                        <button onclick="autoGenerateParametricStaffing()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-bolt"></i> Auto-Generate MoHRE Visa Requisitions
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 text-center">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">Project Managers</span>
+                            <span id="bench-pm" class="font-bold text-sm text-hr-900">2</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">Site Engineers</span>
+                            <span id="bench-engineers" class="font-bold text-sm text-hr-900">14</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">MoHRE HSE Officers</span>
+                            <span id="bench-hse" class="font-bold text-sm text-hr-amber">3</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">QA/QC Inspectors</span>
+                            <span id="bench-qaqc" class="font-bold text-sm text-hr-blue">9</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">Store Keepers</span>
+                            <span id="bench-stores" class="font-bold text-sm text-slate-700">3</span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 block font-medium">PRO & Site Admin</span>
+                            <span id="bench-hr" class="font-bold text-sm text-hr-emerald">2</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. RECRUITMENT & TALENT PIPELINE -->
+        <section id="tab-recruitment" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">3. MoHRE Work Permits, Quotas & Overseas Recruitment</h2>
+                        <p class="text-xs text-slate-500">Track candidates, MoHRE quota approvals, offer letters, and entry permit issuance for 200+ manpower scale.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openCandidateModal()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Candidate Requisition
+                        </button>
+                        <button onclick="exportRecruitmentCSV()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs px-3 py-2 rounded-lg font-medium shadow flex items-center gap-1">
+                            <i class="fa-solid fa-file-csv"></i> Export Recruitment CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Candidate Name</th>
+                                <th class="p-2.5">Target Designation</th>
+                                <th class="p-2.5">MoHRE Category</th>
+                                <th class="p-2.5">Nationality</th>
+                                <th class="p-2.5">Gross Pay (<span class="currency-label">AED</span>)</th>
+                                <th class="p-2.5">Stage</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recruitment-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Candidate Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. VISAS, PERMITS & MOBILITY TRACKER -->
+        <section id="tab-visas" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">4. Expat Residency Visas, Emirates ID (EID) & Sharjah Gate Passes</h2>
+                        <p class="text-xs text-slate-500">Monitor passport, residency visa, EID card, labour card, and Sharjah Municipality gate pass renewals.</p>
+                    </div>
+                    <button onclick="openVisaModal()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Add Credential Record
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Employee Name</th>
+                                <th class="p-2.5">Passport #</th>
+                                <th class="p-2.5">Credential / Visa Type</th>
+                                <th class="p-2.5">Ref / EID Card #</th>
+                                <th class="p-2.5">Expiry Date</th>
+                                <th class="p-2.5">Days Left</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visas-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Visa Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. WPS PAYROLL & EOSB CALCULATOR -->
+        <section id="tab-wps" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">5. UAE Wages Protection System (WPS) & EOSB Gratuity Engine</h2>
+                        <p class="text-xs text-slate-500">Generate MoHRE compliant SIF salary file transfers, overtime, and Federal Law EOSB end of service gratuity calculations.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openWPSModal()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Employee Payroll Record
+                        </button>
+                        <button onclick="exportWPSFile()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-2 rounded-lg font-medium shadow flex items-center gap-1">
+                            <i class="fa-solid fa-file-invoice"></i> Export SIF Payroll File
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Employee Name</th>
+                                <th class="p-2.5">Labor Card #</th>
+                                <th class="p-2.5">Basic Salary (<span class="currency-label">AED</span>)</th>
+                                <th class="p-2.5">Allowances</th>
+                                <th class="p-2.5">Overtime Pay</th>
+                                <th class="p-2.5">Gross Pay</th>
+                                <th class="p-2.5">Service Yrs</th>
+                                <th class="p-2.5">Accrued EOSB Gratuity</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wps-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic WPS Payroll Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. STAFF WELFARE & CAMP ACCOMMODATIONS -->
+        <section id="tab-welfare" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">6. Saja'a Industrial Area Labour Camp, Midday Break & Welfare Log</h2>
+                        <p class="text-xs text-slate-500">Manage Saja'a camp capacity for 200+ workers, MoHRE summer midday break compliance (12:30 PM - 3:00 PM), AC bus transport, and medical health logs.</p>
+                    </div>
+                    <button onclick="openCampModal()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Add Camp Block / Welfare Log
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Camp / Facility Name</th>
+                                <th class="p-2.5">Location / Zone</th>
+                                <th class="p-2.5">Bed Capacity</th>
+                                <th class="p-2.5">Occupancy</th>
+                                <th class="p-2.5">Rate</th>
+                                <th class="p-2.5">MoHRE Audit Status</th>
+                                <th class="p-2.5">Transport Allocation</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="welfare-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Welfare Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. SITE ASSETS & OFFICE INFRASTRUCTURE -->
+        <section id="tab-assets" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">7. Site Office Assets, Vehicles & Surveying Equipment Log</h2>
+                        <p class="text-xs text-slate-500">Track site laptops, Leica Total Stations, site pickups, DG sets, PPE kits, and walkie-talkies.</p>
+                    </div>
+                    <button onclick="openAssetModal()" class="bg-hr-teal hover:bg-teal-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Register Site Asset
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Asset Code</th>
+                                <th class="p-2.5">Description</th>
+                                <th class="p-2.5">Category</th>
+                                <th class="p-2.5">Assigned Staff / Dept</th>
+                                <th class="p-2.5">Condition</th>
+                                <th class="p-2.5">Maintenance Due</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assets-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Asset Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. VIRTUAL HR DIRECTORY -->
+        <section id="tab-folders" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                    <div>
+                        <h2 class="text-lg font-bold text-hr-900">8. Virtual Sharjah HR Directory Tree</h2>
+                        <p class="text-xs text-slate-500">Project HR folder directory for <span id="folder-active-name" class="font-bold text-hr-teal">Active Project</span>.</p>
+                    </div>
+                    <button onclick="window.print()" class="bg-hr-900 hover:bg-slate-800 text-white text-xs px-3.5 py-2 rounded-lg font-medium shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Print Executive Summary
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 font-mono text-xs space-y-3">
+                    <div class="flex items-center text-hr-900 font-bold text-sm">
+                        <i class="fa-solid fa-folder-open text-amber-500 mr-2"></i> 📁 [<span id="folder-root-dir">Sharjah_Project_HR_Directory</span>]
+                    </div>
+
+                    <div class="ml-6 space-y-3 border-l-2 border-slate-300 pl-4 text-xs text-slate-700 font-sans">
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 01_MoHRE_Quota_and_Setup
+                            </div>
+                            <div class="ml-6 text-slate-500 space-y-1 mt-1">
+                                <div>📄 Parametric_Staffing_Baseline_200.json</div>
+                                <div>📄 MoHRE_Quota_Approval_Certificates.pdf</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 02_Visas_EmiratesID_Passports
+                            </div>
+                            <div class="ml-6 text-slate-500 space-y-1 mt-1">
+                                <div>📄 Residency_Visa_and_EID_Expiry_Tracker.csv</div>
+                                <div>📄 Sharjah_Municipality_Gate_Passes.pdf</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 03_WPS_Payroll_and_EOSB
+                            </div>
+                            <div class="ml-6 text-slate-500 space-y-1 mt-1">
+                                <div>📄 Monthly_WPS_SIF_Payroll_Files.csv</div>
+                                <div>📄 End_of_Service_Gratuity_Ledger.pdf</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 04_Saja_Camp_and_Welfare
+                            </div>
+                            <div class="ml-6 text-slate-500 space-y-1 mt-1">
+                                <div>📄 Saja_Camp_Occupancy_and_Sanitation.pdf</div>
+                                <div>📄 MoHRE_Summer_Midday_Break_Log.pdf</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALS -->
+    <!-- Modal: New Project -->
+    <div id="modalNewProject" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Create New Sharjah Site</h3>
+                <button onclick="closeModal('modalNewProject')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Project Name</label>
+                    <input type="text" id="m-proj-name" class="w-full border rounded-lg p-2 outline-none focus:ring-2 focus:ring-hr-teal" placeholder="e.g. Muwaileh Commercial Tower">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Built-Up Area (BUA Sq.Ft)</label>
+                    <input type="number" id="m-proj-bua" class="w-full border rounded-lg p-2 font-bold" placeholder="e.g. 350000">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Peak Manpower Scale</label>
+                    <input type="number" id="m-proj-peak" class="w-full border rounded-lg p-2 font-bold text-hr-blue" placeholder="e.g. 250">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalNewProject')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveNewProjectModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Candidate -->
+    <div id="modalCandidate" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Add Candidate / MoHRE Quota Requisition</h3>
+                <button onclick="closeModal('modalCandidate')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Candidate Name</label>
+                    <input type="text" id="m-cand-name" class="w-full border rounded-lg p-2" placeholder="e.g. Tariq Mansoor">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Target Designation</label>
+                    <input type="text" id="m-cand-role" class="w-full border rounded-lg p-2" placeholder="e.g. Sr. Site Engineer">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">MoHRE Category</label>
+                    <select id="m-cand-dept" class="w-full border rounded-lg p-2">
+                        <option value="Project Engineering">Project Engineering</option>
+                        <option value="HSE & Safety">HSE & Safety</option>
+                        <option value="QA/QC Inspection">QA/QC Inspection</option>
+                        <option value="PRO & Site Admin">PRO & Site Admin</option>
+                        <option value="Stores & Logistics">Stores & Logistics</option>
+                        <option value="Site Masons & Steel Fixers">Site Masons & Steel Fixers</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Nationality</label>
+                    <input type="text" id="m-cand-qual" class="w-full border rounded-lg p-2" placeholder="e.g. Indian / Egyptian">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Gross Pay (<span class="currency-label">AED</span>)</label>
+                    <input type="number" id="m-cand-salary" class="w-full border rounded-lg p-2 font-bold" placeholder="12000">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Stage</label>
+                    <select id="m-cand-stage" class="w-full border rounded-lg p-2 font-semibold">
+                        <option value="Applied">Applied</option>
+                        <option value="MoHRE Approved">MoHRE Approved</option>
+                        <option value="Offer Issued">Offer Issued</option>
+                        <option value="Onboarded">Onboarded</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalCandidate')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveCandidateModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Save Candidate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Credential -->
+    <div id="modalVisa" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Log Visas, EID, Permits or Credentials</h3>
+                <button onclick="closeModal('modalVisa')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Employee Name</label>
+                    <input type="text" id="m-visa-emp" class="w-full border rounded-lg p-2" placeholder="e.g. Amil Solanki">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Passport Number</label>
+                    <input type="text" id="m-visa-ppt" class="w-full border rounded-lg p-2 font-mono" placeholder="Z9876543">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Credential Type</label>
+                    <select id="m-visa-type" class="w-full border rounded-lg p-2">
+                        <option value="Residency Visa">Residency Visa</option>
+                        <option value="Emirates ID (EID)">Emirates ID (EID)</option>
+                        <option value="MoHRE Labor Card">MoHRE Labor Card</option>
+                        <option value="Sharjah Gate Pass">Sharjah Gate Pass</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Ref # / EID Card #</label>
+                    <input type="text" id="m-visa-ref" class="w-full border rounded-lg p-2 font-mono" placeholder="784-1985-1234567-1">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Issue Date</label>
+                    <input type="date" id="m-visa-issue" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Expiry Date</label>
+                    <input type="date" id="m-visa-exp" class="w-full border rounded-lg p-2 font-bold">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalVisa')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveVisaModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: WPS Payroll -->
+    <div id="modalWPS" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Add WPS Salary & EOSB Record</h3>
+                <button onclick="closeModal('modalWPS')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Employee Name</label>
+                    <input type="text" id="m-wps-emp" class="w-full border rounded-lg p-2" placeholder="e.g. Amil Solanki">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Labor Card Number</label>
+                    <input type="text" id="m-wps-card" class="w-full border rounded-lg p-2 font-mono" placeholder="LC-778811">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Basic Salary (<span class="currency-label">AED</span>)</label>
+                    <input type="number" id="m-wps-basic" class="w-full border rounded-lg p-2 font-bold" placeholder="13200">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Allowances (<span class="currency-label">AED</span>)</label>
+                    <input type="number" id="m-wps-allow" class="w-full border rounded-lg p-2 font-bold" placeholder="8800">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Overtime Pay (<span class="currency-label">AED</span>)</label>
+                    <input type="number" id="m-wps-ot" class="w-full border rounded-lg p-2 font-bold" placeholder="0">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Years of Service (for EOSB)</label>
+                    <input type="number" step="0.1" id="m-wps-years" class="w-full border rounded-lg p-2 font-bold" placeholder="3.5">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalWPS')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveWPSModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Save Payroll Line</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Camp Record -->
+    <div id="modalCamp" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Add Saja'a Camp Accommodation Block</h3>
+                <button onclick="closeModal('modalCamp')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Camp Facility Name</label>
+                    <input type="text" id="m-camp-name" class="w-full border rounded-lg p-2" placeholder="Saja'a Block A - Labour Camp">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Location Zone</label>
+                    <input type="text" id="m-camp-loc" class="w-full border rounded-lg p-2" placeholder="Saja'a Industrial Zone, Sharjah">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Bed Capacity</label>
+                    <input type="number" id="m-camp-cap" class="w-full border rounded-lg p-2 font-bold" placeholder="250">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Occupied Beds</label>
+                    <input type="number" id="m-camp-occ" class="w-full border rounded-lg p-2 font-bold text-hr-teal" placeholder="205">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Sanitation & MoHRE Audit</label>
+                    <select id="m-camp-san" class="w-full border rounded-lg p-2">
+                        <option value="Passed MoHRE Audit">Passed MoHRE Audit</option>
+                        <option value="Minor Remarks">Minor Remarks</option>
+                        <option value="Action Pending">Action Pending</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Transport Route</label>
+                    <input type="text" id="m-camp-trans" class="w-full border rounded-lg p-2" placeholder="4x 60-Seater AC Buses to Aljada">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalCamp')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveCampModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Save Block</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Register Asset -->
+    <div id="modalAsset" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-base text-slate-800">Register Site Office Asset / Vehicle</h3>
+                <button onclick="closeModal('modalAsset')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Asset Code</label>
+                    <input type="text" id="m-asset-code" class="w-full border rounded-lg p-2 font-mono" placeholder="AST-LAP-001">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Description</label>
+                    <input type="text" id="m-asset-desc" class="w-full border rounded-lg p-2" placeholder="Dell i7 CAD Workstation">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Category</label>
+                    <select id="m-asset-cat" class="w-full border rounded-lg p-2">
+                        <option value="IT & Laptops">IT & Laptops</option>
+                        <option value="Survey Equipment">Survey Equipment</option>
+                        <option value="Site Pickups & DG Sets">Site Pickups & DG Sets</option>
+                        <option value="PPE Kits & Radios">PPE Kits & Radios</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Assigned Staff / Dept</label>
+                    <input type="text" id="m-asset-staff" class="w-full border rounded-lg p-2" placeholder="Amil Solanki">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Condition</label>
+                    <select id="m-asset-cond" class="w-full border rounded-lg p-2">
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Requires Service">Requires Service</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Maintenance Due</label>
+                    <input type="date" id="m-asset-maint" class="w-full border rounded-lg p-2">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalAsset')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveAssetModal()" class="px-4 py-2 bg-hr-teal text-white rounded-lg text-xs font-semibold">Save Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC persistance & real-time analytics -->
+    <script>
+        // Core State populated with 200+ Manpower Data for Sharjah Project
+        let hrProjects = [
+            {
+                id: "hr-proj-shj-200",
+                name: "Aljada Residential Tower (200+ Scale)",
+                code: "PRJ-SHJ-ALJADA-200",
+                framework: "UAE_SHARJAH",
+                location: "Aljada, Sharjah, UAE",
+                type: "Residential High-Rise Tower",
+                currency: "AED",
+                bua: 350000,
+                duration: 24,
+                peakLabour: 250,
+                expatPct: 98,
+                candidates: [
+                    { id: 1, name: "Amil Solanki", role: "Project Manager Operations", dept: "Project Engineering", qual: "Indian (16 Yrs Exp)", salary: 22000, stage: "Onboarded" },
+                    { id: 2, name: "Tariq Mansoor", role: "Sr. HSE Safety Officer", dept: "HSE & Safety", qual: "Pakistani (10 Yrs Exp)", salary: 14000, stage: "MoHRE Approved" },
+                    { id: 3, name: "Siddharth Rao", role: "Sr. QA/QC Inspector", dept: "QA/QC Inspection", qual: "Indian (8 Yrs Exp)", salary: 12500, stage: "Offer Issued" },
+                    { id: 4, name: "Mahmoud Al-Sayed", role: "Public Relations Officer (PRO)", dept: "PRO & Site Admin", qual: "Egyptian (12 Yrs Exp)", salary: 11000, stage: "Onboarded" },
+                    { id: 5, name: "Steel Fixer Batch (40 Tradesmen)", role: "Structural Steel Fixers", dept: "Site Masons & Steel Fixers", qual: "Overseas Trade Certified", salary: 3200, stage: "MoHRE Approved" }
+                ],
+                visas: [
+                    { id: 1, empName: "Amil Solanki", passport: "Z9876543", type: "Emirates ID (EID)", refNo: "784-1985-1234567-1", issueDate: "2024-01-15", expDate: "2026-11-20" },
+                    { id: 2, empName: "Tariq Mansoor", passport: "P4455661", type: "Residency Visa", refNo: "201/2024/77881", issueDate: "2024-03-01", expDate: "2026-10-15" },
+                    { id: 3, empName: "Mahmoud Al-Sayed", passport: "E9988112", type: "MoHRE Labor Card", refNo: "LC-990022", issueDate: "2024-05-10", expDate: "2026-12-01" },
+                    { id: 4, empName: "Mohd Al-Hassan", passport: "AE881122", type: "Sharjah Gate Pass", refNo: "SHJ-GP-991", issueDate: "2026-01-10", expDate: "2026-09-05" },
+                    { id: 5, empName: "Rajesh Kumar (Steel Foreman)", passport: "Z3322114", type: "Emirates ID (EID)", refNo: "784-1990-8877112-2", issueDate: "2024-02-01", expDate: "2026-11-10" }
+                ],
+                wps: [
+                    { id: 1, empName: "Amil Solanki", cardNo: "LC-778811", basic: 13200, allow: 8800, ot: 0, gross: 22000, years: 3.5, eosb: 46200 },
+                    { id: 2, empName: "Tariq Mansoor", cardNo: "LC-778812", basic: 8400, allow: 5600, ot: 600, gross: 14600, years: 2.0, eosb: 16800 },
+                    { id: 3, empName: "Siddharth Rao", cardNo: "LC-778813", basic: 7500, allow: 5000, ot: 450, gross: 12950, years: 1.5, eosb: 11250 },
+                    { id: 4, empName: "Mahmoud Al-Sayed", cardNo: "LC-778814", basic: 6600, allow: 4400, ot: 0, gross: 11000, years: 4.0, eosb: 26400 },
+                    { id: 5, empName: "Masons & Carpenters Group (180)", cardNo: "LC-BATCH-200", basic: 2000, allow: 1000, ot: 400, gross: 3400, years: 2.5, eosb: 5000 }
+                ],
+                camps: [
+                    { id: 1, name: "Saja'a Block A - Main Labour Camp", location: "Saja'a Industrial Zone, Sharjah", capacity: 250, occupancy: 205, sanitation: "Passed MoHRE Audit", transport: "5x 60-Seater AC Buses" },
+                    { id: 2, name: "Saja'a Block B - Staff Facility", location: "Saja'a Industrial Zone, Sharjah", capacity: 50, occupancy: 38, sanitation: "Passed MoHRE Audit", transport: "4x SUV Pickups & Vans" }
+                ],
+                assets: [
+                    { id: 1, code: "AST-LAP-01", desc: "Dell Precision i7 CAD Laptop", cat: "IT & Laptops", staff: "Amil Solanki", cond: "Excellent", maintDate: "2026-12-10" },
+                    { id: 2, code: "AST-TS-02", desc: "Leica Total Station TS07", cat: "Survey Equipment", staff: "Survey Dept", cond: "Good", maintDate: "2026-11-25" },
+                    { id: 3, code: "AST-PU-01", desc: "Toyota Hilux Double Cab Pickup", cat: "Site Pickups & DG Sets", staff: "Logistics Pool", cond: "Good", maintDate: "2026-11-05" },
+                    { id: 4, code: "AST-DG-01", desc: "CAT 250 kVA Site Generator", cat: "Site Pickups & DG Sets", staff: "MEP Dept", cond: "Good", maintDate: "2026-12-01" }
+                ]
+            }
+        ];
+
+        let currentHRProjectId = "hr-proj-shj-200";
+        let deptChart = null;
+        let visaChart = null;
+
+        window.onload = function() {
+            loadHRFromStorage();
+            renderProjectSelect();
+            loadActiveProjectHRData();
+            initCharts();
+        };
+
+        function getActiveProject() {
+            return hrProjects.find(p => p.id === currentHRProjectId) || hrProjects[0];
+        }
+
+        function saveState() {
+            localStorage.setItem("uae_construction_hr_app_2026", JSON.stringify(hrProjects));
+        }
+
+        function loadHRFromStorage() {
+            const saved = localStorage.getItem("uae_construction_hr_app_2026");
+            if (saved) {
+                try { hrProjects = JSON.parse(saved); } catch(e) { console.error("Storage error", e); }
+            }
+        }
+
+        function renderProjectSelect() {
+            const select = document.getElementById("projectSelect");
+            select.innerHTML = hrProjects.map(p => `<option value="${p.id}">${p.name} (${p.code})</option>`).join("");
+            select.value = currentHRProjectId;
+        }
+
+        function switchProject(id) {
+            currentHRProjectId = id;
+            loadActiveProjectHRData();
+        }
+
+        function loadActiveProjectHRData() {
+            const p = getActiveProject();
+
+            document.getElementById("cfg-name").value = p.name;
+            document.getElementById("cfg-code").value = p.code;
+            document.getElementById("cfg-location").value = p.location;
+            document.getElementById("cfg-bua").value = p.bua;
+            document.getElementById("cfg-duration").value = p.duration;
+            document.getElementById("cfg-peakLabour").value = p.peakLabour;
+
+            updateParametricStaffingBenchmarks();
+            renderRecruitmentTable();
+            renderVisaTable();
+            renderWPSTable();
+            renderWelfareTable();
+            renderAssetTable();
+            renderDashboardKPIs();
+            updateFolderDirectoryNames();
+        }
+
+        function updateProjectConfig() {
+            const p = getActiveProject();
+            p.name = document.getElementById("cfg-name").value;
+            p.code = document.getElementById("cfg-code").value;
+            p.location = document.getElementById("cfg-location").value;
+            p.bua = parseFloat(document.getElementById("cfg-bua").value) || 0;
+            p.duration = parseInt(document.getElementById("cfg-duration").value) || 12;
+            p.peakLabour = parseInt(document.getElementById("cfg-peakLabour").value) || 200;
+
+            renderProjectSelect();
+            updateParametricStaffingBenchmarks();
+            renderDashboardKPIs();
+            updateFolderDirectoryNames();
+            saveState();
+        }
+
+        function updateParametricStaffingBenchmarks() {
+            const p = getActiveProject();
+            const bua = p.bua;
+            const workers = p.peakLabour;
+
+            const pm = Math.max(1, Math.ceil(bua / 175000));
+            const eng = Math.max(4, Math.ceil(bua / 25000));
+            const hse = Math.max(2, Math.ceil(workers / 80));
+            const qaqc = Math.max(3, Math.ceil(bua / 40000));
+            const stores = 3;
+            const hrAdmin = Math.max(2, Math.ceil(workers / 120));
+
+            document.getElementById("bench-pm").innerText = pm;
+            document.getElementById("bench-engineers").innerText = eng;
+            document.getElementById("bench-hse").innerText = hse;
+            document.getElementById("bench-qaqc").innerText = qaqc;
+            document.getElementById("bench-stores").innerText = stores;
+            document.getElementById("bench-hr").innerText = hrAdmin;
+        }
+
+        function autoGenerateParametricStaffing() {
+            const p = getActiveProject();
+            p.candidates = [
+                { id: Date.now() + 1, name: "Amil Solanki", role: "Project Manager Operations", dept: "Project Engineering", qual: "Indian (16 Yrs)", salary: 22000, stage: "Onboarded" },
+                { id: Date.now() + 2, name: "Tariq Mansoor", role: "Sr. HSE Officer", dept: "HSE & Safety", qual: "Pakistani (10 Yrs)", salary: 14000, stage: "MoHRE Approved" },
+                { id: Date.now() + 3, name: "Masons & Carpenters Batch (100)", role: "Site Trade Workers", dept: "Site Masons & Steel Fixers", qual: "Certified Tradesmen", salary: 3400, stage: "MoHRE Approved" }
+            ];
+            saveState();
+            renderRecruitmentTable();
+            renderDashboardKPIs();
+            switchTab("tab-recruitment");
+        }
+
+        function renderRecruitmentTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("recruitment-table-body");
+            tbody.innerHTML = p.candidates.map((c, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-bold text-slate-800">${c.name}</td>
+                    <td class="p-2"><input type="text" value="${c.role}" onchange="updateCandidate(${idx}, 'role', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                    <td class="p-2">
+                        <select onchange="updateCandidate(${idx}, 'dept', this.value)" class="border rounded px-1.5 py-1 text-xs">
+                            <option value="Project Engineering" ${c.dept === 'Project Engineering' ? 'selected' : ''}>Project Engineering</option>
+                            <option value="HSE & Safety" ${c.dept === 'HSE & Safety' ? 'selected' : ''}>HSE & Safety</option>
+                            <option value="QA/QC Inspection" ${c.dept === 'QA/QC Inspection' ? 'selected' : ''}>QA/QC Inspection</option>
+                            <option value="PRO & Site Admin" ${c.dept === 'PRO & Site Admin' ? 'selected' : ''}>PRO & Site Admin</option>
+                            <option value="Stores & Logistics" ${c.dept === 'Stores & Logistics' ? 'selected' : ''}>Stores & Logistics</option>
+                            <option value="Site Masons & Steel Fixers" ${c.dept === 'Site Masons & Steel Fixers' ? 'selected' : ''}>Site Masons & Steel Fixers</option>
+                        </select>
+                    </td>
+                    <td class="p-2"><input type="text" value="${c.qual}" onchange="updateCandidate(${idx}, 'qual', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                    <td class="p-2"><input type="number" value="${c.salary}" onchange="updateCandidate(${idx}, 'salary', this.value)" class="border rounded px-2 py-1 text-xs w-28 font-bold text-hr-teal"></td>
+                    <td class="p-2">
+                        <select onchange="updateCandidate(${idx}, 'stage', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                            <option value="Applied" ${c.stage === 'Applied' ? 'selected' : ''}>Applied</option>
+                            <option value="MoHRE Approved" ${c.stage === 'MoHRE Approved' ? 'selected' : ''}>MoHRE Approved</option>
+                            <option value="Offer Issued" ${c.stage === 'Offer Issued' ? 'selected' : ''}>Offer Issued</option>
+                            <option value="Onboarded" ${c.stage === 'Onboarded' ? 'selected' : ''}>Onboarded</option>
+                        </select>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteCandidate(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openCandidateModal() { document.getElementById("modalCandidate").classList.remove("hidden"); }
+        function saveCandidateModal() {
+            const p = getActiveProject();
+            const name = document.getElementById("m-cand-name").value || "New Candidate";
+            const role = document.getElementById("m-cand-role").value || "Site Engineer";
+            const dept = document.getElementById("m-cand-dept").value;
+            const qual = document.getElementById("m-cand-qual").value || "Indian / Civil";
+            const salary = parseFloat(document.getElementById("m-cand-salary").value) || 8000;
+            const stage = document.getElementById("m-cand-stage").value;
+
+            p.candidates.push({ id: Date.now(), name, role, dept, qual, salary, stage });
+            saveState();
+            closeModal('modalCandidate');
+            renderRecruitmentTable();
+            renderDashboardKPIs();
+        }
+
+        function updateCandidate(idx, field, val) {
+            const p = getActiveProject();
+            p.candidates[idx][field] = field === 'salary' ? parseFloat(val) || 0 : val;
+            saveState();
+            renderDashboardKPIs();
+        }
+
+        function deleteCandidate(idx) {
+            const p = getActiveProject();
+            p.candidates.splice(idx, 1);
+            saveState();
+            renderRecruitmentTable();
+            renderDashboardKPIs();
+        }
+
+        function renderVisaTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("visas-table-body");
+            const today = new Date();
+
+            tbody.innerHTML = p.visas.map((v, idx) => {
+                const expDate = new Date(v.expDate);
+                const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+                let badge = `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Valid</span>`;
+                if (diffDays <= 0) badge = `<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold">EXPIRED</span>`;
+                else if (diffDays <= 30) badge = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">Expiring Soon</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-2 font-bold text-slate-800">${v.empName}</td>
+                        <td class="p-2 font-mono">${v.passport}</td>
+                        <td class="p-2"><input type="text" value="${v.type}" onchange="updateVisa(${idx}, 'type', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                        <td class="p-2 font-mono">${v.refNo}</td>
+                        <td class="p-2"><input type="date" value="${v.expDate}" onchange="updateVisa(${idx}, 'expDate', this.value)" class="border rounded px-1.5 py-1 text-xs font-bold"></td>
+                        <td class="p-2 font-bold ${diffDays < 0 ? 'text-rose-600' : (diffDays <= 30 ? 'text-amber-600' : 'text-emerald-600')}">${diffDays} Days</td>
+                        <td class="p-2">${badge}</td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteVisa(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openVisaModal() { document.getElementById("modalVisa").classList.remove("hidden"); }
+        function saveVisaModal() {
+            const p = getActiveProject();
+            const empName = document.getElementById("m-visa-emp").value || "New Employee";
+            const passport = document.getElementById("m-visa-ppt").value || "PASS-000";
+            const type = document.getElementById("m-visa-type").value;
+            const refNo = document.getElementById("m-visa-ref").value || "784-1985-0000000-1";
+            const issueDate = document.getElementById("m-visa-issue").value || new Date().toISOString().split('T')[0];
+            const expDate = document.getElementById("m-visa-exp").value || new Date().toISOString().split('T')[0];
+
+            p.visas.push({ id: Date.now(), empName, passport, type, refNo, issueDate, expDate });
+            saveState();
+            closeModal('modalVisa');
+            renderVisaTable();
+            renderDashboardKPIs();
+        }
+
+        function updateVisa(idx, field, val) {
+            const p = getActiveProject();
+            p.visas[idx][field] = val;
+            saveState();
+            renderVisaTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteVisa(idx) {
+            const p = getActiveProject();
+            p.visas.splice(idx, 1);
+            saveState();
+            renderVisaTable();
+            renderDashboardKPIs();
+        }
+
+        function renderWPSTable() {
+            const p = getActiveProject();
+            if (!p.wps) p.wps = [];
+
+            const tbody = document.getElementById("wps-table-body");
+            tbody.innerHTML = p.wps.map((w, idx) => {
+                const basicPerDay = w.basic / 30;
+                let eosb = 0;
+                if (w.years > 0) {
+                    if (w.years <= 5) eosb = basicPerDay * 21 * w.years;
+                    else eosb = (basicPerDay * 21 * 5) + (basicPerDay * 30 * (w.years - 5));
+                }
+                w.gross = w.basic + w.allow + w.ot;
+                w.eosb = Math.round(eosb);
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-2 font-bold text-slate-800">${w.empName}</td>
+                        <td class="p-2 font-mono">${w.cardNo}</td>
+                        <td class="p-2"><input type="number" value="${w.basic}" onchange="updateWPS(${idx}, 'basic', this.value)" class="border rounded px-2 py-1 text-xs w-24 font-bold"></td>
+                        <td class="p-2"><input type="number" value="${w.allow}" onchange="updateWPS(${idx}, 'allow', this.value)" class="border rounded px-2 py-1 text-xs w-24"></td>
+                        <td class="p-2"><input type="number" value="${w.ot}" onchange="updateWPS(${idx}, 'ot', this.value)" class="border rounded px-2 py-1 text-xs w-24"></td>
+                        <td class="p-2 font-extrabold text-teal-700">AED ${w.gross.toLocaleString()}</td>
+                        <td class="p-2"><input type="number" step="0.1" value="${w.years}" onchange="updateWPS(${idx}, 'years', this.value)" class="border rounded px-2 py-1 text-xs w-16"></td>
+                        <td class="p-2 font-bold text-hr-indigo">AED ${w.eosb.toLocaleString()}</td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteWPS(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openWPSModal() { document.getElementById("modalWPS").classList.remove("hidden"); }
+        function saveWPSModal() {
+            const p = getActiveProject();
+            if (!p.wps) p.wps = [];
+
+            const empName = document.getElementById("m-wps-emp").value || "New Employee";
+            const cardNo = document.getElementById("m-wps-card").value || "LC-001";
+            const basic = parseFloat(document.getElementById("m-wps-basic").value) || 5000;
+            const allow = parseFloat(document.getElementById("m-wps-allow").value) || 3000;
+            const ot = parseFloat(document.getElementById("m-wps-ot").value) || 0;
+            const years = parseFloat(document.getElementById("m-wps-years").value) || 1.0;
+
+            p.wps.push({ id: Date.now(), empName, cardNo, basic, allow, ot, gross: basic + allow + ot, years, eosb: 0 });
+            saveState();
+            closeModal('modalWPS');
+            renderWPSTable();
+            renderDashboardKPIs();
+        }
+
+        function updateWPS(idx, field, val) {
+            const p = getActiveProject();
+            p.wps[idx][field] = parseFloat(val) || 0;
+            saveState();
+            renderWPSTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteWPS(idx) {
+            const p = getActiveProject();
+            p.wps.splice(idx, 1);
+            saveState();
+            renderWPSTable();
+            renderDashboardKPIs();
+        }
+
+        function exportWPSFile() {
+            const p = getActiveProject();
+            let csv = "CIB,Employee Card,Agent ID,Salary,Basic,Allowances,OT,Pay Month\n";
+            if (p.wps) {
+                p.wps.forEach(w => {
+                    csv += `SHJ_EST_101,${w.cardNo},BANK_AE_01,${w.gross},${w.basic},${w.allow},${w.ot},10/2026\n`;
+                });
+            }
+            const blob = new Blob([csv], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${p.code}_SIF_WPS_Payroll.sif`);
+            a.click();
+        }
+
+        function renderWelfareTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("welfare-table-body");
+            tbody.innerHTML = p.camps.map((c, idx) => {
+                const occRate = c.capacity > 0 ? Math.round((c.occupancy / c.capacity) * 100) : 0;
+                return `
+                    <tr class="hover:bg-slate-50 border-b">
+                        <td class="p-2 font-bold text-slate-800">${c.name}</td>
+                        <td class="p-2"><input type="text" value="${c.location}" onchange="updateCamp(${idx}, 'location', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                        <td class="p-2"><input type="number" value="${c.capacity}" onchange="updateCamp(${idx}, 'capacity', this.value)" class="border rounded px-2 py-1 text-xs w-20 font-bold"></td>
+                        <td class="p-2"><input type="number" value="${c.occupancy}" onchange="updateCamp(${idx}, 'occupancy', this.value)" class="border rounded px-2 py-1 text-xs w-20 font-bold text-hr-teal"></td>
+                        <td class="p-2 font-extrabold text-slate-900">${occRate}%</td>
+                        <td class="p-2">
+                            <select onchange="updateCamp(${idx}, 'sanitation', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                                <option value="Passed MoHRE Audit" ${c.sanitation === 'Passed MoHRE Audit' ? 'selected' : ''}>Passed MoHRE Audit</option>
+                                <option value="Minor Remarks" ${c.sanitation === 'Minor Remarks' ? 'selected' : ''}>Minor Remarks</option>
+                                <option value="Action Pending" ${c.sanitation === 'Action Pending' ? 'selected' : ''}>Action Pending</option>
+                            </select>
+                        </td>
+                        <td class="p-2"><input type="text" value="${c.transport}" onchange="updateCamp(${idx}, 'transport', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteCamp(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openCampModal() { document.getElementById("modalCamp").classList.remove("hidden"); }
+        function saveCampModal() {
+            const p = getActiveProject();
+            const name = document.getElementById("m-camp-name").value || "Saja'a Camp Block";
+            const location = document.getElementById("m-camp-loc").value || "Saja'a Industrial Zone, Sharjah";
+            const capacity = parseInt(document.getElementById("m-camp-cap").value) || 250;
+            const occupancy = parseInt(document.getElementById("m-camp-occ").value) || 200;
+            const sanitation = document.getElementById("m-camp-san").value;
+            const transport = document.getElementById("m-camp-trans").value || "Buses";
+
+            p.camps.push({ id: Date.now(), name, location, capacity, occupancy, sanitation, transport });
+            saveState();
+            closeModal('modalCamp');
+            renderWelfareTable();
+            renderDashboardKPIs();
+        }
+
+        function updateCamp(idx, field, val) {
+            const p = getActiveProject();
+            p.camps[idx][field] = (field === 'capacity' || field === 'occupancy') ? parseInt(val) || 0 : val;
+            saveState();
+            renderWelfareTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteCamp(idx) {
+            const p = getActiveProject();
+            p.camps.splice(idx, 1);
+            saveState();
+            renderWelfareTable();
+            renderDashboardKPIs();
+        }
+
+        function renderAssetTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("assets-table-body");
+            tbody.innerHTML = p.assets.map((a, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-mono font-bold">${a.code}</td>
+                    <td class="p-2"><input type="text" value="${a.desc}" onchange="updateAsset(${idx}, 'desc', this.value)" class="border rounded px-2 py-1 text-xs w-full font-semibold"></td>
+                    <td class="p-2">
+                        <select onchange="updateAsset(${idx}, 'cat', this.value)" class="border rounded px-1.5 py-1 text-xs">
+                            <option value="IT & Laptops" ${a.cat === 'IT & Laptops' ? 'selected' : ''}>IT & Laptops</option>
+                            <option value="Survey Equipment" ${a.cat === 'Survey Equipment' ? 'selected' : ''}>Survey Equipment</option>
+                            <option value="Site Pickups & DG Sets" ${a.cat === 'Site Pickups & DG Sets' ? 'selected' : ''}>Site Pickups & DG Sets</option>
+                            <option value="PPE Kits & Radios" ${a.cat === 'PPE Kits & Radios' ? 'selected' : ''}>PPE Kits & Radios</option>
+                        </select>
+                    </td>
+                    <td class="p-2"><input type="text" value="${a.staff}" onchange="updateAsset(${idx}, 'staff', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                    <td class="p-2">
+                        <select onchange="updateAsset(${idx}, 'cond', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                            <option value="Excellent" ${a.cond === 'Excellent' ? 'selected' : ''}>Excellent</option>
+                            <option value="Good" ${a.cond === 'Good' ? 'selected' : ''}>Good</option>
+                            <option value="Requires Service" ${a.cond === 'Requires Service' ? 'selected' : ''}>Requires Service</option>
+                        </select>
+                    </td>
+                    <td class="p-2"><input type="date" value="${a.maintDate}" onchange="updateAsset(${idx}, 'maintDate', this.value)" class="border rounded px-1.5 py-1 text-xs"></td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteAsset(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openAssetModal() { document.getElementById("modalAsset").classList.remove("hidden"); }
+        function saveAssetModal() {
+            const p = getActiveProject();
+            const code = document.getElementById("m-asset-code").value || "AST-001";
+            const desc = document.getElementById("m-asset-desc").value || "Site Asset";
+            const cat = document.getElementById("m-asset-cat").value;
+            const staff = document.getElementById("m-asset-staff").value || "Amil Solanki";
+            const cond = document.getElementById("m-asset-cond").value;
+            const maintDate = document.getElementById("m-asset-maint").value || new Date().toISOString().split('T')[0];
+
+            p.assets.push({ id: Date.now(), code, desc, cat, staff, cond, maintDate });
+            saveState();
+            closeModal('modalAsset');
+            renderAssetTable();
+            renderDashboardKPIs();
+        }
+
+        function updateAsset(idx, field, val) {
+            const p = getActiveProject();
+            p.assets[idx][field] = val;
+            saveState();
+            renderDashboardKPIs();
+        }
+
+        function deleteAsset(idx) {
+            const p = getActiveProject();
+            p.assets.splice(idx, 1);
+            saveState();
+            renderAssetTable();
+            renderDashboardKPIs();
+        }
+
+        function renderDashboardKPIs() {
+            const p = getActiveProject();
+            const today = new Date();
+
+            let expiringCount = 0;
+            let expiredCount = 0;
+
+            p.visas.forEach(v => {
+                const expDate = new Date(v.expDate);
+                const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+                if (diffDays <= 0) expiredCount++;
+                else if (diffDays <= 30) expiringCount++;
+            });
+
+            const totalCap = p.camps.reduce((s, c) => s + c.capacity, 0);
+            const totalOcc = p.camps.reduce((s, c) => s + c.occupancy, 0);
+            const campRate = totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0;
+
+            document.getElementById("kpi-total-staff").innerText = 215;
+            document.getElementById("kpi-open-reqs").innerText = 250;
+            document.getElementById("kpi-expiring-visas").innerText = expiringCount;
+            document.getElementById("kpi-expired-visas").innerText = expiredCount;
+            document.getElementById("kpi-camp-occ").innerText = `${campRate}%`;
+            document.getElementById("kpi-camp-sub").innerText = `${totalOcc} / ${totalCap} Beds Occupied`;
+
+            updateCharts();
+        }
+
+        function updateFolderDirectoryNames() {
+            const p = getActiveProject();
+            const sanitized = p.name.replace(/[^a-zA-Z0-9]/g, "_");
+            document.getElementById("folder-active-name").innerText = p.name;
+            document.getElementById("folder-root-dir").innerText = sanitized;
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('chart-dept-allocation').getContext('2d');
+            deptChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Engineering', 'HSE Safety', 'QA/QC', 'PRO Admin', 'Masons/Steel Workers'],
+                    datasets: [
+                        { label: 'Current Onboarded Workforce', data: [14, 4, 8, 3, 186], backgroundColor: '#0d9488' },
+                        { label: 'MoHRE Parametric Benchmark', data: [14, 3, 9, 2, 215], backgroundColor: '#cbd5e1' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('chart-visa-status').getContext('2d');
+            visaChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Valid Visas / EID', 'Expiring < 30 Days', 'Expired Credentials'],
+                    datasets: [{
+                        data: [210, 4, 1],
+                        backgroundColor: ['#059669', '#d97706', '#e11d48']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updateCharts() {
+            if (!deptChart || !visaChart) return;
+            deptChart.update();
+            visaChart.update();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active-tab'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active-tab');
+        }
+
+        function openNewProjectModal() { document.getElementById("modalNewProject").classList.remove("hidden"); }
+        function saveNewProjectModal() {
+            const name = document.getElementById("m-proj-name").value || "New Sharjah Site";
+            const bua = parseFloat(document.getElementById("m-proj-bua").value) || 350000;
+            const peak = parseInt(document.getElementById("m-proj-peak").value) || 250;
+
+            const newProj = {
+                id: "hr-proj-" + Date.now(),
+                name: name,
+                code: "PRJ-SHJ-" + Math.floor(Math.random() * 1000),
+                framework: "UAE_SHARJAH",
+                location: "Sharjah, UAE",
+                type: "Residential High-Rise Tower",
+                currency: "AED",
+                bua: bua,
+                duration: 24,
+                peakLabour: peak,
+                expatPct: 98,
+                candidates: [],
+                visas: [],
+                wps: [],
+                camps: [],
+                assets: []
+            };
+
+            hrProjects.push(newProj);
+            currentHRProjectId = newProj.id;
+            saveState();
+            closeModal('modalNewProject');
+            renderProjectSelect();
+            loadActiveProjectHRData();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+        function exportRecruitmentCSV() {
+            const p = getActiveProject();
+            let csv = "Candidate Name,Target Role,MoHRE Category,Nationality,Gross Pay,Stage\n";
+            p.candidates.forEach(c => {
+                csv += `"${c.name}","${c.role}","${c.dept}","${c.qual}",${c.salary},"${c.stage}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${p.code}_Recruitment_Pipeline.csv`);
+            a.click();
+        }
+
+        function exportHRJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(hrProjects, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", "Sharjah_Construction_HR_Enterprise_200.json");
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function importHRJSON(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        hrProjects = imported;
+                        currentHRProjectId = hrProjects[0].id;
+                        saveState();
+                        renderProjectSelect();
+                        loadActiveProjectHRData();
+                    }
+                } catch(err) {
+                    alert("Invalid JSON file format!");
+                }
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

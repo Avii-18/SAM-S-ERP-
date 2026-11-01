@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAM Enterprise ERP - UAE Procurement & Subcontracting Suite</title>
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060a14;
+      color: #f1f5f9;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1120;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-nav {
+      background: rgba(6, 10, 20, 0.94);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-badge {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-backdrop {
+      background: rgba(2, 6, 15, 0.88);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP ENTERPRISE NAVBAR -->
+  <header class="glass-nav sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+    <!-- Brand & Sharjah/UAE Context Switcher -->
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-blue-600 to-emerald-400 p-0.5 shadow-lg shadow-blue-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="building-2" class="w-5 h-5 text-amber-400"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-2">
+            SAM ERP <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">UAE V26.10</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 mt-0.5">Sharjah & UAE Operations | FIDIC Red Book Compliant</p>
+        </div>
+      </div>
+
+      <div class="h-6 w-[1px] bg-slate-800"></div>
+
+      <!-- Active UAE Project Context -->
+      <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-800">
+        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
+        <div class="text-xs">
+          <span class="text-slate-400 block text-[10px]">ACTIVE UAE SITE / LOGISTICS HUB</span>
+          <select id="project-selector" onchange="switchProject(this.value)" class="bg-transparent font-semibold text-slate-200 outline-none cursor-pointer">
+            <option value="PRJ-ALJADA" class="bg-slate-900">Aljada Residential Towers (Site 01 - Sharjah)</option>
+            <option value="PRJ-MUWAILEH" class="bg-slate-900">Muwaileh Commercial Complex (Site 02 - Sharjah)</option>
+            <option value="PRJ-SAJAA" class="bg-slate-900">Saja'a Industrial Logistics Yard (Central Hub)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Controls: SAM AI Token Wallet & User Profile -->
+    <div class="flex items-center gap-4">
+      <!-- SAM AI Token Counter -->
+      <div class="glass-card px-4 py-1.5 rounded-xl flex items-center gap-3 border border-amber-500/30 bg-amber-500/5">
+        <div class="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase tracking-wider text-amber-300 font-medium">SAM AI Copilot</div>
+          <div class="font-mono text-sm font-bold text-amber-400 flex items-center gap-1">
+            <span id="ai-token-balance">50,000</span> <span class="text-[10px] text-amber-500">TOKENS</span>
+          </div>
+        </div>
+        <button onclick="openTokenModal()" class="ml-2 px-2 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs rounded border border-amber-500/40 transition">
+          + Refill
+        </button>
+      </div>
+
+      <div class="h-6 w-[1px] bg-slate-800"></div>
+
+      <!-- User Profile -->
+      <div class="flex items-center gap-3">
+        <div class="text-right text-xs">
+          <div class="font-semibold text-slate-200">Tariq Al-Mansoori</div>
+          <div class="text-slate-400">Senior QS & Procurement Director</div>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-amber-400">
+          TM
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE LAYOUT -->
+  <div class="flex flex-1 overflow-hidden">
+    
+    <!-- LEFT SIDEBAR MENU -->
+    <aside class="w-64 glass-card border-r border-slate-800 flex flex-col justify-between shrink-0">
+      <div class="p-4 space-y-6 overflow-y-auto">
+
+        <!-- Module Group 1: Material Procurement -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>1. Material Workflow</span>
+            <i data-lucide="package" class="w-3.5 h-3.5 text-blue-400"></i>
+          </div>
+          <nav class="space-y-1">
+            <button onclick="switchTab('tab-material-req')" id="nav-tab-material-req" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="file-plus-2" class="w-4 h-4 text-blue-400"></i>
+              <span>Requisitions (MR/PR)</span>
+            </button>
+            <button onclick="switchTab('tab-stock-ver')" id="nav-tab-stock-ver" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="warehouse" class="w-4 h-4 text-emerald-400"></i>
+              <span>Stores & Yard Stock</span>
+            </button>
+            <button onclick="switchTab('tab-material-po')" id="nav-tab-material-po" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="shopping-bag" class="w-4 h-4 text-indigo-400"></i>
+              <span>Purchase Orders (PO)</span>
+            </button>
+            <button onclick="switchTab('tab-grn')" id="nav-tab-grn" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="truck" class="w-4 h-4 text-amber-400"></i>
+              <span>GRN & QA Inspection</span>
+            </button>
+            <button onclick="switchTab('tab-material-recon')" id="nav-tab-material-recon" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="scale" class="w-4 h-4 text-cyan-400"></i>
+              <span>Material Reconciliation</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Module Group 2: Subcontracting & FIDIC Works -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>2. Subcontracting Works</span>
+            <i data-lucide="hard-hat" class="w-3.5 h-3.5 text-purple-400"></i>
+          </div>
+          <nav class="space-y-1">
+            <button onclick="switchTab('tab-work-req')" id="nav-tab-work-req" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="clipboard-list" class="w-4 h-4 text-purple-400"></i>
+              <span>Work Requisitions</span>
+            </button>
+            <button onclick="switchTab('tab-work-order')" id="nav-tab-work-order" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="file-signature" class="w-4 h-4 text-fuchsia-400"></i>
+              <span>FIDIC Work Orders</span>
+            </button>
+            <button onclick="switchTab('tab-measurement')" id="nav-tab-measurement" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="ruler" class="w-4 h-4 text-pink-400"></i>
+              <span>Joint Measurement (JMS)</span>
+            </button>
+            <button onclick="switchTab('tab-cop-billing')" id="nav-tab-cop-billing" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="receipt" class="w-4 h-4 text-rose-400"></i>
+              <span>IPC Bills & COP Certificates</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Module Group 3: Vendor Master & AI Copilot -->
+        <div>
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>3. Controls & AI Tools</span>
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-400"></i>
+          </div>
+          <nav class="space-y-1">
+            <button onclick="switchTab('tab-vendor-master')" id="nav-tab-vendor-master" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="users" class="w-4 h-4 text-sky-400"></i>
+              <span>UAE Vendor Master (TRN)</span>
+            </button>
+            <button onclick="switchTab('tab-ai-procurement')" id="nav-tab-ai-procurement" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span>SAM AI Procurement Copilot</span>
+            </button>
+            <button onclick="switchTab('tab-mgt-dashboard')" id="nav-tab-mgt-dashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-teal-400"></i>
+              <span>Executive Dashboard</span>
+            </button>
+          </nav>
+        </div>
+
+      </div>
+
+      <!-- Quick Workflow Diagram Launcher -->
+      <div class="p-3 border-t border-slate-800">
+        <button onclick="openFlowchartModal()" class="w-full flex items-center justify-center gap-2 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-medium rounded-lg border border-slate-700 transition">
+          <i data-lucide="git-fork" class="w-4 h-4 text-blue-400"></i>
+          <span>UAE Process Flowcharts</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN WORKSPACE -->
+    <main class="flex-1 bg-slate-950 p-6 overflow-y-auto">
+
+      <!-- ================= 1. MATERIAL REQUISITIONS TAB ================= -->
+      <section id="tab-material-req" class="tab-content space-y-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-plus-2" class="text-blue-400"></i>
+              Material Requisitions (MR / MAR)
+            </h2>
+            <p class="text-xs text-slate-400">Standardized 3-tier taxonomy demand logging, drawing references & stock balance check</p>
+          </div>
+          <button onclick="openModal('modal-new-mr')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-blue-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Raise Material Requisition
+          </button>
+        </div>
+
+        <!-- Requisitions Data Table -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
+              <input type="text" id="mr-search-input" onkeyup="filterMRTable()" placeholder="Search MR #, Item or WBS..." class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 w-64 outline-none focus:border-blue-500">
+              <select id="mr-category-filter" onchange="filterMRTable()" class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none">
+                <option value="">All Categories</option>
+                <option value="Civil & Structural">Civil & Structural</option>
+                <option value="Waterproofing">Waterproofing</option>
+                <option value="Formwork">Aluminium Formwork (Mivan)</option>
+                <option value="Plumbing">Plumbing & Water Supply</option>
+                <option value="Electrical">Electrical & Earthing</option>
+              </select>
+              <select id="mr-status-filter" onchange="filterMRTable()" class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 outline-none">
+                <option value="">All Statuses</option>
+                <option value="Approved">Approved PM</option>
+                <option value="Pending">Pending QA Check</option>
+                <option value="Fulfilled">Fulfilled / Transferred</option>
+              </select>
+            </div>
+            <span class="text-xs text-slate-400">Showing: <strong id="mr-count" class="text-slate-200">4</strong> Requisitions</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300" id="mr-table">
+              <thead class="bg-slate-900/90 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                <tr>
+                  <th class="p-3">Req ID & Date</th>
+                  <th class="p-3">Taxonomy Hierarchy</th>
+                  <th class="p-3">Item Specification</th>
+                  <th class="p-3">WBS / Target Site</th>
+                  <th class="p-3 text-right">Req. Qty</th>
+                  <th class="p-3 text-right">Available Yard Stock</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60" id="mr-table-body">
+                <!-- Row 1: Civil -->
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-mono font-medium text-blue-400">
+                    MR-SHJ-2026-101<br>
+                    <span class="text-[10px] text-slate-500">2026-10-25</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] block w-max">Civil & Structural</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">C-02 Concrete ➔ Ready Mix Concrete</span>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-medium text-slate-200">Ready Mix Concrete C40/50 (SRC)</div>
+                    <div class="text-[10px] text-slate-500">Sulphate Resisting Cement for Substructure Pour</div>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-mono text-slate-400">WBS-CONC-001</div>
+                    <div class="text-[10px] text-slate-500">Aljada Project (Site 01)</div>
+                  </td>
+                  <td class="p-3 text-right font-mono font-bold text-slate-200">350 m³</td>
+                  <td class="p-3 text-right font-mono text-amber-400">0 m³</td>
+                  <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Approved PM</span></td>
+                  <td class="p-3 text-center">
+                    <button onclick="autoFillPOFromMR('MR-SHJ-2026-101', 'Ready Mix Concrete C40/50 (SRC)', 350, 'm³')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 rounded text-[11px] transition">
+                      Issue PO
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 2: Civil Steel -->
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-mono font-medium text-blue-400">
+                    MR-SHJ-2026-102<br>
+                    <span class="text-[10px] text-slate-500">2026-10-28</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] block w-max">Civil & Structural</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">C-05 Steel ➔ Rebar Grade 500B</span>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-medium text-slate-200">High Yield Rebar 20mm (BS 4449)</div>
+                    <div class="text-[10px] text-slate-500">Emirates Steel Main Columns Reinforcement</div>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-mono text-slate-400">WBS-STEL-002</div>
+                    <div class="text-[10px] text-slate-500">Muwaileh Commercial (Site 02)</div>
+                  </td>
+                  <td class="p-3 text-right font-mono font-bold text-slate-200">45 MT</td>
+                  <td class="p-3 text-right font-mono text-emerald-400">120 MT</td>
+                  <td class="p-3"><span class="status-badge bg-blue-500/10 text-blue-400 border border-blue-500/20">Approved PM</span></td>
+                  <td class="p-3 text-center">
+                    <button onclick="openStockTransferModal('Muwaileh Commercial (Site 02)', 'Rebar Grade 500B (20mm)', 45)" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 rounded text-[11px] transition">
+                      Transfer Stock
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 3: Waterproofing -->
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-mono font-medium text-blue-400">
+                    MR-SHJ-2026-103<br>
+                    <span class="text-[10px] text-slate-500">2026-10-29</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 text-[10px] block w-max">Waterproofing</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">WP-01 Basement ➔ APP Modified Membrane</span>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-medium text-slate-200">4mm Torch-On APP Bituminous Membrane</div>
+                    <div class="text-[10px] text-slate-500">Polyester reinforced for raft tanking</div>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-mono text-slate-400">WBS-WPRF-001</div>
+                    <div class="text-[10px] text-slate-500">Aljada Project (Site 01)</div>
+                  </td>
+                  <td class="p-3 text-right font-mono font-bold text-slate-200">1,200 m²</td>
+                  <td class="p-3 text-right font-mono text-amber-400">0 m²</td>
+                  <td class="p-3"><span class="status-badge bg-amber-500/10 text-amber-400 border border-amber-500/20">Pending QA Check</span></td>
+                  <td class="p-3 text-center">
+                    <button onclick="autoFillPOFromMR('MR-SHJ-2026-103', '4mm Torch-On APP Bituminous Membrane', 1200, 'm²')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 rounded text-[11px] transition">
+                      Issue PO
+                    </button>
+                  </td>
+                </tr>
+                <!-- Row 4: Mivan Formwork -->
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-mono font-medium text-blue-400">
+                    MR-SHJ-2026-104<br>
+                    <span class="text-[10px] text-slate-500">2026-10-30</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[10px] block w-max">Formwork (Mivan)</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Hardware ➔ Tie Rods & PVC Cones</span>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-medium text-slate-200">Aluminium Wall Tie Rods & Sleeves</div>
+                    <div class="text-[10px] text-slate-500">High tensile ties for wall panel shuttering</div>
+                  </td>
+                  <td class="p-3">
+                    <div class="font-mono text-slate-400">WBS-FORM-004</div>
+                    <div class="text-[10px] text-slate-500">Aljada Project (Site 01)</div>
+                  </td>
+                  <td class="p-3 text-right font-mono font-bold text-slate-200">5,000 Pcs</td>
+                  <td class="p-3 text-right font-mono text-emerald-400">8,500 Pcs</td>
+                  <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Approved PM</span></td>
+                  <td class="p-3 text-center">
+                    <button onclick="openStockTransferModal('Aljada Site Store', 'Aluminium Wall Tie Rods', 5000)" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 rounded text-[11px] transition">
+                      Transfer Stock
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. STORES & YARD STOCK TAB ================= -->
+      <section id="tab-stock-ver" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="warehouse" class="text-emerald-400"></i>
+              Stores & Central Yard Inventory Control
+            </h2>
+            <p class="text-xs text-slate-400">Multi-site stock balances (Saja'a Central Yard, Aljada Site, Muwaileh Site) & transfer issues</p>
+          </div>
+          <button onclick="openStockTransferModal('', '', 0)" class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i> Issue Inter-Site Transfer Note
+          </button>
+        </div>
+
+        <!-- Stock Summary Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400 font-medium">Saja'a Industrial Yard (Central Hub)</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px]">Primary Hub</span>
+            </div>
+            <div class="text-lg font-bold font-mono text-emerald-400" id="sajaa-rebar-stock">120 MT Rebar | 42,000 Blocks</div>
+            <p class="text-[11px] text-slate-500">Main storage area for raw rebar, blocks, Mivan & MEP fittings</p>
+          </div>
+
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400 font-medium">Aljada Site Store (Site 01)</span>
+              <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px]">Active Site</span>
+            </div>
+            <div class="text-lg font-bold font-mono text-blue-400" id="aljada-stock-val">32 MT Steel | 2,500 Blocks</div>
+            <p class="text-[11px] text-slate-500">3 days operational buffer remaining</p>
+          </div>
+
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400 font-medium">Muwaileh Store (Site 02)</span>
+              <span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[10px]">Active Site</span>
+            </div>
+            <div class="text-lg font-bold font-mono text-purple-400" id="muwaileh-stock-val">18 MT Steel | 8,000 Blocks</div>
+            <p class="text-[11px] text-slate-500">Optimal buffer balance</p>
+          </div>
+        </div>
+
+        <!-- Detailed Stores Ledger Table -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-200">Stock Breakdown by Category & Location</h3>
+            <span class="text-xs text-slate-400">Live Quantity Matrix</span>
+          </div>
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900 text-slate-400 font-semibold uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Item Code & Specification</th>
+                <th class="p-3">Taxonomy Category</th>
+                <th class="p-3 text-right">Saja'a Central Yard</th>
+                <th class="p-3 text-right">Aljada Site Store</th>
+                <th class="p-3 text-right">Muwaileh Site Store</th>
+                <th class="p-3 text-right">Total UAE Stock</th>
+                <th class="p-3 text-center">Buffer Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60" id="stores-inventory-table">
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-200">Rebar Grade 500B (20mm)</div>
+                  <div class="text-[10px] text-slate-500">BS 4449 Standard High Yield Steel</div>
+                </td>
+                <td class="p-3 text-slate-400">Civil & Structural</td>
+                <td class="p-3 text-right font-mono font-bold text-emerald-400" id="inv-rebar-sajaa">120 MT</td>
+                <td class="p-3 text-right font-mono text-blue-400" id="inv-rebar-aljada">32 MT</td>
+                <td class="p-3 text-right font-mono text-purple-400" id="inv-rebar-muwaileh">18 MT</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-100" id="inv-rebar-total">170 MT</td>
+                <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Optimal</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-200">Hollow Concrete Blocks 200mm</div>
+                  <div class="text-[10px] text-slate-500">Masonry 200x200x400mm 12.5N</div>
+                </td>
+                <td class="p-3 text-slate-400">Civil & Structural</td>
+                <td class="p-3 text-right font-mono font-bold text-emerald-400" id="inv-block-sajaa">42,000 Pcs</td>
+                <td class="p-3 text-right font-mono text-blue-400" id="inv-block-aljada">2,500 Pcs</td>
+                <td class="p-3 text-right font-mono text-purple-400" id="inv-block-muwaileh">8,000 Pcs</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-100" id="inv-block-total">52,500 Pcs</td>
+                <td class="p-3 text-center"><span class="status-badge bg-amber-500/10 text-amber-400">Reorder Aljada</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-200">Mivan Tie Rods & PVC Cones</div>
+                  <div class="text-[10px] text-slate-500">Hardware Accessories</div>
+                </td>
+                <td class="p-3 text-slate-400">Aluminium Formwork</td>
+                <td class="p-3 text-right font-mono font-bold text-emerald-400">12,500 Pcs</td>
+                <td class="p-3 text-right font-mono text-blue-400">4,200 Pcs</td>
+                <td class="p-3 text-right font-mono text-purple-400">1,800 Pcs</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-100">18,500 Pcs</td>
+                <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Optimal</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-200">CPVC Class 1 Pipes 1" (Water)</div>
+                  <div class="text-[10px] text-slate-500">SDR 11 Pressure Piping</div>
+                </td>
+                <td class="p-3 text-slate-400">Plumbing & Water</td>
+                <td class="p-3 text-right font-mono font-bold text-emerald-400">850 Lengths</td>
+                <td class="p-3 text-right font-mono text-blue-400">120 Lengths</td>
+                <td class="p-3 text-right font-mono text-purple-400">300 Lengths</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-100">1,270 Lengths</td>
+                <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Optimal</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 3. PURCHASE ORDERS (PO) TAB ================= -->
+      <section id="tab-material-po" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="shopping-bag" class="text-indigo-400"></i>
+              Purchase Orders (PO) & 5% UAE VAT Delivery Schedules
+            </h2>
+            <p class="text-xs text-slate-400">Formal commitments issued to UAE suppliers with site delivery allocations & VAT calculations</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="triggerPOAIComparison()" class="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30 rounded-xl text-xs transition">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Compare Supplier Quotes (5 Tokens)
+            </button>
+            <button onclick="openModal('modal-new-po')" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-500/20 transition">
+              <i data-lucide="plus" class="w-4 h-4"></i> Draft Purchase Order
+            </button>
+          </div>
+        </div>
+
+        <!-- Active PO Cards List -->
+        <div class="space-y-4" id="po-list-container">
+          <div class="glass-card rounded-2xl border border-slate-800 p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold text-indigo-400">PO-UAE-2026-088</span>
+                <span class="text-slate-200 font-semibold text-xs">Sharjah National Concrete Co. WLL</span>
+                <span class="text-[10px] text-slate-400 font-mono">TRN: 100293847500003</span>
+                <span class="status-badge bg-blue-500/10 text-blue-400 border border-blue-500/20">Active Delivery Schedule</span>
+              </div>
+              <div class="text-right font-mono text-xs">
+                <span class="text-slate-400">PO Value (incl. 5% VAT):</span> <strong class="text-emerald-400 text-sm">AED 367,500.00</strong>
+              </div>
+            </div>
+
+            <div class="text-xs space-y-2">
+              <div class="text-slate-400 font-medium text-[11px] uppercase tracking-wider flex justify-between">
+                <span>Scope: 350 m³ Ready Mix Concrete C40/50 SRC @ AED 1,000/m³ + 5% VAT</span>
+                <span class="text-indigo-400 font-mono">PO Date: 2026-10-26</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                <div class="p-2.5 bg-slate-900/90 rounded-lg border border-slate-800 flex justify-between items-center">
+                  <div>
+                    <div class="font-semibold text-slate-200">Aljada Site (Sharjah)</div>
+                    <div class="text-[10px] text-slate-400">Ordered: 250 m³ | Delivered: 120 m³</div>
+                  </div>
+                  <span class="font-mono text-blue-400 font-bold">48% Received</span>
+                </div>
+                <div class="p-2.5 bg-slate-900/90 rounded-lg border border-slate-800 flex justify-between items-center">
+                  <div>
+                    <div class="font-semibold text-slate-200">Muwaileh Commercial</div>
+                    <div class="text-[10px] text-slate-400">Ordered: 100 m³ | Delivered: 100 m³</div>
+                  </div>
+                  <span class="font-mono text-emerald-400 font-bold">100% Completed</span>
+                </div>
+                <div class="p-2.5 bg-slate-900/90 rounded-lg border border-slate-800 flex justify-between items-center">
+                  <div>
+                    <div class="font-semibold text-slate-200">Saja'a Storage Yard</div>
+                    <div class="text-[10px] text-slate-400">Ordered: 0 m³ | Direct Site Pour</div>
+                  </div>
+                  <span class="font-mono text-slate-500 font-bold">N/A</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. GRN & QA INSPECTION TAB ================= -->
+      <section id="tab-grn" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="truck" class="text-amber-400"></i>
+              Site Delivery GRN & QA Quarantine Inspection
+            </h2>
+            <p class="text-xs text-slate-400">Delivery logging under BS EN / ASTM norms, Sharjah lab cube testing holds & accepted stock entry</p>
+          </div>
+          <button onclick="openModal('modal-new-grn')" class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-amber-500/20 transition">
+            <i data-lucide="file-check-2" class="w-4 h-4"></i> Record Site Delivery (GRN)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Pending Inspections / Quarantined Material -->
+          <div class="glass-card rounded-2xl p-4 border border-amber-500/30 bg-amber-500/5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                <i data-lucide="flask-conical" class="w-4 h-4"></i> QA Quarantine & Testing Hold
+              </h3>
+              <span id="qa-pending-badge" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-mono">1 Lot</span>
+            </div>
+
+            <div id="qa-quarantine-container" class="space-y-3">
+              <div id="qa-card-01" class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-2">
+                <div class="flex justify-between font-mono text-amber-400">
+                  <span>LOT-STEL-UAE-902</span>
+                  <span>2026-10-27</span>
+                </div>
+                <div class="font-medium text-slate-200">Emirates Steel Rebar 20mm (Grade 500B)</div>
+                <div class="text-[10px] text-slate-400">Supplier: Emirates Steel Arkan PJSC | Qty: 25 MT</div>
+                <p class="text-[11px] text-amber-300/80 italic">"7-day tensile test report pending certification from Sharjah Independent Test Lab."</p>
+                <div class="pt-2 flex gap-2">
+                  <button onclick="approveGRNQuality('LOT-STEL-UAE-902', 'Rebar Grade 500B (20mm)', 25, 'MT')" class="flex-1 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[11px] font-medium transition">
+                    Accept & Move to Stock
+                  </button>
+                  <button onclick="rejectGRNQuality('LOT-STEL-UAE-902')" class="py-1 px-3 bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 rounded text-[11px] transition">
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accepted GRN Log Table -->
+          <div class="lg:col-span-2 glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
+            <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Accepted Goods Receipt Notes Log</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900 text-slate-400 font-semibold uppercase text-[10px]">
+                  <tr>
+                    <th class="p-2.5">GRN #</th>
+                    <th class="p-2.5">PO Ref</th>
+                    <th class="p-2.5">Item Delivered</th>
+                    <th class="p-2.5 text-right">Accepted Qty</th>
+                    <th class="p-2.5 text-right">Shortage Note</th>
+                    <th class="p-2.5">Posting Status</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/50" id="grn-log-body">
+                  <tr class="hover:bg-slate-900/40">
+                    <td class="p-2.5 font-mono text-blue-400">GRN-ALJ-2026-044</td>
+                    <td class="p-2.5 font-mono text-slate-400">PO-UAE-2026-088</td>
+                    <td class="p-2.5 text-slate-200">Concrete C40/50 SRC (15 Transit Mixers)</td>
+                    <td class="p-2.5 text-right font-mono text-emerald-400">120 m³</td>
+                    <td class="p-2.5 text-right font-mono text-slate-500">0 m³</td>
+                    <td class="p-2.5"><span class="status-badge bg-emerald-500/10 text-emerald-400">Stock Posted</span></td>
+                  </tr>
+                  <tr class="hover:bg-slate-900/40">
+                    <td class="p-2.5 font-mono text-blue-400">GRN-MUW-2026-012</td>
+                    <td class="p-2.5 font-mono text-slate-400">PO-UAE-2026-077</td>
+                    <td class="p-2.5 text-slate-200">Hollow Blocks 200mm (National Blocks)</td>
+                    <td class="p-2.5 text-right font-mono text-emerald-400">8,000 Pcs</td>
+                    <td class="p-2.5 text-right font-mono text-rose-400">120 Broken</td>
+                    <td class="p-2.5"><span class="status-badge bg-amber-500/10 text-amber-400">Debit Note Issued</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. MATERIAL RECONCILIATION TAB ================= -->
+      <section id="tab-material-recon" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="scale" class="text-cyan-400"></i>
+              Material Reconciliation & Wastage Analytics
+            </h2>
+            <p class="text-xs text-slate-400">Comparing Theoretical BOQ vs GRN Receipts vs Measured In-Situ Work against UAE Norm Coefficients</p>
+          </div>
+          <button onclick="recalculateReconciliation()" class="flex items-center gap-2 px-3.5 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-xs rounded-xl shadow-lg transition">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Recalculate Wastage Metrics
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/60">
+            <div class="text-xs text-slate-300 font-medium">Standard UAE Wastage Coefficients: <span class="text-cyan-400 font-mono font-bold">Concrete (1.5%) | Rebar Steel (2.5%) | Blockwork (3.0%)</span></div>
+            <span class="text-xs text-slate-400">Project Cumulative Status</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 font-semibold uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Material Category</th>
+                  <th class="p-3 text-right">BOQ Estimated Qty</th>
+                  <th class="p-3 text-right">Received via GRN</th>
+                  <th class="p-3 text-right">In-Situ Executed Qty</th>
+                  <th class="p-3 text-right">Allowable Wastage</th>
+                  <th class="p-3 text-right">Actual Wastage %</th>
+                  <th class="p-3 text-center">Variance / Alert</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60">
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3">
+                    <div class="font-bold text-slate-100">Ready Mix Concrete C40/50</div>
+                    <div class="text-[10px] text-slate-500">Structural Slabs & Columns</div>
+                  </td>
+                  <td class="p-3 text-right font-mono text-slate-300">1,200 m³</td>
+                  <td class="p-3 text-right font-mono text-slate-200">820 m³</td>
+                  <td class="p-3 text-right font-mono text-slate-200">808 m³</td>
+                  <td class="p-3 text-right font-mono text-cyan-400">12.1 m³ (1.5%)</td>
+                  <td class="p-3 text-right font-mono font-bold text-emerald-400" id="recon-conc-wastage">1.48%</td>
+                  <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Within UAE Norm</span></td>
+                </tr>
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3">
+                    <div class="font-bold text-slate-100">High Yield Rebar Steel (Grade 500B)</div>
+                    <div class="text-[10px] text-slate-500">Reinforcement Cut & Bent</div>
+                  </td>
+                  <td class="p-3 text-right font-mono text-slate-300">180 MT</td>
+                  <td class="p-3 text-right font-mono text-slate-200">110 MT</td>
+                  <td class="p-3 text-right font-mono text-slate-200">106.2 MT</td>
+                  <td class="p-3 text-right font-mono text-cyan-400">2.65 MT (2.5%)</td>
+                  <td class="p-3 text-right font-mono font-bold text-rose-400" id="recon-steel-wastage">3.45%</td>
+                  <td class="p-3 text-center"><span class="status-badge bg-rose-500/10 text-rose-400">Excess Wastage Alert</span></td>
+                </tr>
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3">
+                    <div class="font-bold text-slate-100">Hollow Concrete Blocks 200mm</div>
+                    <div class="text-[10px] text-slate-500">Masonry Enclosures</div>
+                  </td>
+                  <td class="p-3 text-right font-mono text-slate-300">60,000 Pcs</td>
+                  <td class="p-3 text-right font-mono text-slate-200">35,000 Pcs</td>
+                  <td class="p-3 text-right font-mono text-slate-200">34,100 Pcs</td>
+                  <td class="p-3 text-right font-mono text-cyan-400">1,023 Pcs (3.0%)</td>
+                  <td class="p-3 text-right font-mono font-bold text-emerald-400" id="recon-block-wastage">2.57%</td>
+                  <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Within UAE Norm</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. SUBCONTRACTOR WORK REQUISITIONS TAB ================= -->
+      <section id="tab-work-req" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="clipboard-list" class="text-purple-400"></i>
+              Subcontract Work Requisitions (WR)
+            </h2>
+            <p class="text-xs text-slate-400">Requisition trade packages (Civil, MEP, Structural, Aluminium Cladding) for tender issue</p>
+          </div>
+          <button onclick="openModal('modal-new-wr')" class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-purple-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Raise Work Requisition
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Req ID & Date</th>
+                <th class="p-3">Trade Package Title</th>
+                <th class="p-3">Target UAE Site</th>
+                <th class="p-3">Estimated Budget (AED)</th>
+                <th class="p-3">Required Start</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60" id="wr-table-body">
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-mono text-purple-400">WR-SHJ-2026-012</td>
+                <td class="p-3">
+                  <div class="font-bold text-slate-100">Aluminium Glazing & Curtain Wall Package</div>
+                  <div class="text-[10px] text-slate-500">Double Glazed Powder Coated Profile - Aljada Tower A</div>
+                </td>
+                <td class="p-3">Aljada Project (Site 01)</td>
+                <td class="p-3 font-mono font-bold text-slate-200">AED 1,450,000.00</td>
+                <td class="p-3 text-slate-400">2026-11-15</td>
+                <td class="p-3"><span class="status-badge bg-blue-500/10 text-blue-400">Approved for RFQ</span></td>
+                <td class="p-3 text-center">
+                  <button onclick="autoFillWOFromWR('WR-SHJ-2026-012', 'Aluminium Glazing & Curtain Wall', 1450000)" class="px-2.5 py-1 bg-fuchsia-600/20 hover:bg-fuchsia-600/40 text-fuchsia-300 border border-fuchsia-500/30 rounded text-[11px] transition">
+                    Draft FIDIC WO
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 7. CONTRACTOR FIDIC WORK ORDERS (WO) TAB ================= -->
+      <section id="tab-work-order" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-signature" class="text-fuchsia-400"></i>
+              FIDIC Red Book Subcontract Work Orders (WO)
+            </h2>
+            <p class="text-xs text-slate-400">Defined scope boundaries, POMI measurement standards, advance recovery & retention terms</p>
+          </div>
+          <button onclick="openModal('modal-new-wo')" class="flex items-center gap-2 px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-fuchsia-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Issue New Work Order
+          </button>
+        </div>
+
+        <!-- Active Work Orders -->
+        <div class="space-y-4" id="wo-list-container">
+          <div class="glass-card rounded-2xl border border-slate-800 p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold text-fuchsia-400">WO-FIDIC-2026-004</span>
+                <div class="font-semibold text-sm text-slate-100">Al-Bahar Structural Subcontracting LLC</div>
+                <span class="text-[10px] text-slate-400 font-mono">TRN: 100382910400003</span>
+                <span class="status-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active Works</span>
+              </div>
+              <div class="font-mono text-xs text-slate-300">
+                Order Value: <strong class="text-fuchsia-300 text-sm">AED 2,850,000.00</strong>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
+              <div>
+                <span class="text-slate-400 block text-[10px]">SUPPLY RESPONSIBILITIES</span>
+                <p class="text-slate-200 font-medium">Main Cont: Steel & Ready Mix Concrete<br>Subcontractor: Labour, Formwork, Tools</p>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px]">MEASUREMENT STANDARD</span>
+                <p class="text-slate-200 font-medium">POMI (Principles of Measurement Intl)</p>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px]">RETENTION & ADVANCE</span>
+                <p class="text-slate-200 font-medium">10% Retention Hold | 10% Mob Advance Recovery</p>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px]">CERTIFIED TO DATE (IPC)</span>
+                <p class="text-emerald-400 font-mono font-bold">AED 1,140,000.00 (40.0%)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 8. JOINT MEASUREMENT SHEET (JMS) TAB ================= -->
+      <section id="tab-measurement" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="ruler" class="text-pink-400"></i>
+              Joint Site Measurement Sheets (JMS)
+            </h2>
+            <p class="text-xs text-slate-400">Verifiable quantity site records signed by Site Engineer, Subcontractor, and Consultant QS</p>
+          </div>
+          <button onclick="openModal('modal-new-jms')" class="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-pink-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Log Joint Site Measurement
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">JMS Ref #</th>
+                <th class="p-3">Subcontractor</th>
+                <th class="p-3">Location & Grid Lines</th>
+                <th class="p-3">Work Executed</th>
+                <th class="p-3 text-right">Verified Qty</th>
+                <th class="p-3">Consultant QS Approval</th>
+                <th class="p-3 text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60" id="jms-table-body">
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3 font-mono text-pink-400">JMS-ALJ-2026-022</td>
+                <td class="p-3 font-medium text-slate-200">Al-Bahar Structural Subcontracting LLC</td>
+                <td class="p-3">Tower A - Slab Level 08 (Axis C1-C8)</td>
+                <td class="p-3">Reinforced Concrete Suspended Slab Pour</td>
+                <td class="p-3 text-right font-mono font-bold text-slate-100">420 m²</td>
+                <td class="p-3 text-slate-300">Eng. Khalid (Khatib & Alami)</td>
+                <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Signoff Complete</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 9. IPC BILLS & PAYMENT CERTIFICATES (COP) TAB ================= -->
+      <section id="tab-cop-billing" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="receipt" class="text-rose-400"></i>
+              FIDIC Interim Payment Certificates (IPC) & COP
+            </h2>
+            <p class="text-xs text-slate-400">Cumulative certified works, 10% retention, advance recoveries, materials on site & 5% UAE VAT</p>
+          </div>
+          <button onclick="openModal('modal-new-ipc')" class="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-rose-500/20 transition">
+            <i data-lucide="calculator" class="w-4 h-4"></i> Generate New IPC / COP Certificate
+          </button>
+        </div>
+
+        <!-- Calculation Sheet -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-6">
+          <div class="border-b border-slate-800 pb-4 flex justify-between items-center flex-wrap gap-2">
+            <div>
+              <span class="text-xs text-rose-400 font-mono font-bold">FIDIC RED BOOK PAYMENT CERTIFICATE #IPC-2026-009</span>
+              <h3 class="text-base font-bold text-slate-100">Al-Bahar Structural Subcontracting LLC - RA Bill #03</h3>
+            </div>
+            <div class="text-right">
+              <span class="status-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">Commercial Director Approved</span>
+            </div>
+          </div>
+
+          <!-- Formula Breakdown Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+              <span class="text-slate-400 text-[10px] block">A. CUMULATIVE WORK CERTIFIED</span>
+              <div class="text-sm font-bold text-slate-100" id="ipc-cum-work">AED 1,140,000.00</div>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+              <span class="text-slate-400 text-[10px] block">B. PREVIOUS CERTIFIED (IPC #02)</span>
+              <div class="text-sm font-bold text-slate-400" id="ipc-prev-cert">AED 750,000.00</div>
+            </div>
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-rose-500/30 bg-rose-500/5 space-y-1">
+              <span class="text-rose-300 text-[10px] block">C. GROSS CURRENT WORK (A - B)</span>
+              <div class="text-sm font-bold text-rose-400" id="ipc-gross-curr">AED 390,000.00</div>
+            </div>
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+              <span class="text-emerald-400 text-[10px] block">D. MATERIALS ON SITE CREDIT (75%)</span>
+              <div class="text-sm font-bold text-emerald-400" id="ipc-mos-val">AED 45,000.00</div>
+            </div>
+          </div>
+
+          <!-- Deductions & VAT Breakdown -->
+          <div class="space-y-2">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Contractual Deductions & UAE VAT Calculation Summary</h4>
+            <div class="bg-slate-900 rounded-xl border border-slate-800 p-4 text-xs space-y-2.5">
+              <div class="flex justify-between text-slate-300">
+                <span>1. Retention Money Holdback (10% of Gross Work Value)</span>
+                <span class="font-mono text-rose-400" id="ipc-ded-retention">- AED 39,000.00</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>2. Mobilisation Advance Recovery (10% Deduction)</span>
+                <span class="font-mono text-rose-400" id="ipc-ded-advance">- AED 39,000.00</span>
+              </div>
+              <div class="flex justify-between text-slate-300">
+                <span>3. Backcharge Material Recovery (Main Contractor Concrete & Power Usage)</span>
+                <span class="font-mono text-rose-400" id="ipc-ded-backcharge">- AED 12,500.00</span>
+              </div>
+              <div class="border-t border-slate-800 pt-2 flex justify-between font-bold text-slate-200">
+                <span>NET CERTIFIED VALUE BEFORE TAX</span>
+                <span class="font-mono text-slate-100" id="ipc-net-pretax">AED 344,500.00</span>
+              </div>
+              <div class="flex justify-between text-emerald-400 font-semibold">
+                <span>4. Add: 5% UAE VAT Amount (Applicable on Taxable Supply)</span>
+                <span class="font-mono" id="ipc-vat-val">+ AED 17,225.00</span>
+              </div>
+              <div class="border-t-2 border-slate-700 pt-2 flex justify-between font-bold text-sm text-slate-100">
+                <span>FINAL NET APPROVED PAYMENT TO SUBCONTRACTOR</span>
+                <span class="font-mono text-emerald-400 text-base" id="ipc-final-net">AED 361,725.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 10. UAE VENDOR MASTER (TRN) TAB ================= -->
+      <section id="tab-vendor-master" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="users" class="text-sky-400"></i>
+              UAE Vendor & Contractor Master Registry
+            </h2>
+            <p class="text-xs text-slate-400">Central database with 15-digit Tax Registration Numbers (TRN), Sharjah Trade Licenses & IBAN checks</p>
+          </div>
+          <button onclick="openModal('modal-new-vendor')" class="flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-sky-500/20 transition">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Register New UAE Vendor
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Vendor / Subcontractor Name</th>
+                <th class="p-3">Role & Trade</th>
+                <th class="p-3">15-Digit UAE TRN</th>
+                <th class="p-3">Sharjah Trade License</th>
+                <th class="p-3">Bank IBAN Status</th>
+                <th class="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60" id="vendor-table-body">
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-100">Sharjah National Concrete Co. WLL</div>
+                  <div class="text-[10px] text-slate-500">Contact: Eng. Salim (+971 6 534 1122)</div>
+                </td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px]">Ready Mix Supplier</span></td>
+                <td class="p-3 font-mono text-slate-300">100293847500003</td>
+                <td class="p-3 font-mono text-slate-400">SHJ-LIC-88291</td>
+                <td class="p-3"><span class="text-emerald-400 font-medium flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> IBAN Verified</span></td>
+                <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">Approved</span></td>
+              </tr>
+              <tr class="hover:bg-slate-900/40">
+                <td class="p-3">
+                  <div class="font-bold text-slate-100">Al-Bahar Structural Subcontracting LLC</div>
+                  <div class="text-[10px] text-slate-500">Contact: Zaid Mansoor (+971 50 482 9911)</div>
+                </td>
+                <td class="p-3"><span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 text-[10px]">Structure Contractor</span></td>
+                <td class="p-3 font-mono text-slate-300">100382910400003</td>
+                <td class="p-3 font-mono text-slate-400">SHJ-LIC-44120</td>
+                <td class="p-3"><span class="text-emerald-400 font-medium flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> IBAN Verified</span></td>
+                <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">Approved</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 11. SAM AI PROCUREMENT SUITE TAB ================= -->
+      <section id="tab-ai-procurement" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="sparkles" class="text-amber-400"></i>
+              SAM AI Procurement Copilot & Rate Analysis
+            </h2>
+            <p class="text-xs text-slate-400">Automated supplier quotation normalization (AED + VAT) and Sharjah rate estimation engine</p>
+          </div>
+          <div class="flex items-center gap-2 text-xs font-mono bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 text-amber-300">
+            <i data-lucide="zap" class="w-4 h-4"></i> Cost: 2–5 Tokens / Operation
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Quotation Normalization AI -->
+          <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <i data-lucide="file-spreadsheet" class="text-amber-400"></i> Supplier Quote Normalizer
+            </h3>
+            <p class="text-xs text-slate-400">Normalizes freight, pump charges, testing costs, and credit terms into AED landed cost + 5% VAT.</p>
+            <div class="border-2 border-dashed border-slate-800 hover:border-amber-500/50 p-6 rounded-xl text-center cursor-pointer transition bg-slate-900/40">
+              <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-500 mx-auto mb-2"></i>
+              <span class="text-xs text-slate-300 block font-medium">Drop UAE Quotations PDF / Excel Here</span>
+              <span class="text-[10px] text-slate-500">Supports Ready-Mix, Steel, MEP & Finishing Quotes</span>
+            </div>
+            <button onclick="runAIQuotationComparison()" class="w-full py-2.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2">
+              <i data-lucide="cpu" class="w-4 h-4"></i> Analyze & Compare Quotations (5 Tokens)
+            </button>
+          </div>
+
+          <!-- Rate Analysis Engine -->
+          <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+              <i data-lucide="calculator" class="text-cyan-400"></i> Sharjah Rate Analysis Assistant
+            </h3>
+            <p class="text-xs text-slate-400">Derive item unit rates based on current Sharjah material prices and productivity norms.</p>
+            <div class="space-y-3">
+              <input type="text" id="ai-rate-item-input" value="Blockwork 200mm Hollow Masonry with Mortar (Sand-Cement 1:4)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 outline-none focus:border-cyan-500">
+              <button onclick="runAIRateAnalysis()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> Derive UAE Rate Estimate (3 Tokens)
+              </button>
+            </div>
+            <div id="ai-rate-output" class="p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs font-mono hidden space-y-1.5">
+              <div class="text-cyan-400 font-bold text-sm">Estimated Unit Rate: AED 48.50 / m²</div>
+              <div class="text-[10px] text-slate-400">Includes 12.5 Blocks @ AED 2.20/pc + Mortar (AED 6.00) + Mason Labour (AED 12.00/m²) + 5% Wastage Buffer.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 12. EXECUTIVE DASHBOARD TAB ================= -->
+      <section id="tab-mgt-dashboard" class="tab-content space-y-6 hidden">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="layout-dashboard" class="text-teal-400"></i>
+              Sharjah Executive Procurement Control Dashboard
+            </h2>
+            <p class="text-xs text-slate-400">Real-time financial visibility into AED commitments, pending approvals, unbilled receipts & retention balances</p>
+          </div>
+        </div>
+
+        <!-- Metric Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Requisitions</span>
+            <div class="text-2xl font-bold font-mono text-amber-400">4 MRs</div>
+            <span class="text-[10px] text-slate-500">Requires PM Signoff</span>
+          </div>
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active AED Commitments</span>
+            <div class="text-2xl font-bold font-mono text-indigo-400">AED 3,217,500</div>
+            <span class="text-[10px] text-slate-500">Across POs & Work Orders</span>
+          </div>
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Unbilled Site Deliveries</span>
+            <div class="text-2xl font-bold font-mono text-cyan-400">AED 142,000</div>
+            <span class="text-[10px] text-slate-500">Pending Supplier Invoices</span>
+          </div>
+          <div class="glass-card p-4 rounded-2xl border border-slate-800 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Retention Funds Held</span>
+            <div class="text-2xl font-bold font-mono text-rose-400">AED 285,000</div>
+            <span class="text-[10px] text-slate-500">Contractor Defect Liability Hold</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODALS SECTION ================= -->
+
+  <!-- 1. NEW MATERIAL REQUISITION MODAL (3-TIER TAXONOMY) -->
+  <div id="modal-new-mr" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-2xl p-6 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="file-plus-2" class="text-blue-400"></i> New Material Requisition (MR / MAR)
+        </h3>
+        <button onclick="closeModal('modal-new-mr')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewMR(event)" class="space-y-4 text-xs">
+        
+        <!-- Category & Sub-Category Dynamic Selection -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-slate-900/90 rounded-xl border border-slate-800">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">1. Main Material Category</label>
+            <select id="mr-main-cat" onchange="onMainCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none focus:border-blue-500">
+              <option value="">Select Main Category...</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">2. Sub-Category</label>
+            <select id="mr-sub-cat" onchange="onSubCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none focus:border-blue-500" disabled>
+              <option value="">Select Sub-Category...</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">3. Detailed Material Specification / Grade / Item</label>
+          <select id="mr-item-spec" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none focus:border-blue-500" disabled>
+            <option value="">Select Material Spec...</option>
+          </select>
+          <input type="text" id="mr-item-custom" placeholder="Or enter custom item specification if not in list..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none mt-2">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">WBS Cost Code</label>
+            <input type="text" id="mr-wbs" required placeholder="WBS-CONC-001" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Target UAE Site</label>
+            <select id="mr-site" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+              <option value="Aljada Project (Site 01)">Aljada Project (Site 01 - Sharjah)</option>
+              <option value="Muwaileh Commercial (Site 02)">Muwaileh Commercial (Site 02 - Sharjah)</option>
+              <option value="Saja'a Central Yard">Saja'a Industrial Central Yard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Required Qty</label>
+            <input type="number" id="mr-qty" required placeholder="100" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Unit of Measure</label>
+            <input type="text" id="mr-unit" required placeholder="m³, MT, m², Pcs" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Required By Date</label>
+            <input type="date" id="mr-date" required class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-mr')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500">Save & Submit Requisition</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. INTER-SITE STOCK TRANSFER MODAL -->
+  <div id="modal-stock-transfer" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="arrow-left-right" class="text-emerald-400"></i> Issue Inter-Site Material Transfer Note
+        </h3>
+        <button onclick="closeModal('modal-stock-transfer')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitStockTransfer(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Material to Transfer</label>
+          <select id="transfer-item" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+            <option value="Rebar Grade 500B (20mm)">Rebar Grade 500B (20mm) - Steel</option>
+            <option value="Hollow Concrete Blocks 200mm">Hollow Concrete Blocks 200mm</option>
+            <option value="Aluminium Wall Tie Rods">Aluminium Wall Tie Rods (Mivan)</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Source Store (Dispatch)</label>
+            <input type="text" id="transfer-source" value="Saja'a Industrial Yard (Central)" readonly class="w-full bg-slate-900/60 border border-slate-800 text-slate-400 rounded-lg p-2 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Destination Site Store</label>
+            <select id="transfer-dest" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+              <option value="Aljada Site Store">Aljada Site Store (Site 01)</option>
+              <option value="Muwaileh Store">Muwaileh Store (Site 02)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Transfer Quantity</label>
+          <input type="number" id="transfer-qty" required placeholder="10" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-stock-transfer')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-500">Execute Transfer & Post</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. NEW PURCHASE ORDER (PO) MODAL -->
+  <div id="modal-new-po" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="text-indigo-400"></i> Draft Purchase Order (5% UAE VAT)
+        </h3>
+        <button onclick="closeModal('modal-new-po')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewPO(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Select Approved UAE Supplier</label>
+          <select id="po-supplier" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+            <option value="Sharjah National Concrete Co. WLL">Sharjah National Concrete Co. WLL (TRN: 100293847500003)</option>
+            <option value="Emirates Steel Arkan PJSC">Emirates Steel Arkan PJSC (TRN: 100982310100003)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Line Item Description</label>
+          <input type="text" id="po-item" required placeholder="Ready Mix Concrete C40/50" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Quantity</label>
+            <input type="number" id="po-qty" oninput="calculatePOTotal()" required placeholder="100" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Unit Price (AED excl. VAT)</label>
+            <input type="number" id="po-unit-price" oninput="calculatePOTotal()" required placeholder="1000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800 font-mono flex justify-between items-center text-xs">
+          <span class="text-slate-400">Calculated Value (incl 5% VAT):</span>
+          <strong class="text-emerald-400 text-sm" id="po-total-calc">AED 0.00</strong>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-po')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500">Issue Purchase Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. NEW SITE GRN MODAL -->
+  <div id="modal-new-grn" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="truck" class="text-amber-400"></i> Record Delivery (GRN)
+        </h3>
+        <button onclick="closeModal('modal-new-grn')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewGRN(event)" class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">PO Reference #</label>
+            <input type="text" id="grn-po-ref" required value="PO-UAE-2026-088" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Delivery Location</label>
+            <select id="grn-site" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+              <option value="Aljada Site Store">Aljada Site Store</option>
+              <option value="Muwaileh Store">Muwaileh Store</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Item Delivered</label>
+          <input type="text" id="grn-item" required placeholder="Ready Mix Concrete C40/50" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Quantity Received</label>
+            <input type="number" id="grn-qty" required placeholder="50" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Requires QA Testing?</label>
+            <select id="grn-qa-req" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+              <option value="NO">Direct Accept to Stock</option>
+              <option value="YES">Send to QA Quarantine Queue</option>
+            </select>
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-grn')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-500">Log GRN Receipt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. NEW WORK REQUISITION MODAL -->
+  <div id="modal-new-wr" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="clipboard-list" class="text-purple-400"></i> Raise Subcontract Work Requisition
+        </h3>
+        <button onclick="closeModal('modal-new-wr')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewWR(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Trade Package Title</label>
+          <input type="text" id="wr-title" required placeholder="Internal MEP & HVAC Works Package" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Target Site Location</label>
+            <select id="wr-site" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+              <option value="Aljada Project (Site 01)">Aljada Project (Site 01)</option>
+              <option value="Muwaileh Commercial (Site 02)">Muwaileh Commercial (Site 02)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Budget Amount (AED)</label>
+            <input type="number" id="wr-budget" required placeholder="850000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-wr')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-500">Submit Work Requisition</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. NEW FIDIC WORK ORDER MODAL -->
+  <div id="modal-new-wo" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="file-signature" class="text-fuchsia-400"></i> Issue Subcontract FIDIC Work Order
+        </h3>
+        <button onclick="closeModal('modal-new-wo')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewWO(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Subcontractor Name</label>
+          <select id="wo-subcontractor" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+            <option value="Al-Bahar Structural Subcontracting LLC">Al-Bahar Structural Subcontracting LLC</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Package Scope Title</label>
+          <input type="text" id="wo-title" required placeholder="Aluminium Glazing & Curtain Wall" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Total Order Value (AED excl. VAT)</label>
+          <input type="number" id="wo-value" required placeholder="1450000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-wo')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-fuchsia-600 text-white font-medium rounded-lg hover:bg-fuchsia-500">Issue FIDIC Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. NEW JOINT MEASUREMENT SHEET MODAL -->
+  <div id="modal-new-jms" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="ruler" class="text-pink-400"></i> Log Joint Site Measurement (JMS)
+        </h3>
+        <button onclick="closeModal('modal-new-jms')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewJMS(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Subcontractor</label>
+          <select id="jms-sub" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+            <option value="Al-Bahar Structural Subcontracting LLC">Al-Bahar Structural Subcontracting LLC</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Location & Grid Reference</label>
+          <input type="text" id="jms-location" required placeholder="Tower A - Level 09 Slab" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Work Description</label>
+            <input type="text" id="jms-work" required placeholder="Reinforced Concrete Slab Pour" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Verified Qty & Unit</label>
+            <input type="text" id="jms-qty" required placeholder="450 m²" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-jms')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-pink-600 text-white font-medium rounded-lg hover:bg-pink-500">Signoff JMS Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. NEW IPC / COP CERTIFICATE MODAL -->
+  <div id="modal-new-ipc" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="calculator" class="text-rose-400"></i> Generate IPC Payment Certificate
+        </h3>
+        <button onclick="closeModal('modal-new-ipc')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewIPC(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Cumulative Certified Work Value (AED)</label>
+          <input type="number" id="inp-ipc-cum" oninput="updateIPCLiveCalc()" required value="1140000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Previous Certified (AED)</label>
+            <input type="number" id="inp-ipc-prev" oninput="updateIPCLiveCalc()" required value="750000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Material On Site (75%)</label>
+            <input type="number" id="inp-ipc-mos" oninput="updateIPCLiveCalc()" required value="45000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-ipc')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-rose-600 text-white font-medium rounded-lg hover:bg-rose-500">Recalculate & Save IPC Certificate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 9. NEW VENDOR REGISTRATION MODAL -->
+  <div id="modal-new-vendor" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="user-plus" class="text-sky-400"></i> Register New UAE Vendor / Contractor
+        </h3>
+        <button onclick="closeModal('modal-new-vendor')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="submitNewVendor(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Company Trade Name</label>
+          <input type="text" id="v-name" required placeholder="Sharjah Building Materials Supplies LLC" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">15-Digit UAE TRN Number</label>
+            <input type="text" id="v-trn" required placeholder="100392817400003" maxlength="15" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Sharjah Trade License Ref</label>
+            <input type="text" id="v-lic" required placeholder="SHJ-LIC-99120" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Role / Trade Category</label>
+          <input type="text" id="v-role" required placeholder="Masonry & Aggregates Supplier" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-vendor')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg hover:bg-slate-700">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-sky-600 text-white font-medium rounded-lg hover:bg-sky-500">Register & Verify Vendor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PROCESS FLOWCHART MODAL -->
+  <div id="flowchart-modal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="git-fork" class="text-blue-400"></i> Connected Enterprise Procurement Workflows (UAE)
+        </h3>
+        <button onclick="closeFlowchartModal()" class="p-1 hover:bg-slate-800 text-slate-400 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+        <div class="space-y-2">
+          <h4 class="font-bold text-blue-400 uppercase tracking-wider text-[11px]">1. UAE Material Procurement Lifecycle</h4>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 font-mono text-[11px] leading-relaxed text-slate-200">
+            Requisition (MR) ➔ Yard Stock Check ➔ Purchase Order (PO + 5% VAT) ➔ Delivery & GRN ➔ Sharjah Lab QA Testing ➔ Stock Posting ➔ Reconciliation
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h4 class="font-bold text-purple-400 uppercase tracking-wider text-[11px]">2. Subcontracting & FIDIC IPC Billing Lifecycle</h4>
+          <div class="p-4 bg-slate-900 rounded-xl border border-slate-800 font-mono text-[11px] leading-relaxed text-slate-200">
+            Work Requisition ➔ FIDIC Work Order ➔ Joint Measurement (JMS) ➔ IPC Certification ➔ Deductions (10% Retention + 10% Advance) ➔ 5% UAE VAT ➔ Payment Release
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOKEN REFILL MODAL -->
+  <div id="token-modal" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-amber-500/30 w-full max-w-md p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Refill SAM AI Tokens
+        </h3>
+        <button onclick="closeTokenModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-xs text-slate-400">Tokens power quotation comparison, UAE rate estimation, and automated document extraction.</p>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="addTokens(10000)" class="p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-amber-500/30 text-amber-300 font-bold font-mono text-center transition">
+          + 10,000 Tokens
+        </button>
+        <button onclick="addTokens(50000)" class="p-3 bg-amber-500/20 hover:bg-amber-500/30 rounded-xl border border-amber-500/50 text-amber-200 font-bold font-mono text-center transition">
+          + 50,000 Tokens
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // 18-CATEGORY CONSTRUCTION MATERIAL TAXONOMY TREE
+    const MATERIAL_TAXONOMY = {
+      "Civil & Structural": {
+        "C-01 Cement": ["OPC 43/53 Grade", "PPC (Portland Pozzolana)", "Sulphate Resistant Cement (SRC)"],
+        "C-02 Concrete": ["Ready Mix C20/25", "Ready Mix C30/37", "Ready Mix C40/50 (SRC)", "Ready Mix C60/75 High Strength"],
+        "C-05 Reinforcement Steel": ["High Yield Rebar 8mm (Grade 500B)", "High Yield Rebar 12mm (Grade 500B)", "High Yield Rebar 20mm (Grade 500B)", "High Yield Rebar 25mm (Grade 500B)"],
+        "C-15 Masonry Blocks": ["AAC Lightweight Blocks 200mm", "Hollow Concrete Blocks 200mm (12.5N)", "Solid Concrete Blocks 150mm"]
+      },
+      "Waterproofing Systems": {
+        "WP-01 Basement Tanking": ["4mm Torch-On APP Bituminous Membrane", "4mm SBS Modified Membrane", "Polyurethane Liquid Waterproofing"],
+        "WP-07 Waterstops": ["PVC Waterstops 250mm", "Hydrophilic Swellable Water Bar", "Heavy Duty Expansion Joint Seal"],
+        "WP-12 Wet Area Waterproofing": ["Two-Part Cementitious Slurry Coating", "PU Elastomeric Membrane"]
+      },
+      "Aluminium Formwork (Mivan)": {
+        "Formwork Panels": ["Mivan Wall Panels (600x2100mm)", "Mivan Deck Panels (600x1200mm)", "Mivan Kicker Panels"],
+        "Formwork Accessories": ["Aluminium Wall Tie Rods", "PVC Cones & Sleeves", "Push-Pull Adjustable Props", "Pin & Wedge Fasteners"]
+      },
+      "Architectural & Finishes": {
+        "Flooring & Tiles": ["Vitrified Porcelain Tiles 600x600mm", "Granite Slabs 20mm", "Anti-Skid Ceramic Tiles 300x300mm"],
+        "Ceiling Systems": ["12.5mm Moisture Resistant Gypsum Board", "Metal Grid Ceiling Frame T24", "Acoustic Mineral Fibre Tiles"]
+      },
+      "Painting & Coatings": {
+        "Internal Paint": ["Acrylic Emulsion Internal Paint", "Wall Primer & Polymer Putty"],
+        "External Paint": ["Weatherproof Exterior Texture Coating", "Anti-Carbonation Concrete Paint"]
+      },
+      "Doors, Windows & Glazing": {
+        "Doors & Hardware": ["Fire Rated Metal Doors (2-Hour)", "Flush Wooden Doors (Veneer)", "Mortise Locksets & Closers"],
+        "Glazing Systems": ["Aluminium Double Glazed Curtain Wall (DGU)", "Toughened Glass Balustrade 12mm"]
+      },
+      "Plumbing & Water Supply": {
+        "Pipes & Fittings": ["CPVC Class 1 Pipes 1\"", "UPVC SWR Drainage Pipes 110mm", "PPR Hot/Cold Water Pipes 25mm"],
+        "Sanitaryware": ["Wall-Hung Water Closet (WC)", "Basin Mixers & Angle Valves"]
+      },
+      "Fire Fighting & Protection": {
+        "Fire Piping": ["Heavy Duty GI Fire Pipe 4\"", "Grooved Pipe Fittings 3\""],
+        "Fire Equipment": ["Automatic Sprinkler Heads 68°C", "Fire Hose Reel Cabinets"]
+      },
+      "Electrical & Earthing": {
+        "Cables & Conduits": ["XLPE Armoured Cable 4C x 16sqmm", "FRLS Wires 2.5sqmm", "Rigid PVC Conduits 25mm"],
+        "Switchgear": ["Main Distribution Board (MDB) 400A", "MCB 16A Single Pole"]
+      },
+      "HVAC & Ventilation": {
+        "Ducting": ["Galvanized Iron (GI) Duct Sheets", "Volume Control Dampers (VCD)"],
+        "Equipment": ["Inline Exhaust Fans", "VRF Outdoor Units"]
+      },
+      "ELV & ICT Systems": {
+        "Networking": ["Cat6 UTP Ethernet Cable", "IP Dome Cameras 4MP"]
+      },
+      "Lifts & Elevators": {
+        "Lift Materials": ["Passenger Elevator Traction Machine", "Stainless Steel Car Cabin"]
+      },
+      "Kitchen & Joinery": {
+        "Cabinets & Sinks": ["Marine Plywood Cabinets 18mm", "Stainless Steel Kitchen Sink Double Bowl"]
+      },
+      "Staircase & Metalwork": {
+        "Railings": ["SS316 Stainless Steel Handrails", "MS Powder Coated Safety Railing"]
+      },
+      "Car Parking & Traffic Safety": {
+        "Safety Assets": ["Rubber Corner Guards 800mm", "Reflective Rubber Wheel Stoppers"]
+      },
+      "STP & Water Treatment": {
+        "Treatment Equipment": ["Submersible Sewage Pump 5kW", "Fine Bubble Air Diffusers"]
+      },
+      "Landscape Materials": {
+        "Softscape": ["Organic Topsoil Blend", "Automatic Pop-Up Sprinklers"]
+      },
+      "Miscellaneous & Fixings": {
+        "Fixings & Fasteners": ["Hilti Chemical Anchor Bolts M12", "Structural Silicone Sealant"]
+      }
+    };
+
+    // Global Interactive State
+    let currentTokens = 50000;
+    let stockState = {
+      rebar: { sajaa: 120, aljada: 32, muwaileh: 18 },
+      blocks: { sajaa: 42000, aljada: 2500, muwaileh: 8000 }
+    };
+
+    // Initialize Taxonomy Select Dropdowns
+    function initTaxonomyDropdowns() {
+      const mainSelect = document.getElementById('mr-main-cat');
+      mainSelect.innerHTML = '<option value="">Select Main Category...</option>';
+      
+      for (let category in MATERIAL_TAXONOMY) {
+        let opt = document.createElement('option');
+        opt.value = category;
+        opt.innerText = category;
+        mainSelect.appendChild(opt);
+      }
+    }
+
+    function onMainCategoryChange() {
+      const mainCat = document.getElementById('mr-main-cat').value;
+      const subSelect = document.getElementById('mr-sub-cat');
+      const specSelect = document.getElementById('mr-item-spec');
+
+      subSelect.innerHTML = '<option value="">Select Sub-Category...</option>';
+      specSelect.innerHTML = '<option value="">Select Material Spec...</option>';
+      specSelect.disabled = true;
+
+      if (mainCat && MATERIAL_TAXONOMY[mainCat]) {
+        subSelect.disabled = false;
+        for (let subCat in MATERIAL_TAXONOMY[mainCat]) {
+          let opt = document.createElement('option');
+          opt.value = subCat;
+          opt.innerText = subCat;
+          subSelect.appendChild(opt);
+        }
+      } else {
+        subSelect.disabled = true;
+      }
+    }
+
+    function onSubCategoryChange() {
+      const mainCat = document.getElementById('mr-main-cat').value;
+      const subCat = document.getElementById('mr-sub-cat').value;
+      const specSelect = document.getElementById('mr-item-spec');
+
+      specSelect.innerHTML = '<option value="">Select Material Spec...</option>';
+
+      if (mainCat && subCat && MATERIAL_TAXONOMY[mainCat][subCat]) {
+        specSelect.disabled = false;
+        MATERIAL_TAXONOMY[mainCat][subCat].forEach(item => {
+          let opt = document.createElement('option');
+          opt.value = item;
+          opt.innerText = item;
+          specSelect.appendChild(opt);
+        });
+      } else {
+        specSelect.disabled = true;
+      }
+    }
+
+    // Navigation Switcher
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('nav button').forEach(el => {
+        el.classList.remove('bg-slate-800/80', 'text-blue-400', 'border-l-2', 'border-blue-500');
+      });
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      const navBtn = document.getElementById('nav-' + tabId);
+      if (navBtn) {
+        navBtn.classList.add('bg-slate-800/80', 'text-blue-400', 'border-l-2', 'border-blue-500');
+      }
+    }
+
+    // Modal Controls
+    function openModal(id) { 
+      if (id === 'modal-new-mr') initTaxonomyDropdowns();
+      document.getElementById(id).classList.remove('hidden'); 
+    }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function openFlowchartModal() { document.getElementById('flowchart-modal').classList.remove('hidden'); }
+    function closeFlowchartModal() { document.getElementById('flowchart-modal').classList.add('hidden'); }
+    function openTokenModal() { document.getElementById('token-modal').classList.remove('hidden'); }
+    function closeTokenModal() { document.getElementById('token-modal').classList.add('hidden'); }
+
+    // AI Token Management
+    function updateTokenDisplay() {
+      document.getElementById('ai-token-balance').innerText = currentTokens.toLocaleString('en-US');
+    }
+
+    function deductTokens(amount) {
+      if (currentTokens >= amount) {
+        currentTokens -= amount;
+        updateTokenDisplay();
+        return true;
+      } else {
+        alert('Insufficient SAM AI Tokens! Please refill your wallet.');
+        openTokenModal();
+        return false;
+      }
+    }
+
+    function addTokens(amount) {
+      currentTokens += amount;
+      updateTokenDisplay();
+      closeTokenModal();
+    }
+
+    // --- REQUISITIONS MODULE ---
+    function filterMRTable() {
+      const search = document.getElementById('mr-search-input').value.toLowerCase();
+      const cat = document.getElementById('mr-category-filter').value.toLowerCase();
+      const status = document.getElementById('mr-status-filter').value.toLowerCase();
+      const rows = document.querySelectorAll('#mr-table-body tr');
+      let visibleCount = 0;
+
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchesSearch = text.includes(search);
+        const matchesCat = !cat || text.includes(cat);
+        const matchesStatus = !status || text.includes(status);
+
+        if (matchesSearch && matchesCat && matchesStatus) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      document.getElementById('mr-count').innerText = visibleCount;
+    }
+
+    function submitNewMR(e) {
+      e.preventDefault();
+      const mainCat = document.getElementById('mr-main-cat').value || 'General';
+      const subCat = document.getElementById('mr-sub-cat').value || '';
+      const selectedSpec = document.getElementById('mr-item-spec').value;
+      const customSpec = document.getElementById('mr-item-custom').value;
+      
+      const itemDesc = selectedSpec || customSpec || "Material Item";
+      const wbs = document.getElementById('mr-wbs').value;
+      const site = document.getElementById('mr-site').value;
+      const qty = document.getElementById('mr-qty').value;
+      const unit = document.getElementById('mr-unit').value;
+      const date = document.getElementById('mr-date').value;
+
+      const newId = `MR-SHJ-2026-${Math.floor(100 + Math.random() * 900)}`;
+      const newRow = document.createElement('tr');
+      newRow.className = "hover:bg-slate-900/40";
+      newRow.innerHTML = `
+        <td class="p-3 font-mono font-medium text-blue-400">${newId}<br><span class="text-[10px] text-slate-500">2026-10-30</span></td>
+        <td class="p-3">
+          <span class="px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 text-[10px] block w-max">${mainCat}</span>
+          <span class="text-[10px] text-slate-400 block mt-0.5">${subCat}</span>
+        </td>
+        <td class="p-3"><div class="font-medium text-slate-200">${itemDesc}</div></td>
+        <td class="p-3"><div class="font-mono text-slate-400">${wbs}</div><div class="text-[10px] text-slate-500">${site}</div></td>
+        <td class="p-3 text-right font-mono font-bold text-slate-200">${qty} ${unit}</td>
+        <td class="p-3 text-right font-mono text-amber-400">0</td>
+        <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">Approved PM</span></td>
+        <td class="p-3 text-center">
+          <button onclick="autoFillPOFromMR('${newId}', '${itemDesc}', ${qty}, '${unit}')" class="px-2.5 py-1 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 rounded text-[11px]">Issue PO</button>
+        </td>
+      `;
+      document.getElementById('mr-table-body').prepend(newRow);
+      closeModal('modal-new-mr');
+      filterMRTable();
+    }
+
+    function autoFillPOFromMR(mrId, item, qty, unit) {
+      document.getElementById('po-item').value = item;
+      document.getElementById('po-qty').value = qty;
+      calculatePOTotal();
+      switchTab('tab-material-po');
+      openModal('modal-new-po');
+    }
+
+    // --- STORES & STOCK TRANSFER MODULE ---
+    function openStockTransferModal(targetSite, item, defaultQty) {
+      if (targetSite) document.getElementById('transfer-dest').value = targetSite;
+      if (item) document.getElementById('transfer-item').value = item.includes('Rebar') ? "Rebar Grade 500B (20mm)" : "Hollow Concrete Blocks 200mm";
+      if (defaultQty) document.getElementById('transfer-qty').value = defaultQty;
+      openModal('modal-stock-transfer');
+    }
+
+    function submitStockTransfer(e) {
+      e.preventDefault();
+      const item = document.getElementById('transfer-item').value;
+      const dest = document.getElementById('transfer-dest').value;
+      const qty = parseInt(document.getElementById('transfer-qty').value) || 0;
+
+      if (item.includes('Rebar')) {
+        if (stockState.rebar.sajaa < qty) {
+          alert("Insufficient Saja'a Yard Stock for Rebar!");
+          return;
+        }
+        stockState.rebar.sajaa -= qty;
+        if (dest.includes('Aljada')) stockState.rebar.aljada += qty;
+        else stockState.rebar.muwaileh += qty;
+      } else {
+        if (stockState.blocks.sajaa < qty) {
+          alert("Insufficient Saja'a Yard Stock for Blocks!");
+          return;
+        }
+        stockState.blocks.sajaa -= qty;
+        if (dest.includes('Aljada')) stockState.blocks.aljada += qty;
+        else stockState.blocks.muwaileh += qty;
+      }
+
+      document.getElementById('inv-rebar-sajaa').innerText = stockState.rebar.sajaa + " MT";
+      document.getElementById('inv-rebar-aljada').innerText = stockState.rebar.aljada + " MT";
+      document.getElementById('inv-rebar-muwaileh').innerText = stockState.rebar.muwaileh + " MT";
+
+      document.getElementById('inv-block-sajaa').innerText = stockState.blocks.sajaa.toLocaleString() + " Pcs";
+      document.getElementById('inv-block-aljada').innerText = stockState.blocks.aljada.toLocaleString() + " Pcs";
+      document.getElementById('inv-block-muwaileh').innerText = stockState.blocks.muwaileh.toLocaleString() + " Pcs";
+
+      document.getElementById('sajaa-rebar-stock').innerText = `${stockState.rebar.sajaa} MT Rebar | ${stockState.blocks.sajaa.toLocaleString()} Blocks`;
+
+      closeModal('modal-stock-transfer');
+    }
+
+    // --- PURCHASE ORDERS (PO) MODULE ---
+    function calculatePOTotal() {
+      const qty = parseFloat(document.getElementById('po-qty').value) || 0;
+      const unit = parseFloat(document.getElementById('po-unit-price').value) || 0;
+      const totalWithVat = (qty * unit) * 1.05;
+      document.getElementById('po-total-calc').innerText = `AED ${totalWithVat.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    }
+
+    function submitNewPO(e) {
+      e.preventDefault();
+      const supplier = document.getElementById('po-supplier').value;
+      const item = document.getElementById('po-item').value;
+      const qty = parseFloat(document.getElementById('po-qty').value) || 0;
+      const unit = parseFloat(document.getElementById('po-unit-price').value) || 0;
+      const totalVal = (qty * unit * 1.05).toLocaleString('en-US', {minimumFractionDigits: 2});
+
+      const poId = `PO-UAE-2026-${Math.floor(100 + Math.random() * 900)}`;
+      const card = document.createElement('div');
+      card.className = "glass-card rounded-2xl border border-slate-800 p-5 space-y-3";
+      card.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-sm font-bold text-indigo-400">${poId}</span>
+            <span class="text-slate-200 font-semibold text-xs">${supplier}</span>
+            <span class="status-badge bg-blue-500/10 text-blue-400 border border-blue-500/20">Issued</span>
+          </div>
+          <div class="text-right font-mono text-xs">
+            <span class="text-slate-400">PO Value (incl 5% VAT):</span> <strong class="text-emerald-400 text-sm">AED ${totalVal}</strong>
+          </div>
+        </div>
+        <div class="text-xs text-slate-300">
+          Scope: ${qty} units of ${item} @ AED ${unit}/unit
+        </div>
+      `;
+      document.getElementById('po-list-container').prepend(card);
+      closeModal('modal-new-po');
+    }
+
+    // --- GRN & QA MODULE ---
+    function submitNewGRN(e) {
+      e.preventDefault();
+      const po = document.getElementById('grn-po-ref').value;
+      const item = document.getElementById('grn-item').value;
+      const qty = document.getElementById('grn-qty').value;
+      const isQA = document.getElementById('grn-qa-req').value;
+
+      const grnId = `GRN-SHJ-2026-${Math.floor(10 + Math.random() * 90)}`;
+
+      if (isQA === 'YES') {
+        const lotId = `LOT-SHJ-${Math.floor(100 + Math.random() * 900)}`;
+        const qaCard = document.createElement('div');
+        qaCard.className = "p-3 bg-slate-900/90 rounded-xl border border-slate-800 text-xs space-y-2";
+        qaCard.innerHTML = `
+          <div class="flex justify-between font-mono text-amber-400"><span>${lotId}</span><span>2026-10-30</span></div>
+          <div class="font-medium text-slate-200">${item} - ${qty} Units</div>
+          <p class="text-[11px] text-amber-300/80 italic">"Sharjah Municipality lab cube test hold pending."</p>
+          <div class="pt-2 flex gap-2">
+            <button onclick="approveGRNQuality('${lotId}', '${item}', ${qty}, 'Units')" class="flex-1 py-1 bg-emerald-600 text-white rounded text-[11px]">Accept to Stock</button>
+          </div>
+        `;
+        document.getElementById('qa-quarantine-container').prepend(qaCard);
+        switchTab('tab-grn');
+      } else {
+        const row = document.createElement('tr');
+        row.className = "hover:bg-slate-900/40";
+        row.innerHTML = `
+          <td class="p-2.5 font-mono text-blue-400">${grnId}</td>
+          <td class="p-2.5 font-mono text-slate-400">${po}</td>
+          <td class="p-2.5 text-slate-200">${item}</td>
+          <td class="p-2.5 text-right font-mono text-emerald-400">${qty}</td>
+          <td class="p-2.5 text-right font-mono text-slate-500">0</td>
+          <td class="p-2.5"><span class="status-badge bg-emerald-500/10 text-emerald-400">Stock Posted</span></td>
+        `;
+        document.getElementById('grn-log-body').prepend(row);
+      }
+      closeModal('modal-new-grn');
+    }
+
+    function approveGRNQuality(lotId, item, qty, unit) {
+      alert(`QA Certificate verified for ${lotId}! Quantity (${qty} ${unit}) accepted and posted into active stock.`);
+      const elem = document.getElementById('qa-card-01');
+      if (elem) elem.remove();
+      document.getElementById('qa-pending-badge').innerText = "0 Lots";
+    }
+
+    function rejectGRNQuality(lotId) {
+      alert(`Lot ${lotId} failed QA testing and has been rejected. NCR issued to supplier.`);
+      const elem = document.getElementById('qa-card-01');
+      if (elem) elem.remove();
+      document.getElementById('qa-pending-badge').innerText = "0 Lots";
+    }
+
+    // --- RECONCILIATION ENGINE ---
+    function recalculateReconciliation() {
+      document.getElementById('recon-conc-wastage').innerText = "1.42%";
+      document.getElementById('recon-steel-wastage').innerText = "2.48%";
+      document.getElementById('recon-block-wastage').innerText = "2.30%";
+      alert("Material reconciliation metrics updated with latest GRN and JMS site logs.");
+    }
+
+    // --- WORK ORDERS & IPC BILLING ---
+    function submitNewWR(e) {
+      e.preventDefault();
+      const title = document.getElementById('wr-title').value;
+      const site = document.getElementById('wr-site').value;
+      const budget = parseFloat(document.getElementById('wr-budget').value) || 0;
+      const wrId = `WR-SHJ-2026-${Math.floor(10 + Math.random() * 90)}`;
+
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-900/40";
+      tr.innerHTML = `
+        <td class="p-3 font-mono text-purple-400">${wrId}</td>
+        <td class="p-3"><div class="font-bold text-slate-100">${title}</div></td>
+        <td class="p-3">${site}</td>
+        <td class="p-3 font-mono font-bold text-slate-200">AED ${budget.toLocaleString()}</td>
+        <td class="p-3 text-slate-400">2026-11-20</td>
+        <td class="p-3"><span class="status-badge bg-blue-500/10 text-blue-400">Approved</span></td>
+        <td class="p-3 text-center">
+          <button onclick="autoFillWOFromWR('${wrId}', '${title}', ${budget})" class="px-2.5 py-1 bg-fuchsia-600/20 text-fuchsia-300 border border-fuchsia-500/30 rounded text-[11px]">Draft FIDIC WO</button>
+        </td>
+      `;
+      document.getElementById('wr-table-body').prepend(tr);
+      closeModal('modal-new-wr');
+    }
+
+    function autoFillWOFromWR(wrId, title, budget) {
+      document.getElementById('wo-title').value = title;
+      document.getElementById('wo-value').value = budget;
+      switchTab('tab-work-order');
+      openModal('modal-new-wo');
+    }
+
+    function submitNewWO(e) {
+      e.preventDefault();
+      const sub = document.getElementById('wo-subcontractor').value;
+      const title = document.getElementById('wo-title').value;
+      const val = parseFloat(document.getElementById('wo-value').value) || 0;
+
+      const woCard = document.createElement('div');
+      woCard.className = "glass-card rounded-2xl border border-slate-800 p-5 space-y-3";
+      woCard.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-sm font-bold text-fuchsia-400">WO-FIDIC-2026-${Math.floor(10 + Math.random() * 90)}</span>
+            <div class="font-semibold text-sm text-slate-100">${sub}</div>
+            <span class="status-badge bg-emerald-500/10 text-emerald-400">Active</span>
+          </div>
+          <div class="font-mono text-xs text-slate-300">Order Value: <strong class="text-fuchsia-300">AED ${val.toLocaleString()}</strong></div>
+        </div>
+        <div class="text-xs text-slate-300">Scope: ${title} under FIDIC Red Book Subcontract Rules</div>
+      `;
+      document.getElementById('wo-list-container').prepend(woCard);
+      closeModal('modal-new-wo');
+    }
+
+    function submitNewJMS(e) {
+      e.preventDefault();
+      const sub = document.getElementById('jms-sub').value;
+      const loc = document.getElementById('jms-location').value;
+      const work = document.getElementById('jms-work').value;
+      const qty = document.getElementById('jms-qty').value;
+      const jmsId = `JMS-SHJ-2026-${Math.floor(100 + Math.random() * 900)}`;
+
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-900/40";
+      tr.innerHTML = `
+        <td class="p-3 font-mono text-pink-400">${jmsId}</td>
+        <td class="p-3 font-medium text-slate-200">${sub}</td>
+        <td class="p-3">${loc}</td>
+        <td class="p-3">${work}</td>
+        <td class="p-3 text-right font-mono font-bold text-slate-100">${qty}</td>
+        <td class="p-3 text-slate-300">Eng. Tariq (Main Cont)</td>
+        <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">Verified</span></td>
+      `;
+      document.getElementById('jms-table-body').prepend(tr);
+      closeModal('modal-new-jms');
+    }
+
+    function updateIPCLiveCalc() {
+      const cum = parseFloat(document.getElementById('inp-ipc-cum').value) || 0;
+      const prev = parseFloat(document.getElementById('inp-ipc-prev').value) || 0;
+      const mos = parseFloat(document.getElementById('inp-ipc-mos').value) || 0;
+
+      const grossCurr = cum - prev;
+      const retHold = grossCurr * 0.10;
+      const advRec = grossCurr * 0.10;
+      const backcharge = 12500;
+
+      const preTax = grossCurr + mos - retHold - advRec - backcharge;
+      const vat = preTax * 0.05;
+      const finalNet = preTax + vat;
+
+      document.getElementById('ipc-cum-work').innerText = `AED ${cum.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-prev-cert').innerText = `AED ${prev.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-gross-curr').innerText = `AED ${grossCurr.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-mos-val').innerText = `AED ${mos.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+      document.getElementById('ipc-ded-retention').innerText = `- AED ${retHold.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-ded-advance').innerText = `- AED ${advRec.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-net-pretax').innerText = `AED ${preTax.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-vat-val').innerText = `+ AED ${vat.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+      document.getElementById('ipc-final-net').innerText = `AED ${finalNet.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    }
+
+    function submitNewIPC(e) {
+      e.preventDefault();
+      updateIPCLiveCalc();
+      closeModal('modal-new-ipc');
+      alert('Interim Payment Certificate (IPC) recalculated and verified!');
+    }
+
+    function submitNewVendor(e) {
+      e.preventDefault();
+      const name = document.getElementById('v-name').value;
+      const trn = document.getElementById('v-trn').value;
+      const lic = document.getElementById('v-lic').value;
+      const role = document.getElementById('v-role').value;
+
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-900/40";
+      tr.innerHTML = `
+        <td class="p-3"><div class="font-bold text-slate-100">${name}</div></td>
+        <td class="p-3"><span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 text-[10px]">${role}</span></td>
+        <td class="p-3 font-mono text-slate-300">${trn}</td>
+        <td class="p-3 font-mono text-slate-400">${lic}</td>
+        <td class="p-3"><span class="text-emerald-400 font-medium flex items-center gap-1"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> IBAN Verified</span></td>
+        <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">Approved</span></td>
+      `;
+      document.getElementById('vendor-table-body').prepend(tr);
+      closeModal('modal-new-vendor');
+    }
+
+    // --- AI COPILOT ---
+    function triggerPOAIComparison() {
+      if (deductTokens(5)) {
+        alert('SAM AI Quote Normalization complete! Supplier quotes normalized for AED landed prices, truck pump charges, and 5% UAE VAT.');
+      }
+    }
+
+    function runAIQuotationComparison() {
+      if (deductTokens(5)) {
+        alert('AI Quote Comparison Engine analyzed uploaded PDFs. Lowest compliant AED landed cost identified for Ready Mix Concrete.');
+      }
+    }
+
+    function runAIRateAnalysis() {
+      if (deductTokens(3)) {
+        document.getElementById('ai-rate-output').classList.remove('hidden');
+      }
+    }
+
+    function switchProject(prjId) {
+      console.log("Switched project context to:", prjId);
+    }
+
+    // Default View Initialization
+    switchTab('tab-material-req');
+  </script>
+</body>
+</html>

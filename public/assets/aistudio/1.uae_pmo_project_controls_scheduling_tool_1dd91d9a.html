@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAE Construction PMO Controls & Scheduling Tool – Sharjah Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for S-Curve Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        pmo: {
+                            50: '#f0f4f9',
+                            100: '#e1e9f2',
+                            500: '#1e3a8a',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .tab-btn.active {
+            border-bottom-color: #1d4ed8;
+            color: #1d4ed8;
+            font-weight: 700;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; font-size: 10pt; }
+            .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+            .page-break { page-break-before: always; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-pmo-600 p-2 rounded-lg text-white">
+                    <i class="fa-solid fa-chart-line text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        <span>Construction PMO Controls Tool</span>
+                        <span class="text-xs font-normal bg-pmo-700 text-pmo-100 px-2 py-0.5 rounded-full border border-pmo-500">UAE · Sharjah Edition</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Project Controls • EVM (AED) & S-Curve • UAE Coefficients, Authority Approvals & Milestones</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button onclick="exportJSON()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-medium border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-download text-pmo-500"></i> <span>Export Data</span>
+                </button>
+                <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs font-medium border border-slate-700 cursor-pointer flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-upload text-pmo-500"></i> <span>Import Data</span>
+                    <input type="file" id="importFileInput" onchange="importJSON(event)" class="hidden" accept=".json">
+                </label>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-pmo-600 hover:bg-pmo-700 text-white rounded text-xs font-semibold flex items-center space-x-1.5 transition shadow-sm">
+                    <i class="fa-solid fa-print"></i> <span>Executive Print</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+
+        <!-- Sidebar: Active Project & PMO Folder Directory -->
+        <aside class="w-full md:w-64 flex-shrink-0 space-y-4 no-print">
+            
+            <!-- Active Project Selector Card -->
+            <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Active PMO Project</label>
+                    <button onclick="openNewProjectModal()" class="text-xs text-pmo-600 font-semibold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> New
+                    </button>
+                </div>
+                <select id="projectSelector" onchange="switchProject(this.value)" class="w-full px-3 py-2 border border-slate-300 rounded-md text-xs font-semibold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-pmo-500 focus:outline-none">
+                    <!-- Dynamic Project List -->
+                </select>
+                <div id="projectMetaBadge" class="mt-2 text-[11px] text-slate-500 bg-slate-100 p-2 rounded border border-slate-200">
+                    <!-- Dynamic project metadata -->
+                </div>
+            </div>
+
+            <!-- Virtual Folder Structure Tree -->
+            <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-3 bg-slate-800 text-white flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-pmo-500"></i> PMO Virtual Folders
+                    </span>
+                    <button onclick="editProjectConfig()" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-0.5 rounded text-slate-200">
+                        <i class="fa-solid fa-gear"></i> Settings
+                    </button>
+                </div>
+                
+                <div class="p-2 space-y-1 text-xs" id="virtualFolderTree">
+                    <!-- Dynamic Directory Structure -->
+                </div>
+            </div>
+
+            <!-- Scheduling Benchmark Mode Indicator Card -->
+            <div id="sidebarModeCard" class="p-4 rounded-lg shadow-sm space-y-2 border text-xs">
+                <!-- Dynamic Status Badge -->
+            </div>
+        </aside>
+
+        <main class="flex-1 min-w-0 space-y-6">
+
+            <!-- View Navigation Switcher Tabs -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 no-print overflow-hidden">
+                <div class="flex border-b border-slate-200 overflow-x-auto text-xs sm:text-sm custom-scroll">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-5 py-3 border-b-2 border-transparent font-medium text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap active">
+                        <i class="fa-solid fa-gauge-high"></i><span>Executive PMO Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('gantt')" id="tab-gantt" class="tab-btn px-5 py-3 border-b-2 border-transparent font-medium text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                        <i class="fa-solid fa-timeline"></i><span>WBS Schedule & Gantt</span>
+                    </button>
+                    <button onclick="switchTab('milestones')" id="tab-milestones" class="tab-btn px-5 py-3 border-b-2 border-transparent font-medium text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                        <i class="fa-solid fa-flag-checkered"></i><span>Milestones & Watchlist</span>
+                    </button>
+                    <button onclick="switchTab('coeff')" id="tab-coeff" class="tab-btn px-5 py-3 border-b-2 border-transparent font-medium text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                        <i class="fa-solid fa-calculator"></i><span>UAE Coefficients & Rules</span>
+                    </button>
+                    <button onclick="switchTab('config')" id="tab-config" class="tab-btn px-5 py-3 border-b-2 border-transparent font-medium text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                        <i class="fa-solid fa-sliders"></i><span>Project Controls Setup</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="content-dashboard" class="tab-content space-y-6">
+                <!-- Parametric Mode Information Notice Banner (Conditional) -->
+                <div id="benchmarkNoticeBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r shadow-sm">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 text-amber-600 mt-0.5">
+                            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-xs font-bold text-amber-800 uppercase tracking-wider">UAE Coefficient Benchmark Schedule Applied</h3>
+                            <p class="text-xs text-amber-700 mt-0.5">UAE planning coefficients (project type, BUA, floors, basements, emirate, climate and Ramadan productivity, finish grade) generated this schedule, S-curve and milestone set. Replace with your Primavera/MS Project baseline before contractual use.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Summary KPI Metrics Block -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Schedule Performance (SPI)</span>
+                        <div id="kpiSPI" class="text-2xl font-extrabold text-emerald-600 mt-1">1.00</div>
+                        <span id="kpiSPIMeta" class="text-[10px] font-medium text-emerald-700">On Schedule</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Overall Progress (%)</span>
+                        <div id="kpiOverallProgress" class="text-2xl font-extrabold text-pmo-600 mt-1">0.0%</div>
+                        <span id="kpiProgressMeta" class="text-[10px] font-medium text-slate-500">Target: 0.0%</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Schedule Variance</span>
+                        <div id="kpiVarianceDays" class="text-2xl font-extrabold text-slate-900 mt-1">0 Days</div>
+                        <span id="kpiVarianceMeta" class="text-[10px] font-medium text-slate-500">Vs Approved Baseline</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Milestone Completion</span>
+                        <div id="kpiMilestones" class="text-2xl font-extrabold text-indigo-600 mt-1">0 / 0</div>
+                        <span id="kpiMilestoneMeta" class="text-[10px] font-medium text-indigo-600">0% Critical Events</span>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Cost Performance (CPI)</span>
+                        <div id="kpiCPI" class="text-2xl font-extrabold text-slate-700 mt-1">1.00</div>
+                        <span id="kpiCPIMeta" class="text-[10px] font-medium text-slate-500">Enter actual cost in Setup</span>
+                    </div>
+                </div>
+
+                <!-- Chart.js S-Curve Plot (Planned vs Actual vs Forecast Progress) -->
+                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-pmo-600"></i> Baseline Progress S-Curve (Cumulative %)
+                            </h2>
+                            <p class="text-xs text-slate-500">Earned Value S-Curve comparing Early Baseline, Actual Progress, and Forecast Trend</p>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="flex items-center gap-1 font-semibold text-slate-600"><span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span> Planned S-Curve</span>
+                            <span class="flex items-center gap-1 font-semibold text-slate-600"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Actual S-Curve</span>
+                        </div>
+                    </div>
+
+                    <div class="relative h-72">
+                        <canvas id="scurveChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Printable Executive Summary Status Card -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-800 text-white flex justify-between items-center no-print">
+                        <h3 class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-file-contract text-pmo-400"></i> Executive PMO Status Report & Action Plan
+                        </h3>
+                        <button onclick="window.print()" class="px-2.5 py-1 bg-pmo-600 hover:bg-pmo-500 text-white text-xs font-semibold rounded">
+                            <i class="fa-solid fa-file-pdf"></i> Print PDF Report
+                        </button>
+                    </div>
+
+                    <div class="p-6 space-y-4 text-xs">
+                        <div class="print-only border-b border-slate-300 pb-4 mb-4">
+                            <h1 class="text-xl font-bold text-slate-900" id="printReportTitle">PROJECT EXECUTIVE PMO STATUS REPORT</h1>
+                            <p class="text-xs text-slate-600" id="printReportMeta">Location: Sharjah, UAE | Type: Residential High-Rise</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1">Key Controls Summary</h4>
+                                <ul class="space-y-1.5 text-slate-700">
+                                    <li class="flex justify-between"><span>Primary Project Baseline:</span> <strong id="repBaselineMode">Primavera P6 Active</strong></li>
+                                    <li class="flex justify-between"><span>Target Contract Duration:</span> <strong id="repTargetDuration">24 Months</strong></li>
+                                    <li class="flex justify-between"><span>Current Project Month:</span> <strong id="repCurrentMonth">Month 6</strong></li>
+                                    <li class="flex justify-between"><span>Critical Path Delay Risk:</span> <strong id="repCriticalRisk" class="text-emerald-600">Low Risk</strong></li>
+                                </ul>
+                            </div>
+
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1">PMO Area & Scale Profile</h4>
+                                <ul class="space-y-1.5 text-slate-700">
+                                    <li class="flex justify-between"><span>Built-Up Area (BUA):</span> <strong id="repArea">150,000 sq.ft</strong></li>
+                                    <li class="flex justify-between"><span>Total Floor Count:</span> <strong id="repFloors">18 Floors</strong></li>
+                                    <li class="flex justify-between"><span>Budget at Completion (BAC):</span> <strong id="repBAC">-</strong></li>
+<li class="flex justify-between"><span>Earned / Planned Value:</span> <strong id="repEV">-</strong></li>
+                                    <li class="flex justify-between"><span>Controls Status:</span> <strong class="text-pmo-600">Active PMO Monitoring</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <h4 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1 mb-2">Executive PMO Observation & Recommended Recovery Plan</h4>
+                            <p id="repExecutiveText" class="p-3 bg-slate-50 border border-slate-200 rounded text-slate-700 leading-relaxed">
+                                Project execution is progressing in line with the planned early S-curve baseline. Critical path activities in Superstructure RCC framing are maintained without significant float erosion.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-gantt" class="tab-content hidden space-y-6">
+                <!-- Activity Entry / Add Row Form -->
+                <div class="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-3 no-print">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-square-plus text-pmo-600"></i> Add Activity to Schedule
+                        </h3>
+                        <button onclick="generateStandardWBS()" class="text-xs px-3 py-1 bg-slate-800 text-slate-200 rounded hover:bg-slate-700">
+                            <i class="fa-solid fa-wand-magic-sparkles text-pmo-400"></i> Auto-Generate UAE Benchmark WBS
+                        </button>
+                    </div>
+
+                    <form id="activityForm" onsubmit="saveActivityItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+                        <input type="hidden" id="actEditId" value="">
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">WBS Code *</label>
+                            <input type="text" id="actWbs" required placeholder="e.g. 1.2.1" class="w-full px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block font-bold text-slate-600 mb-1">Activity Description *</label>
+                            <input type="text" id="actName" required placeholder="e.g. Foundation Raft Concrete Pouring" class="w-full px-2 py-1.5 border border-slate-300 rounded">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Planned Start Month *</label>
+                            <input type="number" min="1" id="actStart" required placeholder="Month (e.g. 1)" class="w-full px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Planned Finish Month *</label>
+                            <input type="number" min="1" id="actFinish" required placeholder="Month (e.g. 3)" class="w-full px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Weightage (%) *</label>
+                            <input type="number" step="0.1" id="actWeight" required placeholder="Weight %" class="w-full px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Actual Progress (%)</label>
+                            <input type="number" min="0" max="100" id="actProgress" value="0" class="w-full px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div class="sm:col-span-5 flex items-center gap-2">
+                            <label class="block font-bold text-slate-600">Predecessor WBS:</label>
+                            <input type="text" id="actPred" placeholder="e.g. 1.0" class="flex-1 px-2 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div class="flex items-end justify-end">
+                            <button type="submit" class="w-full px-3 py-1.5 bg-pmo-600 hover:bg-pmo-700 text-white rounded font-bold">
+                                Save Activity
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- WBS Table & Visual Gantt Chart Layout -->
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-3 bg-slate-800 text-white flex justify-between items-center no-print">
+                        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-pmo-400"></i> Schedule WBS Activity Grid & Visual Timeline
+                        </span>
+                        <button onclick="exportScheduleCSV()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded font-semibold">
+                            <i class="fa-solid fa-file-csv"></i> Export Schedule CSV
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                    <th class="py-2.5 px-2 w-16">WBS</th>
+                                    <th class="py-2.5 px-3 min-w-[180px]">Activity Name</th>
+                                    <th class="py-2.5 px-2 w-16 text-center">Start</th>
+                                    <th class="py-2.5 px-2 w-16 text-center">Finish</th>
+                                    <th class="py-2.5 px-2 w-16 text-center">Weight</th>
+                                    <th class="py-2.5 px-2 w-16 text-center">Prog %</th>
+                                    <th class="py-2.5 px-2 w-64">Gantt Visual Timeline</th>
+                                    <th class="py-2.5 px-2 w-16 text-center no-print">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody" class="divide-y divide-slate-200 font-sans">
+                                <!-- Dynamic Schedule Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-milestones" class="tab-content hidden space-y-6">
+                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-flag-checkered text-pmo-600"></i> Critical Contractual Milestones
+                            </h2>
+                            <p class="text-xs text-slate-500">Track key completion events, baseline target dates vs actual dates, and variance days.</p>
+                        </div>
+                        <button onclick="openMilestoneModal()" class="px-3 py-1.5 bg-pmo-600 hover:bg-pmo-700 text-white rounded text-xs font-bold no-print flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Milestone
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto custom-scroll">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                    <th class="py-3 px-3">Milestone Event Name</th>
+                                    <th class="py-3 px-3 w-28 text-center">Baseline Month</th>
+                                    <th class="py-3 px-3 w-28 text-center">Actual/Forecast</th>
+                                    <th class="py-3 px-3 w-24 text-center">Variance</th>
+                                    <th class="py-3 px-3 w-28 text-center">Status</th>
+                                    <th class="py-3 px-3 w-20 text-center no-print">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="milestoneTableBody" class="divide-y divide-slate-200">
+                                <!-- Dynamic Milestones -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-coeff" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 space-y-3 text-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-calculator text-pmo-600"></i> Project-Type Coefficients</h2>
+                            <p class="text-slate-500">Duration (months) = (Base + Floors×perFloor + Basements×perBasement + BUA(000 m²)×perK) × Emirate × Climate × Grade × (6 ÷ work-days) + Permit. Cost in AED per sq.m BUA. Weights = % for the 10 WBS phases (1 Approvals, 2 Shoring/Excav., 3 Foundations, 4 Basement, 5 Structure, 6 Façade, 7 MEP, 8 Finishes, 9 External, 10 Handover).</p>
+                        </div>
+                        <button onclick="resetCoeff()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-semibold">Reset to UAE defaults</button>
+                    </div>
+                    <div class="overflow-x-auto custom-scroll"><table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px]"><th class="py-2 px-2">Project Type</th><th>Base</th><th>/Floor</th><th>/Basement</th><th>/000 m²</th><th>Min</th><th>Max</th><th>AED/m²</th><th>Phase weights (10)</th></tr></thead>
+                        <tbody id="coeffTypes"></tbody></table></div>
+                    <p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">These are planning-grade benchmarks for early-stage controls, not quotations. Calibrate Base/AED rates against your own completed projects, BOQ and the contractor's programme.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 text-xs space-y-2">
+                        <h3 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1">Emirate Factors & Approval Lead-Time</h3>
+                        <table class="w-full text-left border-collapse"><thead><tr class="bg-slate-100 text-[10px] uppercase font-bold text-slate-700"><th class="py-2 px-2">Emirate</th><th>Duration factor</th><th>Permit (months)</th></tr></thead><tbody id="coeffRegions"></tbody></table>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 text-xs space-y-1">
+                        <h3 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1 mb-1">Climate, Ramadan & Grade Factors</h3>
+                        <div id="coeffClimate"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 text-xs leading-relaxed">
+                        <h3 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1 mb-2">Sharjah Approval Sequence (modelled in WBS 1.0 / 10.0)</h3>
+                        <ul class="list-disc pl-4 space-y-1 text-slate-700">
+                            <li>Sharjah Municipality – building permit and final Completion Certificate (CCC).</li>
+                            <li>Sharjah Civil Defence – fire &amp; life-safety design approval, then final inspection before completion.</li>
+                            <li>SEWA – electricity / water / gas NOCs, temporary power, and permanent connections (WBS 9.0 / 7.0).</li>
+                            <li>Telecom (Etisalat / du), district-cooling provider where applicable, and Sharjah Urban Planning Council for zoning / master-plan items.</li>
+                            <li class="text-slate-500">Authority durations are allowances only – confirm current procedures and fees with each authority.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 text-xs leading-relaxed">
+                        <h3 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1 mb-2">UAE Working Calendar Rules</h3>
+                        <ul class="list-disc pl-4 space-y-1 text-slate-700">
+                            <li>Midday outdoor-work break (12:30–15:00) applies 15 June – 15 September (MOHRE) – drives the summer productivity loss.</li>
+                            <li>Ramadan: working hours reduced (typically 2 h/day) – drives the Ramadan loss factor.</li>
+                            <li>Fixed holidays: New Year (1 Jan), National Day (2–3 Dec). Eid Al-Fitr, Arafat Day / Eid Al-Adha and Hijri New Year follow moon-sighting – add the officially announced dates in P6 before baselining.</li>
+                            <li>Sites usually run Mon–Sat (6 days). Sharjah government offices run a Mon–Thu week, so allow for authority-response lag on Fridays.</li>
+                            <li>Hot-weather concreting (temperature limits, retarders, night pours) is assumed inside the structure cycle times.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-config" class="tab-content hidden space-y-6">
+                <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-5 space-y-5">
+                    <div class="border-b border-slate-200 pb-3">
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-pmo-600"></i>
+                            <span>Project Controls Configuration & Controls Baseline</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">Define project metadata, duration parameters, location settings, and schedule baseline mode.</p>
+                    </div>
+
+                    <form id="pmoConfigForm" onsubmit="saveProjectControlsConfig(event)" class="space-y-5 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Project Name *</label>
+                                <input type="text" id="cfgProjName" required placeholder="e.g. Al Majaz Residential Tower" class="w-full px-3 py-2 border border-slate-300 rounded font-semibold text-slate-900">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Project Code *</label>
+                                <input type="text" id="cfgProjCode" required placeholder="e.g. PRJ-2026-08" class="w-full px-3 py-2 border border-slate-300 rounded font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Location *</label>
+                                <input type="text" id="cfgLocation" required placeholder="e.g. Sharjah, UAE" class="w-full px-3 py-2 border border-slate-300 rounded">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Project Type *</label>
+                                <select id="cfgProjType" required class="w-full px-3 py-2 border border-slate-300 rounded font-semibold"></select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Built-Up Area (BUA, sq.m) *</label>
+                                <input type="number" id="cfgArea" required placeholder="e.g. 45000" class="w-full px-3 py-2 border border-slate-300 rounded font-mono font-bold">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Floor Count *</label>
+                                <input type="number" id="cfgFloors" required placeholder="e.g. 18" class="w-full px-3 py-2 border border-slate-300 rounded font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Target Duration (Months) *</label>
+                                <input type="number" id="cfgDuration" placeholder="auto from coefficients" class="w-full px-3 py-2 border border-slate-300 rounded font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-slate-700 uppercase mb-1">Current Progress Month *</label>
+                                <input type="number" id="cfgCurrentMonth" required placeholder="e.g. 6" class="w-full px-3 py-2 border border-slate-300 rounded font-mono">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Emirate</label><select id="cfgRegion" class="w-full px-3 py-2 border border-slate-300 rounded font-semibold"></select></div>
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Basement Levels</label><input type="number" min="0" id="cfgBasements" class="w-full px-3 py-2 border border-slate-300 rounded font-mono"></div>
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Project Start Date</label><input type="date" id="cfgStartDate" class="w-full px-3 py-2 border border-slate-300 rounded font-mono"></div>
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Finish Grade</label><select id="cfgGrade" class="w-full px-3 py-2 border border-slate-300 rounded font-semibold"><option>Standard</option><option>Premium</option><option>Luxury</option></select></div>
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Site Work-Days / Week</label><input type="number" min="5" max="7" id="cfgWorkDays" class="w-full px-3 py-2 border border-slate-300 rounded font-mono"></div>
+                            <div><label class="block font-bold text-slate-700 uppercase mb-1">Actual Cost to Date (AED)</label><input type="number" min="0" id="cfgActualCost" class="w-full px-3 py-2 border border-slate-300 rounded font-mono"></div>
+                        </div>
+                        <p id="cfgBenchPreview" class="text-[11px] text-pmo-700 bg-pmo-50 border border-slate-200 rounded p-2"></p>
+
+                        <!-- Schedule Baseline Mode Selector -->
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                            <label class="block font-bold text-slate-800 uppercase text-xs">Schedule Baseline Data Source Mode *</label>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <label class="flex items-start p-3 bg-white border border-slate-300 rounded-lg cursor-pointer hover:border-pmo-500 transition">
+                                    <input type="radio" name="cfgScheduleMode" value="PRIMAVERA" class="mt-1 text-pmo-600 focus:ring-pmo-500">
+                                    <div class="ml-3">
+                                        <span class="block font-bold text-slate-900">Primavera P6 / MS Project Mode</span>
+                                        <span class="block text-[11px] text-slate-500">Manual WBS activities, predecessor logic, and Primavera schedule weights.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start p-3 bg-white border border-slate-300 rounded-lg cursor-pointer hover:border-pmo-500 transition">
+                                    <input type="radio" name="cfgScheduleMode" value="BENCHMARK" class="mt-1 text-pmo-600 focus:ring-pmo-500">
+                                    <div class="ml-3">
+                                        <span class="block font-bold text-slate-900">Historical Co-efficient Benchmark Mode</span>
+                                        <span class="block text-[11px] text-slate-500">Primavera files missing. Auto-generate S-curve baseline and milestones using construction co-efficients.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button type="button" onclick="regenerateFromSetup()" class="px-4 py-2 mr-2 bg-slate-800 hover:bg-slate-700 text-white rounded font-bold flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Regenerate WBS &amp; Milestones</button>
+                            <button type="submit" class="px-5 py-2 bg-pmo-600 hover:bg-pmo-700 text-white rounded font-bold shadow flex items-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Save PMO Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal: Add New Project -->
+            <div id="modalNewProject" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4 no-print">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Create New PMO Controls Project</h3>
+                    <form onsubmit="saveNewProjectModal(event)" class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Project Name *</label>
+                            <input type="text" id="mProjName" required placeholder="e.g. Heights Tower Phase 2" class="w-full px-3 py-1.5 border border-slate-300 rounded">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Project Code *</label>
+                            <input type="text" id="mProjCode" required placeholder="e.g. SHJ-2026-03" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Location</label>
+                                <input type="text" id="mProjLoc" value="Sharjah, UAE" required class="w-full px-3 py-1.5 border border-slate-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Duration (Months, blank = auto)</label>
+                                <input type="number" id="mProjDuration" placeholder="Auto" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="col-span-2"><label class="block font-bold text-slate-600 mb-1">Project Type</label><select id="mProjType" class="w-full px-3 py-1.5 border border-slate-300 rounded"></select></div>
+                            <div><label class="block font-bold text-slate-600 mb-1">Emirate</label><select id="mProjRegion" class="w-full px-3 py-1.5 border border-slate-300 rounded"></select></div>
+                            <div><label class="block font-bold text-slate-600 mb-1">Start Date</label><input type="date" id="mProjStart" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono"></div>
+                            <div><label class="block font-bold text-slate-600 mb-1">BUA (sq.m)</label><input type="number" id="mProjArea" value="30000" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono"></div>
+                            <div><label class="block font-bold text-slate-600 mb-1">Floors / Basements</label><div class="flex gap-1"><input type="number" id="mProjFloors" value="15" class="w-1/2 px-2 py-1.5 border border-slate-300 rounded font-mono"><input type="number" id="mProjBase" value="1" class="w-1/2 px-2 py-1.5 border border-slate-300 rounded font-mono"></div></div>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                            <button type="button" onclick="closeModal('modalNewProject')" class="px-3 py-1.5 border rounded text-slate-600">Cancel</button>
+                            <button type="submit" class="px-3 py-1.5 bg-pmo-600 text-white rounded font-bold">Initialize Project</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal: Add/Edit Milestone -->
+            <div id="modalMilestone" class="fixed inset-0 bg-slate-900/50 hidden items-center justify-center z-50 p-4 no-print">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Contractual Milestone Event</h3>
+                    <form onsubmit="saveMilestoneItem(event)" class="space-y-3 text-xs">
+                        <input type="hidden" id="msEditId" value="">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Milestone Description *</label>
+                            <input type="text" id="msName" required placeholder="e.g. Façade Enclosure Complete" class="w-full px-3 py-1.5 border border-slate-300 rounded">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Target Baseline Month *</label>
+                                <input type="number" id="msTarget" required placeholder="e.g. 12" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Actual / Forecast Month</label>
+                                <input type="number" id="msActual" placeholder="e.g. 13" class="w-full px-3 py-1.5 border border-slate-300 rounded font-mono">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Milestone Status *</label>
+                            <select id="msStatus" class="w-full px-3 py-1.5 border border-slate-300 rounded font-semibold">
+                                <option value="On-Track">On-Track</option>
+                                <option value="At-Risk">At-Risk</option>
+                                <option value="Delayed">Delayed</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                            <button type="button" onclick="closeModal('modalMilestone')" class="px-3 py-1.5 border rounded text-slate-600">Cancel</button>
+                            <button type="submit" class="px-3 py-1.5 bg-pmo-600 text-white rounded font-bold">Save Milestone</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // ===== UAE / SHARJAH PLANNING COEFFICIENT LIBRARY (planning-grade defaults, all editable in the "UAE Coefficients" tab) =====
+        const DEFAULT_COEFF = {
+            climate: { summerMonths: 3, summerLoss: 8, ramadanMonths: 1, ramadanLoss: 15, workDaysPerWeek: 6 },
+            grades: { Standard: 1.0, Premium: 1.1, Luxury: 1.2 },
+            // factor = logistics/market multiplier on duration; permit = authority approval months added up-front
+            regions: {
+                "Sharjah":   { factor: 1.00, permit: 2.0 },
+                "Dubai":     { factor: 1.02, permit: 2.5 },
+                "Abu Dhabi": { factor: 1.03, permit: 3.0 },
+                "Ajman":     { factor: 1.00, permit: 2.0 },
+                "Ras Al Khaimah": { factor: 1.02, permit: 2.0 },
+                "Umm Al Quwain":  { factor: 1.03, permit: 2.0 },
+                "Fujairah":  { factor: 1.04, permit: 2.0 }
+            },
+            // Duration (months) = (base + perFloor*floors + perBasement*basements + perK*BUA/1000) x region x climate x grade x (6/workdays) + permit
+            // cost = AED per sq.m BUA (construction only). w = phase weights for the 10 WBS phases (normalised to 100)
+            types: {
+                "Residential High-Rise":        { base: 9,  perFloor: 0.55, perBasement: 2.0, perK: 0.12, min: 14, max: 60, cost: 4000,  w: [4,6,10,6,28,9,15,13,4,5] },
+                "Commercial / Office Tower":    { base: 10, perFloor: 0.60, perBasement: 2.2, perK: 0.10, min: 14, max: 66, cost: 5200,  w: [4,5,10,6,26,11,18,12,4,4] },
+                "Mixed-Use Tower":              { base: 11, perFloor: 0.62, perBasement: 2.2, perK: 0.10, min: 16, max: 72, cost: 5000,  w: [4,5,10,6,26,10,17,13,4,5] },
+                "Villa / Townhouse Community":  { base: 6,  perFloor: 1.00, perBasement: 1.0, perK: 0.20, min: 8,  max: 40, cost: 3300,  w: [5,2,6,2,30,4,14,22,10,5] },
+                "Industrial Warehouse / Logistics": { base: 5, perFloor: 1.0, perBasement: 1.0, perK: 0.10, min: 6, max: 30, cost: 1900, w: [5,3,14,2,38,6,12,6,10,4] },
+                "Hospital / Healthcare":        { base: 14, perFloor: 0.70, perBasement: 2.5, perK: 0.09, min: 20, max: 72, cost: 11000, w: [4,4,8,5,22,8,26,14,4,5] },
+                "School / Education":           { base: 8,  perFloor: 0.80, perBasement: 1.5, perK: 0.15, min: 10, max: 40, cost: 4500,  w: [4,3,10,3,28,8,16,16,8,4] },
+                "Hotel / Hospitality":          { base: 12, perFloor: 0.65, perBasement: 2.2, perK: 0.10, min: 18, max: 66, cost: 7500,  w: [4,4,9,5,24,9,18,18,5,4] },
+                "Infrastructure / Roads":       { base: 6,  perFloor: 0,    perBasement: 0,   perK: 0.08, min: 8,  max: 48, cost: 900,   w: [5,8,14,0,32,0,8,0,28,5] }
+            }
+        };
+        let COEFF = JSON.parse(JSON.stringify(DEFAULT_COEFF));
+
+        // WBS phase template: [wbs, name, start% , finish% , predecessors]
+        const PHASES = [
+            ["1.0", "Design, Authority Approvals & Mobilisation", 0, 10, []],
+            ["2.0", "Enabling Works, Shoring & Excavation", 8, 20, ["1.0"]],
+            ["3.0", "Piling & Raft / Foundations", 14, 30, ["2.0"]],
+            ["4.0", "Basement & Substructure (to GF slab)", 26, 40, ["3.0"]],
+            ["5.0", "Superstructure RCC (Podium & Tower)", 34, 70, ["4.0", "3.0"]],
+            ["6.0", "Façade, Glazing & Roofing (Envelope)", 56, 84, ["5.0"]],
+            ["7.0", "MEP – HVAC/District Cooling, Fire & Life Safety, ELV, Lifts", 40, 90, ["5.0"]],
+            ["8.0", "Internal Finishes & Fit-out", 58, 94, ["5.0"]],
+            ["9.0", "External Works, Landscape & Utility Connections (SEWA)", 78, 96, ["6.0"]],
+            ["10.0", "Authority Inspections, T&C, Completion Certificate & Handover", 90, 100, ["7.0", "8.0"]]
+        ];
+
+        let projects = [], scheduleItems = [], milestoneItems = [];
+        let activeProjectId = "PRJ-01";
+        let scurveChartInstance = null;
+        let _idc = Date.now();
+        const nextId = () => ++_idc;
+
+        function fmtDate(s) { return s ? new Date(s + 'T00:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : ''; }
+        function monthLabel(m, proj) {
+            if (!proj || !proj.startDate) return 'M' + m;
+            const [y, mo] = proj.startDate.split('-').map(Number);
+            return 'M' + m + ' · ' + new Date(y, mo - 1 + m - 1, 1).toLocaleString('en-GB', { month: 'short', year: '2-digit' });
+        }
+        function isoMonth(startISO, off, end) {
+            const [y, m] = startISO.split('-').map(Number);
+            const d = new Date(y, m - 1 + off + (end ? 1 : 0), end ? 0 : 1);
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        const fmtAED = v => 'AED ' + (v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : Math.round(v).toLocaleString());
+
+        function typeCoeff(p) { return COEFF.types[p.type] || Object.values(COEFF.types)[0]; }
+        function projectBAC(p) { return (p.areaSqM || 0) * typeCoeff(p).cost; }
+
+        // ---- Benchmark duration engine ----
+        function computeDuration(p) {
+            const t = typeCoeff(p), r = COEFF.regions[p.region] || COEFF.regions["Sharjah"], cl = COEFF.climate;
+            const uplift = 1 + (cl.summerMonths * cl.summerLoss / 100 + cl.ramadanMonths * cl.ramadanLoss / 100) / 12;
+            const g = COEFF.grades[p.grade || 'Standard'] || 1;
+            const wd = p.workDays || cl.workDaysPerWeek;
+            const raw = t.base + t.perFloor * (p.floors || 0) + t.perBasement * (p.basements || 0) + t.perK * ((p.areaSqM || 0) / 1000);
+            const d = raw * r.factor * uplift * (1 + (g - 1) * 0.4) * (6 / wd) + r.permit;
+            return Math.round(Math.min(t.max, Math.max(t.min, d)));
+        }
+
+        function buildBenchmark(p) {
+            const t = typeCoeff(p), D = p.durationMonths, wk = (p.workDays || COEFF.climate.workDaysPerWeek);
+            const w = t.w.slice();
+            if (!p.basements) w[3] = 0;
+            const sum = w.reduce((a, b) => a + b, 0) || 1;
+            const present = PHASES.filter((ph, i) => w[i] > 0).map(ph => ph[0]);
+            const items = [];
+            PHASES.forEach((ph, i) => {
+                if (!(w[i] > 0)) return;
+                let f = Math.min(D, Math.max(2, Math.ceil(ph[3] / 100 * D)));
+                let s = Math.max(1, Math.min(Math.floor(ph[2] / 100 * D) + 1, f - 1));
+                const preds = ph[4].filter(x => present.includes(x));
+                items.push({
+                    id: nextId(), projectId: p.id, wbs: ph[0], name: ph[1], startMonth: s, finishMonth: f,
+                    weight: +(w[i] / sum * 100).toFixed(2), progress: 0, predecessor: preds.length ? preds.join(', ') : '-',
+                    startDate: p.startDate ? isoMonth(p.startDate, s - 1) : '', finishDate: p.startDate ? isoMonth(p.startDate, f - 1, true) : '',
+                    durWd: Math.round((f - s + 1) * wk * 4.345)
+                });
+            });
+            const drift = +(100 - items.reduce((a, b) => a + b.weight, 0)).toFixed(2);
+            if (items.length) items[items.length - 1].weight = +(items[items.length - 1].weight + drift).toFixed(2);
+            return items;
+        }
+
+        function buildMilestones(p, items) {
+            const D = p.durationMonths, cm = p.currentMonth || 1;
+            const defs = [
+                ["Building permit & Civil Defence design approval obtained", "1.0", 0],
+                ["Shoring / excavation complete", "2.0", 0],
+                ["Foundations (piling & raft) complete", "3.0", 0],
+                ["Basement / substructure complete", "4.0", 0],
+                ["Structure top-out", "5.0", 0],
+                ["Façade & envelope complete (weather-tight)", "6.0", 0],
+                ["MEP installation complete – SEWA permanent supply energised", "7.0", 0],
+                ["Internal finishes complete", "8.0", 0],
+                ["Civil Defence final inspection passed", "10.0", -1],
+                ["Municipality Completion Certificate & handover", "10.0", 0]
+            ];
+            const out = [];
+            defs.forEach(d => {
+                const it = items.find(x => x.wbs === d[1]); if (!it) return;
+                const tm = Math.max(1, Math.min(D, it.finishMonth + d[2]));
+                out.push({ id: nextId(), projectId: p.id, name: d[0], targetMonth: tm, actualMonth: tm, status: tm < cm ? 'Completed' : 'On-Track' });
+            });
+            return out;
+        }
+
+        function applyDemoProgress(items, cm, lag) {
+            items.forEach(i => {
+                const f = i.finishMonth > i.startMonth ? Math.min(1, Math.max(0, (cm - i.startMonth) / (i.finishMonth - i.startMonth))) : (cm >= i.finishMonth ? 1 : 0);
+                i.progress = Math.round(Math.max(0, f - (f < 1 ? lag : 0)) * 100);
+            });
+        }
+
+        function regenerateProject(p, demoLag) {
+            if (!p.durationMonths || p.autoDuration !== false) p.durationMonths = computeDuration(p);
+            scheduleItems = scheduleItems.filter(i => i.projectId !== p.id);
+            milestoneItems = milestoneItems.filter(m => m.projectId !== p.id);
+            const items = buildBenchmark(p);
+            if (demoLag !== undefined) applyDemoProgress(items, p.currentMonth, demoLag);
+            scheduleItems.push(...items);
+            milestoneItems.push(...buildMilestones(p, items));
+        }
+
+        function seedDefaults() {
+            projects = [
+                { id: "PRJ-01", code: "SHJ-2026-01", name: "Sharjah Residential Tower (B + G + 20)", location: "Sharjah, UAE", region: "Sharjah", type: "Residential High-Rise",
+                  areaSqM: 45000, floors: 20, basements: 1, grade: "Standard", workDays: 6, startDate: "2026-02-01", currentMonth: 9, scheduleMode: "BENCHMARK", actualCostAED: 0 },
+                { id: "PRJ-02", code: "SHJ-2026-02", name: "Sharjah Industrial Area Logistics Hub", location: "Sharjah Industrial Area, UAE", region: "Sharjah", type: "Industrial Warehouse / Logistics",
+                  areaSqM: 20000, floors: 1, basements: 0, grade: "Standard", workDays: 6, startDate: "2026-06-01", currentMonth: 5, scheduleMode: "BENCHMARK", actualCostAED: 0 }
+            ];
+            scheduleItems = []; milestoneItems = [];
+            projects.forEach(p => regenerateProject(p, 0.05));
+            activeProjectId = "PRJ-01";
+            saveLocalStorage();
+        }
+
+        function populateTypeSelect(id) {
+            const el = document.getElementById(id); if (!el) return;
+            const cur = el.value;
+            el.innerHTML = Object.keys(COEFF.types).map(k => `<option value="${k}">${k}</option>`).join('');
+            if (cur) el.value = cur;
+        }
+        function populateRegionSelect(id) {
+            const el = document.getElementById(id); if (!el) return;
+            const cur = el.value;
+            el.innerHTML = Object.keys(COEFF.regions).map(k => `<option value="${k}">${k}</option>`).join('');
+            if (cur) el.value = cur;
+        }
+
+        window.onload = function() {
+            loadLocalStorage();
+            if (!projects.length) seedDefaults();
+            if (!projects.some(p => p.id === activeProjectId)) activeProjectId = projects[0].id;
+            ['cfgProjType', 'mProjType'].forEach(populateTypeSelect);
+            ['cfgRegion', 'mProjRegion'].forEach(populateRegionSelect);
+            renderProjectDropdown();
+            renderFolderTree();
+            renderAllViews();
+        };
+
+        // ---- Coefficient tab ----
+        function saveCoeff() { localStorage.setItem('pmo_coeff_v3', JSON.stringify(COEFF)); }
+        function cT(k, f, v) { if (f === 'w') COEFF.types[k].w = v.split(',').map(x => parseFloat(x) || 0); else COEFF.types[k][f] = parseFloat(v) || 0; saveCoeff(); }
+        function cR(k, f, v) { COEFF.regions[k][f] = parseFloat(v) || 0; saveCoeff(); }
+        function cC(f, v) { COEFF.climate[f] = parseFloat(v) || 0; saveCoeff(); }
+        function cG(k, v) { COEFF.grades[k] = parseFloat(v) || 1; saveCoeff(); }
+        function resetCoeff() { if (!confirm('Reset all coefficients to UAE defaults?')) return; COEFF = JSON.parse(JSON.stringify(DEFAULT_COEFF)); saveCoeff(); renderCoeffTab(); }
+        function renderCoeffTab() {
+            const inp = (val, fn, w) => `<input value="${val}" onchange="${fn}" class="px-1.5 py-1 border border-slate-300 rounded font-mono text-xs ${w || 'w-16'}">`;
+            const e = k => encodeURIComponent(k).replace(/'/g, '%27');
+            document.getElementById('coeffTypes').innerHTML = Object.entries(COEFF.types).map(([k, t]) => {
+                const key = `decodeURIComponent('${e(k)}')`;
+                return `<tr class="border-b border-slate-200"><td class="py-2 px-2 font-semibold">${k}</td>` +
+                    ['base', 'perFloor', 'perBasement', 'perK', 'min', 'max', 'cost'].map(f => `<td class="px-1">${inp(t[f], `cT(${key},'${f}',this.value)`)}</td>`).join('') +
+                    `<td class="px-1">${inp(t.w.join(','), `cT(${key},'w',this.value)`, 'w-44')}</td></tr>`;
+            }).join('');
+            document.getElementById('coeffRegions').innerHTML = Object.entries(COEFF.regions).map(([k, r]) => {
+                const key = `decodeURIComponent('${e(k)}')`;
+                return `<tr class="border-b border-slate-200"><td class="py-2 px-2 font-semibold">${k}</td><td class="px-1">${inp(r.factor, `cR(${key},'factor',this.value)`)}</td><td class="px-1">${inp(r.permit, `cR(${key},'permit',this.value)`)}</td></tr>`;
+            }).join('');
+            const cl = COEFF.climate;
+            document.getElementById('coeffClimate').innerHTML = [
+                ['Summer months affected (midday-break season)', 'summerMonths', cl.summerMonths], ['Productivity loss in summer (%)', 'summerLoss', cl.summerLoss],
+                ['Ramadan months per year', 'ramadanMonths', cl.ramadanMonths], ['Productivity loss in Ramadan (%)', 'ramadanLoss', cl.ramadanLoss],
+                ['Default site working days / week', 'workDaysPerWeek', cl.workDaysPerWeek]
+            ].map(r => `<label class="flex items-center justify-between gap-3 py-1 border-b border-slate-100"><span>${r[0]}</span>${inp(r[2], `cC('${r[1]}',this.value)`)}</label>`).join('') +
+                Object.entries(COEFF.grades).map(([k, v]) => `<label class="flex items-center justify-between gap-3 py-1 border-b border-slate-100"><span>Finish grade factor – ${k}</span>${inp(v, `cG('${k}',this.value)`)}</label>`).join('');
+        }
+    </script>
+    <script>
+        // LocalStorage Controls
+        function saveLocalStorage() {
+            localStorage.setItem('pmo_projects_v3', JSON.stringify(projects));
+            localStorage.setItem('pmo_schedule_v3', JSON.stringify(scheduleItems));
+            localStorage.setItem('pmo_milestones_v3', JSON.stringify(milestoneItems));
+            localStorage.setItem('pmo_active_proj_v3', activeProjectId);
+            saveCoeff();
+        }
+
+        function loadLocalStorage() {
+            if (localStorage.getItem('pmo_projects_v3')) projects = JSON.parse(localStorage.getItem('pmo_projects_v3'));
+            if (localStorage.getItem('pmo_schedule_v3')) scheduleItems = JSON.parse(localStorage.getItem('pmo_schedule_v3'));
+            if (localStorage.getItem('pmo_milestones_v3')) milestoneItems = JSON.parse(localStorage.getItem('pmo_milestones_v3'));
+            if (localStorage.getItem('pmo_active_proj_v3')) activeProjectId = localStorage.getItem('pmo_active_proj_v3');
+            try { if (localStorage.getItem('pmo_coeff_v3')) COEFF = JSON.parse(localStorage.getItem('pmo_coeff_v3')); } catch (e) {}
+        }
+
+        // Active Project Selection logic
+        function getCurrentProject() {
+            return projects.find(p => p.id === activeProjectId) || projects[0];
+        }
+
+        function renderProjectDropdown() {
+            const select = document.getElementById('projectSelector');
+            select.innerHTML = '';
+            projects.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `[${p.code}] ${p.name}`;
+                if (p.id === activeProjectId) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            const curr = getCurrentProject();
+            if (curr) {
+                document.getElementById('projectMetaBadge').innerHTML = `
+                    <div class="font-bold text-slate-800 truncate">${curr.name}</div>
+                    <div>Location: ${curr.location}</div>
+                    <div class="mt-1 font-mono text-pmo-700 font-bold">${curr.durationMonths} Months | ${curr.type}</div>
+                `;
+
+                const card = document.getElementById('sidebarModeCard');
+                if (curr.scheduleMode === 'PRIMAVERA') {
+                    card.className = "p-3 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs";
+                    card.innerHTML = `
+                        <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-square-check text-emerald-600"></i> Primavera / MSP Baseline</div>
+                        <div class="text-[11px] text-emerald-700 mt-0.5">Custom Schedule Baseline Loaded</div>
+                    `;
+                } else {
+                    card.className = "p-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 text-xs";
+                    card.innerHTML = `
+                        <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-amber-600"></i> UAE Coefficient Mode</div>
+                        <div class="text-[11px] text-amber-700 mt-0.5">Benchmark S-Curve from UAE coefficients</div>
+                    `;
+                }
+            }
+        }
+
+        function switchProject(id) {
+            activeProjectId = id;
+            saveLocalStorage();
+            renderProjectDropdown();
+            renderFolderTree();
+            renderAllViews();
+        }
+
+        // Virtual Folder Tree Renderer
+        function renderFolderTree() {
+            const container = document.getElementById('virtualFolderTree');
+            container.innerHTML = '';
+
+            const folders = [
+                { id: "dashboard", name: "01_Project_Controls_Setup", icon: "fa-folder" },
+                { id: "gantt", name: "02_Schedule_and_Gantt_Baselines", icon: "fa-folder" },
+                { id: "milestones", name: "03_Milestone_and_Key_Events", icon: "fa-folder" },
+                { id: "dashboard", name: "04_Executive_PMO_Reports", icon: "fa-folder" },
+                { id: "coeff", name: "05_UAE_Coefficients_Library", icon: "fa-folder" }
+            ];
+
+            folders.forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left px-2 py-1.5 rounded flex items-center justify-between text-slate-600 hover:bg-slate-100";
+                btn.onclick = () => switchTab(f.id);
+                btn.innerHTML = `<span class="truncate"><i class="fa-solid ${f.icon} text-pmo-500 mr-2"></i>${f.name}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'gantt') renderScheduleTable();
+            if (tabId === 'milestones') renderMilestones();
+            if (tabId === 'config') populateConfigForm();
+            if (tabId === 'coeff') renderCoeffTab();
+        }
+
+        function renderAllViews() {
+            renderDashboard();
+            renderScheduleTable();
+            renderMilestones();
+            populateConfigForm();
+        }
+
+        // PMO Executive Dashboard & S-Curve Rendering Engine
+        function renderDashboard() {
+            const proj = getCurrentProject();
+            const items = scheduleItems.filter(i => i.projectId === activeProjectId);
+
+            // Toggle Benchmark Notice Banner
+            const banner = document.getElementById('benchmarkNoticeBanner');
+            if (proj.scheduleMode === 'BENCHMARK') {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            // Calculate Overall Cumulative Progress
+            let actualCumulative = 0;
+            let totalWeight = 0;
+
+            items.forEach(i => {
+                actualCumulative += (i.progress * i.weight) / 100;
+                totalWeight += i.weight;
+            });
+
+            // Earned Planned Progress at current month
+            let plannedCumulative = 0;
+            items.forEach(i => {
+                if (proj.currentMonth >= i.finishMonth) {
+                    plannedCumulative += i.weight;
+                } else if (proj.currentMonth > i.startMonth) {
+                    const duration = i.finishMonth - i.startMonth;
+                    const elapsed = proj.currentMonth - i.startMonth;
+                    plannedCumulative += (i.weight * (elapsed / duration));
+                }
+            });
+
+            const spi = plannedCumulative > 0 ? (actualCumulative / plannedCumulative).toFixed(2) : "1.00";
+
+            document.getElementById('kpiOverallProgress').innerText = `${actualCumulative.toFixed(1)}%`;
+            document.getElementById('kpiProgressMeta').innerText = `Target Baseline: ${plannedCumulative.toFixed(1)}%`;
+            document.getElementById('kpiSPI').innerText = spi;
+
+            if (parseFloat(spi) >= 0.98) {
+                document.getElementById('kpiSPIMeta').innerText = "On Schedule";
+                document.getElementById('kpiSPIMeta').className = "text-[10px] font-medium text-emerald-600";
+            } else {
+                document.getElementById('kpiSPIMeta').innerText = "Schedule Lag";
+                document.getElementById('kpiSPIMeta').className = "text-[10px] font-medium text-red-600";
+            }
+
+            // Milestone Metrics
+            const msList = milestoneItems.filter(m => m.projectId === activeProjectId);
+            var completedMs = msList.filter(m => m.status === 'Completed').length;
+            document.getElementById('kpiMilestones').innerText = `${completedMs} / ${msList.length}`;
+
+            // S-Curve Chart Generation
+            renderSCurveChart(proj, items);
+
+            // Report Section
+            document.getElementById('printReportTitle').innerText = `${proj.name.toUpperCase()} - PMO EXECUTIVE STATUS`;
+            document.getElementById('printReportMeta').innerText = `Location: ${proj.location} | Code: ${proj.code} | Type: ${proj.type}`;
+            document.getElementById('repBaselineMode').innerText = proj.scheduleMode === 'PRIMAVERA' ? 'Primavera P6 Active' : 'Historical Benchmark';
+            document.getElementById('repTargetDuration').innerText = `${proj.durationMonths} Months`;
+            document.getElementById('repCurrentMonth').innerText = `Month ${proj.currentMonth}`;
+            document.getElementById('repArea').innerText = proj.areaSqM ? `${proj.areaSqM.toLocaleString()} sq.m (${Math.round(proj.areaSqM * 10.7639).toLocaleString()} sq.ft)` : 'TBC';
+            document.getElementById('repFloors').innerText = `${proj.floors} Floors${proj.basements ? ' + ' + proj.basements + ' Basement' : ''}`;
+            // ---- UAE cost, variance & narrative ----
+            const bac = projectBAC(proj), ev = bac * actualCumulative / 100, pv = bac * plannedCumulative / 100, ac = proj.actualCostAED || 0;
+            const plannedAt = mm => { let a = 0; items.forEach(i => { if (mm >= i.finishMonth) a += i.weight; else if (mm > i.startMonth) a += i.weight * (mm - i.startMonth) / (i.finishMonth - i.startMonth); }); return a; };
+            let mAt = 0; while (mAt < proj.currentMonth && plannedAt(mAt + 0.1) < actualCumulative) mAt += 0.1;
+            const slipDays = Math.round((proj.currentMonth - mAt) * 30.4);
+            const vEl = document.getElementById('kpiVarianceDays');
+            vEl.innerText = Math.abs(slipDays) < 3 ? '0 Days' : `${Math.abs(slipDays)} Days ${slipDays > 0 ? 'Behind' : 'Ahead'}`;
+            vEl.className = `text-2xl font-extrabold mt-1 ${slipDays > 14 ? 'text-red-600' : 'text-slate-900'}`;
+            document.getElementById('kpiMilestoneMeta').innerText = `${Math.round(msList.length ? completedMs / msList.length * 100 : 0)}% Complete`;
+            const cpiEl = document.getElementById('kpiCPI'), cpiMeta = document.getElementById('kpiCPIMeta');
+            if (ac > 0) { const cpi = ev / ac; cpiEl.innerText = cpi.toFixed(2); cpiMeta.innerText = cpi >= 0.98 ? 'Within Budget' : 'Cost Overrun'; cpiMeta.className = 'text-[10px] font-medium ' + (cpi >= 0.98 ? 'text-emerald-600' : 'text-red-600'); }
+            else { cpiEl.innerText = 'n/a'; cpiMeta.innerText = 'Enter actual cost in Setup'; cpiMeta.className = 'text-[10px] font-medium text-slate-500'; }
+            document.getElementById('repBAC').innerText = fmtAED(bac);
+            document.getElementById('repEV').innerText = `${fmtAED(ev)} / ${fmtAED(pv)}`;
+            const sp = parseFloat(spi), risk = sp < 0.9 ? 'High Risk' : sp < 0.98 ? 'Medium Risk' : 'Low Risk';
+            const rEl = document.getElementById('repCriticalRisk'); rEl.innerText = risk;
+            rEl.className = sp < 0.9 ? 'text-red-600' : sp < 0.98 ? 'text-amber-600' : 'text-emerald-600';
+            let season = '';
+            if (proj.startDate) { const [y0, m0] = proj.startDate.split('-').map(Number); const cal = (m0 - 1 + proj.currentMonth - 1) % 12 + 1;
+                if (cal >= 6 && cal <= 9) season = ' Summer midday-break season (15 Jun–15 Sep) is active: re-plan outdoor concrete, façade and external works into early-morning / night shifts.'; }
+            document.getElementById('repExecutiveText').innerText =
+                `${proj.name} (${proj.region || 'UAE'}) – ${proj.type}, ${proj.areaSqM ? proj.areaSqM.toLocaleString() + ' sq.m BUA' : 'BUA TBC'}. Benchmark duration ${proj.durationMonths} months` +
+                `${proj.startDate ? ', start ' + fmtDate(proj.startDate) + ', forecast completion ' + fmtDate(isoMonth(proj.startDate, proj.durationMonths - 1, true)) : ''}. ` +
+                `Status month ${proj.currentMonth}: actual ${actualCumulative.toFixed(1)}% vs planned ${plannedCumulative.toFixed(1)}% (SPI ${spi}, ${risk.toLowerCase()}). BAC ${fmtAED(bac)}.` + season +
+                ` Track authority gates – Municipality permit, Civil Defence approvals / final inspection, SEWA connections and the Completion Certificate – as the critical statutory path.`;
+        }
+
+        function renderSCurveChart(proj, items) {
+            const ctx = document.getElementById('scurveChart');
+            if (!ctx) return;
+
+            const labels = [];
+            const plannedData = [];
+            const actualData = [];
+
+            const totalMonths = proj.durationMonths || 24;
+
+            for (let m = 1; m <= totalMonths; m++) {
+                labels.push(monthLabel(m, proj));
+
+                // Calculate planned % at month m
+                let pAcc = 0;
+                items.forEach(i => {
+                    if (m >= i.finishMonth) {
+                        pAcc += i.weight;
+                    } else if (m > i.startMonth) {
+                        const dur = i.finishMonth - i.startMonth;
+                        pAcc += (i.weight * ((m - i.startMonth) / dur));
+                    }
+                });
+                plannedData.push(Math.min(100, Math.round(pAcc)));
+
+                // Actual progress plot up to current month
+                if (m <= proj.currentMonth) {
+                    let aAcc = 0;
+                    items.forEach(i => {
+                        if (m >= i.finishMonth) {
+                            aAcc += (i.progress * i.weight) / 100;
+                        } else if (m >= i.startMonth) {
+                            aAcc += (i.progress * i.weight) / 100;
+                        }
+                    });
+                    actualData.push(Math.min(100, Math.round(aAcc)));
+                }
+            }
+
+            if (scurveChartInstance) scurveChartInstance.destroy();
+
+            scurveChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Planned Early S-Curve (%)',
+                            data: plannedData,
+                            borderColor: '#1d4ed8',
+                            backgroundColor: 'rgba(29, 78, 216, 0.05)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Actual Earned Progress (%)',
+                            data: actualData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { max: 100, min: 0, title: { display: true, text: 'Progress %' } }
+                    }
+                }
+            });
+        }
+
+        // Schedule WBS Table & Visual Gantt Chart Generator
+        function renderScheduleTable() {
+            const proj = getCurrentProject();
+            const items = scheduleItems.filter(i => i.projectId === activeProjectId);
+
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = '';
+
+            const totalMonths = proj.durationMonths || 24;
+
+            items.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition border-b border-slate-200 text-xs";
+
+                // Generate visual Gantt timeline bar
+                const startPct = ((item.startMonth - 1) / totalMonths) * 100;
+                const dateLine = item.startDate ? `<div class="text-[10px] font-normal text-slate-400">${fmtDate(item.startDate)} → ${fmtDate(item.finishDate)} · ${item.durWd || 0} wd</div>` : '';
+                const cpBadge = item.critical ? ` <span class="text-[9px] font-bold bg-red-100 text-red-700 px-1 rounded" title="${item.critical} zero-float activities">CP ${item.critical}</span>` : '';
+                const barColor = item.critical ? 'bg-red-600' : 'bg-pmo-600';
+                const widthPct = Math.max(4, ((item.finishMonth - item.startMonth) / totalMonths) * 100);
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-2 font-mono font-bold text-pmo-600" title="Predecessors: ${item.predecessor}">${item.wbs}</td>
+                    <td class="py-2.5 px-3 font-semibold text-slate-800">${item.name}${cpBadge}${dateLine}</td>
+                    <td class="py-2.5 px-2 text-center font-mono text-slate-600">M${item.startMonth}</td>
+                    <td class="py-2.5 px-2 text-center font-mono text-slate-600">M${item.finishMonth}</td>
+                    <td class="py-2.5 px-2 text-center font-mono font-bold text-slate-900">${item.weight}%</td>
+                    <td class="py-2.5 px-2 text-center font-mono text-emerald-600 font-bold">${item.progress}%</td>
+                    <td class="py-2.5 px-2">
+                        <div class="w-full bg-slate-200 h-4 rounded relative overflow-hidden">
+                            <div class="absolute top-0 bottom-0 ${barColor} rounded" style="left: ${startPct}%; width: ${widthPct}%;">
+                                <div class="bg-emerald-500 h-full" style="width: ${item.progress}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-2 text-center no-print">
+                        <button onclick="editActivity(${item.id})" class="text-pmo-600 hover:text-pmo-800 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteActivity(${item.id})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveActivityItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('actEditId').value;
+
+            const itemData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                projectId: activeProjectId,
+                wbs: document.getElementById('actWbs').value,
+                name: document.getElementById('actName').value,
+                startMonth: parseInt(document.getElementById('actStart').value) || 1,
+                finishMonth: parseInt(document.getElementById('actFinish').value) || 2,
+                weight: parseFloat(document.getElementById('actWeight').value) || 0,
+                progress: parseFloat(document.getElementById('actProgress').value) || 0,
+                predecessor: document.getElementById('actPred').value || '-'
+            };
+
+            if (editId) {
+                const idx = scheduleItems.findIndex(i => i.id === parseInt(editId));
+                if (idx !== -1) scheduleItems[idx] = itemData;
+            } else {
+                scheduleItems.push(itemData);
+            }
+
+            saveLocalStorage();
+            resetActivityForm();
+            renderScheduleTable();
+            renderDashboard();
+        }
+
+        function editActivity(id) {
+            const item = scheduleItems.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('actEditId').value = item.id;
+            document.getElementById('actWbs').value = item.wbs;
+            document.getElementById('actName').value = item.name;
+            document.getElementById('actStart').value = item.startMonth;
+            document.getElementById('actFinish').value = item.finishMonth;
+            document.getElementById('actWeight').value = item.weight;
+            document.getElementById('actProgress').value = item.progress;
+            document.getElementById('actPred').value = item.predecessor;
+        }
+
+        function deleteActivity(id) {
+            scheduleItems = scheduleItems.filter(i => i.id !== id);
+            saveLocalStorage();
+            renderScheduleTable();
+            renderDashboard();
+        }
+
+        function resetActivityForm() {
+            document.getElementById('actEditId').value = '';
+            document.getElementById('activityForm').reset();
+        }
+
+        function generateStandardWBS() {
+            const p = getCurrentProject();
+            if (!confirm('Replace this project\'s activities and milestones with the UAE benchmark set?')) return;
+            regenerateProject(p);
+            saveLocalStorage(); renderScheduleTable(); renderMilestones(); renderDashboard();
+        }
+
+        // Milestone Watchlist Rendering Logic
+        function renderMilestones() {
+            const items = milestoneItems.filter(m => m.projectId === activeProjectId);
+            const tbody = document.getElementById('milestoneTableBody');
+            tbody.innerHTML = '';
+
+            items.forEach(m => {
+                const variance = (m.actualMonth || m.targetMonth) - m.targetMonth;
+                let badgeClass = "bg-emerald-100 text-emerald-800";
+                if (m.status === 'At-Risk') badgeClass = "bg-amber-100 text-amber-800";
+                if (m.status === 'Delayed') badgeClass = "bg-red-100 text-red-800";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-200 text-xs";
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-bold text-slate-800">${m.name}${m.date ? `<div class="text-[10px] font-normal text-slate-400">${fmtDate(m.date)} · ${m.activityId} · ${m.basis}</div>` : ''}</td>
+                    <td class="py-3 px-3 text-center font-mono">M${m.targetMonth}</td>
+                    <td class="py-3 px-3 text-center font-mono font-bold text-pmo-600">M${m.actualMonth || m.targetMonth}</td>
+                    <td class="py-3 px-3 text-center font-mono font-bold ${variance > 0 ? 'text-red-600' : 'text-emerald-600'}">
+                        ${variance > 0 ? '+' + variance + ' Mo' : 'On Time'}
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <span class="px-2 py-0.5 rounded font-bold text-[10px] uppercase ${badgeClass}">${m.status}</span>
+                    </td>
+                    <td class="py-3 px-3 text-center no-print">
+                        <button onclick="editMilestone(${m.id})" class="text-pmo-600 hover:text-pmo-800 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteMilestone(${m.id})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openMilestoneModal() {
+            document.getElementById('msEditId').value = '';
+            document.getElementById('msName').value = '';
+            document.getElementById('msTarget').value = '';
+            document.getElementById('msActual').value = '';
+            openModal('modalMilestone');
+        }
+
+        function saveMilestoneItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('msEditId').value;
+
+            const msData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                projectId: activeProjectId,
+                name: document.getElementById('msName').value,
+                targetMonth: parseInt(document.getElementById('msTarget').value) || 1,
+                actualMonth: parseInt(document.getElementById('msActual').value) || parseInt(document.getElementById('msTarget').value),
+                status: document.getElementById('msStatus').value
+            };
+
+            if (editId) {
+                const idx = milestoneItems.findIndex(m => m.id === parseInt(editId));
+                if (idx !== -1) milestoneItems[idx] = msData;
+            } else {
+                milestoneItems.push(msData);
+            }
+
+            saveLocalStorage();
+            closeModal('modalMilestone');
+            renderMilestones();
+            renderDashboard();
+        }
+
+        function editMilestone(id) {
+            const m = milestoneItems.find(item => item.id === id);
+            if (!m) return;
+
+            document.getElementById('msEditId').value = m.id;
+            document.getElementById('msName').value = m.name;
+            document.getElementById('msTarget').value = m.targetMonth;
+            document.getElementById('msActual').value = m.actualMonth;
+            document.getElementById('msStatus').value = m.status;
+
+            openModal('modalMilestone');
+        }
+
+        function deleteMilestone(id) {
+            milestoneItems = milestoneItems.filter(m => m.id !== id);
+            saveLocalStorage();
+            renderMilestones();
+            renderDashboard();
+        }
+
+        // Configuration Form Logic
+        function populateConfigForm() {
+            const p = getCurrentProject();
+            ['cfgProjType'].forEach(populateTypeSelect); ['cfgRegion'].forEach(populateRegionSelect);
+            document.getElementById('cfgProjName').value = p.name;
+            document.getElementById('cfgProjCode').value = p.code;
+            document.getElementById('cfgLocation').value = p.location;
+            document.getElementById('cfgProjType').value = p.type;
+            document.getElementById('cfgRegion').value = p.region || 'Sharjah';
+            document.getElementById('cfgArea').value = p.areaSqM || '';
+            document.getElementById('cfgFloors').value = p.floors;
+            document.getElementById('cfgBasements').value = p.basements || 0;
+            document.getElementById('cfgDuration').value = p.autoDuration === false ? p.durationMonths : '';
+            document.getElementById('cfgCurrentMonth').value = p.currentMonth;
+            document.getElementById('cfgStartDate').value = p.startDate || '';
+            document.getElementById('cfgGrade').value = p.grade || 'Standard';
+            document.getElementById('cfgWorkDays').value = p.workDays || 6;
+            document.getElementById('cfgActualCost').value = p.actualCostAED || 0;
+            document.getElementById('cfgBenchPreview').innerText = `Coefficient benchmark for current inputs: ${computeDuration(p)} months · Budget ${fmtAED(projectBAC(p))} (${typeCoeff(p).cost.toLocaleString()} AED/sq.m).`;
+            document.getElementsByName('cfgScheduleMode').forEach(r => { r.checked = r.value === p.scheduleMode; });
+        }
+
+        function readConfigInto(p) {
+            p.name = document.getElementById('cfgProjName').value;
+            p.code = document.getElementById('cfgProjCode').value;
+            p.location = document.getElementById('cfgLocation').value;
+            p.type = document.getElementById('cfgProjType').value;
+            p.region = document.getElementById('cfgRegion').value;
+            p.areaSqM = parseFloat(document.getElementById('cfgArea').value) || 1000;
+            p.floors = parseInt(document.getElementById('cfgFloors').value) || 1;
+            p.basements = parseInt(document.getElementById('cfgBasements').value) || 0;
+            const dur = parseInt(document.getElementById('cfgDuration').value);
+            p.autoDuration = !dur; p.durationMonths = dur || computeDuration(p);
+            p.currentMonth = parseInt(document.getElementById('cfgCurrentMonth').value) || 1;
+            p.startDate = document.getElementById('cfgStartDate').value || p.startDate || '';
+            p.grade = document.getElementById('cfgGrade').value;
+            p.workDays = parseInt(document.getElementById('cfgWorkDays').value) || 6;
+            p.actualCostAED = parseFloat(document.getElementById('cfgActualCost').value) || 0;
+            document.getElementsByName('cfgScheduleMode').forEach(r => { if (r.checked) p.scheduleMode = r.value; });
+            if (p.autoDuration) p.durationMonths = computeDuration(p);
+        }
+
+        function saveProjectControlsConfig(e) {
+            e.preventDefault();
+            const p = getCurrentProject();
+            readConfigInto(p);
+            if (!scheduleItems.some(i => i.projectId === p.id)) regenerateProject(p);
+            saveLocalStorage(); renderProjectDropdown(); renderAllViews(); switchTab('dashboard');
+        }
+
+        function regenerateFromSetup() {
+            if (!confirm('Regenerate the WBS and milestones from UAE coefficients? Existing activities for this project will be replaced (progress resets to 0%).')) return;
+            const p = getCurrentProject();
+            readConfigInto(p);
+            regenerateProject(p);
+            saveLocalStorage(); renderProjectDropdown(); renderAllViews(); switchTab('gantt');
+        }
+
+        function editProjectConfig() {
+            switchTab('config');
+        }
+
+        // Modal Utility Functions
+        function openNewProjectModal() { openModal('modalNewProject'); }
+        function saveNewProjectModal(e) {
+            e.preventDefault();
+            const id = 'PRJ-' + String(projects.length + 1).padStart(2, '0') + '-' + String(Date.now()).slice(-3);
+            const dur = parseInt(document.getElementById('mProjDuration').value);
+            const p = {
+                id, code: document.getElementById('mProjCode').value, name: document.getElementById('mProjName').value,
+                location: document.getElementById('mProjLoc').value, region: document.getElementById('mProjRegion').value,
+                type: document.getElementById('mProjType').value, areaSqM: parseFloat(document.getElementById('mProjArea').value) || 10000,
+                floors: parseInt(document.getElementById('mProjFloors').value) || 1, basements: parseInt(document.getElementById('mProjBase').value) || 0,
+                grade: 'Standard', workDays: COEFF.climate.workDaysPerWeek, startDate: document.getElementById('mProjStart').value || new Date().toISOString().slice(0, 10).slice(0, 8) + '01',
+                currentMonth: 1, scheduleMode: 'BENCHMARK', actualCostAED: 0, autoDuration: !dur
+            };
+            p.durationMonths = dur || computeDuration(p);
+            projects.push(p);
+            regenerateProject(p);
+            activeProjectId = id;
+            saveLocalStorage(); renderProjectDropdown(); renderFolderTree(); renderAllViews();
+            closeModal('modalNewProject');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        // Export/Import System Logic
+        function exportJSON() {
+            const payload = { projects, scheduleItems, milestoneItems, coeff: COEFF };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `UAE_PMO_Controls_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function importJSON(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.projects) projects = data.projects;
+                    if (data.scheduleItems) scheduleItems = data.scheduleItems;
+                    if (data.milestoneItems) milestoneItems = data.milestoneItems;
+                    if (data.coeff) COEFF = data.coeff;
+                                        saveLocalStorage();
+                    renderProjectDropdown();
+                    renderFolderTree();
+                    renderAllViews();
+                    alert("PMO controls data successfully restored.");
+                } catch (err) {
+                    alert("Invalid JSON file formatting.");
+                }
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        function exportScheduleCSV() {
+            let csv = "data:text/csv;charset=utf-8,";
+            csv += "WBS,Activity Name,Start Month,Finish Month,Weight (%),Progress (%)\n";
+
+            const items = scheduleItems.filter(i => i.projectId === activeProjectId);
+            items.forEach(i => {
+                csv += `"${i.wbs}","${i.name}",${i.startMonth},${i.finishMonth},${i.weight},${i.progress}\n`;
+            });
+
+            const encodedUri = encodeURI(csv);
+            const a = document.createElement("a");
+            a.href = encodedUri;
+            a.download = `PMO_Schedule_WBS.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    </script>
+</body>
+</html>

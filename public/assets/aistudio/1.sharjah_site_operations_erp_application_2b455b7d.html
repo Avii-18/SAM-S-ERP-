@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharjah Site Operations ERP - Construction Site Management Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        site: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            teal: '#0d9488',
+                            tealHover: '#0f766e',
+                            amber: '#d97706',
+                            rose: '#e11d48',
+                            blue: '#2563eb',
+                            emerald: '#059669',
+                            slateBg: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; font-size: 10pt; }
+            .print-card { border: 1px solid #cbd5e1; page-break-inside: avoid; }
+        }
+        .print-only { display: none; }
+        .active-tab {
+            border-bottom: 3px solid #0d9488;
+            color: #0d9488;
+            font-weight: 700;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .modal-bg {
+            background-color: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(3px);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- TOP HEADER BAR -->
+    <header class="bg-site-900 text-white shadow-md no-print border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-teal-600 to-emerald-500 p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-helmet-safety text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base tracking-tight leading-tight flex items-center gap-2">
+                        Sharjah Site Operations ERP
+                        <span id="headerProjectBadge" class="bg-teal-900 text-teal-300 text-[10px] px-2.5 py-0.5 rounded-full font-semibold border border-teal-700">
+                            Aljada Residential Tower - Block C (200+ Workforce)
+                        </span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400">Site Execution • Readiness Check • DPR • Equipment • Quantities • MoHRE Midday Break Compliance</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center space-x-2 text-xs">
+                <!-- Location & Currency Tag -->
+                <div class="bg-site-800 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-300 flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-location-dot text-site-amber text-xs"></i>
+                    <span>Sharjah, UAE (AED | Metric)</span>
+                </div>
+
+                <!-- Active Project Switcher -->
+                <div class="bg-site-800 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-building text-site-teal text-xs"></i>
+                    <select id="projectSelect" class="bg-transparent text-white font-semibold focus:outline-none cursor-pointer text-xs" onchange="switchProject(this.value)">
+                        <!-- Dynamic Options -->
+                    </select>
+                </div>
+
+                <button onclick="openNewProjectModal()" class="bg-site-teal hover:bg-site-tealHover text-white font-medium px-2.5 py-1.5 rounded-lg transition text-xs flex items-center gap-1 shadow">
+                    <i class="fa-solid fa-plus"></i> New Site
+                </button>
+
+                <!-- Data Backup / Import / Export -->
+                <div class="flex items-center space-x-1 border-l border-slate-700 pl-2">
+                    <button onclick="exportERPJSON()" title="Export Backup JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg text-xs transition">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <label title="Import Backup JSON" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1.5 rounded-lg text-xs cursor-pointer transition">
+                        <i class="fa-solid fa-upload"></i>
+                        <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importERPJSON(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white border-b border-slate-200 no-print sticky top-[53px] z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-5 text-xs custom-scrollbar">
+            <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap active-tab">
+                <i class="fa-solid fa-chart-line"></i> 1. Site Dashboard
+            </button>
+            <button onclick="switchTab('tab-setup')" id="btn-tab-setup" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-sliders"></i> 2. Sharjah Project Settings
+            </button>
+            <button onclick="switchTab('tab-lookahead')" id="btn-tab-lookahead" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-calendar-days"></i> 3. Look-Ahead Plan
+            </button>
+            <button onclick="switchTab('tab-readiness')" id="btn-tab-readiness" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-list-check"></i> 4. Readiness Register
+            </button>
+            <button onclick="switchTab('tab-dpr')" id="btn-tab-dpr" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-clipboard-user"></i> 5. Daily Progress (DPR) & Labour
+            </button>
+            <button onclick="switchTab('tab-equipment')" id="btn-tab-equipment" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-truck-monster"></i> 6. Equipment & Fuel Log
+            </button>
+            <button onclick="switchTab('tab-materials')" id="btn-tab-materials" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-cubes"></i> 7. Materials & Requisitions
+            </button>
+            <button onclick="switchTab('tab-measurements')" id="btn-tab-measurements" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-ruler-combined"></i> 8. Work Measurement & Billing
+            </button>
+            <button onclick="switchTab('tab-crossdept')" id="btn-tab-crossdept" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-diagram-project"></i> 9. Cross-Dept Triggers
+            </button>
+            <button onclick="switchTab('tab-folders')" id="btn-tab-folders" class="nav-tab py-3 px-1 flex items-center gap-1.5 text-slate-600 hover:text-site-teal whitespace-nowrap">
+                <i class="fa-solid fa-folder-tree"></i> 10. Virtual Directory
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN APP BODY CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-5 flex-grow w-full">
+
+        <!-- TAB 1: EXECUTIVE SITE OPERATIONS DASHBOARD -->
+        <section id="tab-dashboard" class="tab-content block space-y-5">
+            <!-- Alert Banner for Blocked Activities -->
+            <div id="dashboardAlertBanner" class="bg-amber-50 border-l-4 border-site-amber p-3.5 rounded-lg flex items-center justify-between shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-triangle-exclamation text-site-amber text-lg"></i>
+                    <div>
+                        <h4 class="font-bold text-xs text-amber-900">Attention: Site Readiness Blockers Detected</h4>
+                        <p id="dashboardAlertText" class="text-xs text-amber-700">3 site activities are currently blocked due to missing IFC drawings, pending RFI inspections, or material shortages.</p>
+                    </div>
+                </div>
+                <button onclick="switchTab('tab-readiness')" class="bg-site-amber hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-md transition shadow">
+                    Resolve Blockers
+                </button>
+            </div>
+
+            <!-- Operational KPI Metrics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Planned vs Actual</span>
+                    <span id="kpi-progress-pct" class="text-xl font-extrabold text-site-900 block mt-0.5">82.5%</span>
+                    <span class="text-[10px] text-emerald-600 font-medium block mt-0.5"><i class="fa-solid fa-arrow-trend-up"></i> +1.2% Variance</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Blocked Activities</span>
+                    <span id="kpi-blocked-count" class="text-xl font-extrabold text-site-rose block mt-0.5">3</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Missing Drawings / Material</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Labour Productivity</span>
+                    <span id="kpi-productivity" class="text-xl font-extrabold text-site-teal block mt-0.5">94.2%</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">1,820 Man-Hours Active</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Equipment Downtime</span>
+                    <span id="kpi-downtime" class="text-xl font-extrabold text-site-amber block mt-0.5">2.5 Hrs</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Tower Crane TC-01 Breakdown</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Overdue RFIs / NCRs</span>
+                    <span id="kpi-pending-rfis" class="text-xl font-extrabold text-site-blue block mt-0.5">4</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Consultant Review Due</span>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200">
+                    <span class="text-[10px] text-slate-500 block font-semibold uppercase tracking-wider">Verified Quantities</span>
+                    <span id="kpi-verified-qty" class="text-xl font-extrabold text-emerald-700 block mt-0.5">AED 1.42M</span>
+                    <span class="text-[10px] text-slate-400 block mt-0.5">Ready for QS Billing</span>
+                </div>
+            </div>
+
+            <!-- Real-time Operations Visualizations -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- S-Curve / Progress Comparison (2 Cols) -->
+                <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-site-teal"></i> Weekly Cumulative Physical Progress (Planned vs Actual S-Curve)
+                        </h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">Aljada Tower Block C</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chart-progress-scurve"></canvas>
+                    </div>
+                </div>
+
+                <!-- Activity Readiness Breakdown (1 Col) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-site-amber"></i> Look-Ahead Activity Readiness Breakdown
+                        </h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-semibold">Readiness Status</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chart-readiness-pie"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Single Complete Activity Cycle Workflow Monitor -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-spin text-site-teal"></i> Live Single Complete Activity Execution Tracker (End-to-End Cycle)
+                    </h3>
+                    <span class="text-[10px] bg-teal-50 text-site-teal border border-teal-200 font-bold px-2 py-0.5 rounded">Active Focus: L12-SLAB-CONCRETE</span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs">
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">1. Approved Drawing</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">DWG-SHJ-STR-L12-04 (Rev B)</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">APPROVED</span>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">2. Look-Ahead Plan</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">W42-ACT-108 Slab Concreting</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">SCHEDULED</span>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">3. Readiness Check</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">Checklist 6/6 Clear</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">READY</span>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">4. Daily Execution</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">DPR-2026-10-30</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">COMPLETED</span>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">5. RFI Inspection</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">RFI-SHJ-QAQC-0412</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">VERIFIED</span>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-emerald-800 font-bold block">6. Measured Qty</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">420 m³ Concrete C50</p>
+                        <span class="bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">ACCEPTED</span>
+                    </div>
+
+                    <div class="bg-indigo-50 border border-indigo-300 p-2 rounded-lg">
+                        <span class="text-[10px] text-indigo-800 font-bold block">7. Billing Handover</span>
+                        <p class="font-mono text-[11px] text-slate-700 font-semibold mt-1">IPC #14 / BOQ-3.02</p>
+                        <span class="bg-indigo-600 text-white text-[9px] px-1.5 py-0.5 rounded mt-1 inline-block">SUBMITTED</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: SHARJAH PROJECT CONFIGURATION & SETTINGS -->
+        <section id="tab-setup" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">2. Sharjah Site Configuration & Master Data Register</h2>
+                        <p class="text-xs text-slate-500">Configure UAE/Sharjah location settings, working shift arrangements, WBS hierarchy, and approval levels.</p>
+                    </div>
+                    <button onclick="saveProjectConfig()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Project Name</label>
+                        <input type="text" id="cfg-name" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-site-teal outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Project Ref Code</label>
+                        <input type="text" id="cfg-code" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-site-teal outline-none font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Location / Emirate</label>
+                        <input type="text" id="cfg-location" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-site-teal outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Currency Code & Units</label>
+                        <input type="text" id="cfg-currency" value="AED (UAE Dirham) | Metric ($m, m^2, m^3$, MT)" readonly class="w-full border bg-slate-100 rounded-lg p-2 font-semibold text-site-teal">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Timezone</label>
+                        <input type="text" value="Asia/Dubai (GST +04:00)" readonly class="w-full border bg-slate-100 rounded-lg p-2 font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Working Days & Shift</label>
+                        <select id="cfg-shifts" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-site-teal outline-none font-semibold">
+                            <option value="6_DAYS_DAY_NIGHT">Mon-Sat (6 Days) - 2 Shifts (Day 07:00-17:00 / Night 19:00-05:00)</option>
+                            <option value="6_DAYS_SINGLE">Mon-Sat (6 Days) - Single Shift (07:00-17:00)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">MoHRE Summer Midday Break Allowance</label>
+                        <input type="text" value="Mandatory Outdoor Work Rest: 12:30 PM - 03:00 PM (15 June - 15 Sept)" readonly class="w-full border bg-amber-50 rounded-lg p-2 text-amber-800 font-semibold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Built-Up Area (BUA)</label>
+                        <input type="number" id="cfg-bua" class="w-full border rounded-lg p-2 font-bold focus:ring-2 focus:ring-site-teal outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 mb-1">Peak Workforce Scale</label>
+                        <input type="number" id="cfg-peakLabour" class="w-full border rounded-lg p-2 font-bold text-site-blue focus:ring-2 focus:ring-site-teal outline-none">
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-sitemap text-site-teal"></i> WBS Site Hierarchy Structure</h4>
+                        <div class="bg-slate-50 p-3 rounded-lg border font-mono text-[11px] space-y-1">
+                            <div>Company: Sharjah General Contracting LLC</div>
+                            <div class="ml-3">└── Project: Aljada Residential Tower (PRJ-SHJ-200)</div>
+                            <div class="ml-6">└── Building/Block: Block C (Podium + 32 Floors)</div>
+                            <div class="ml-9">└── Floor: Level 12 Superstructure</div>
+                            <div class="ml-12">└── Zone: Zone A (Tower Core & Slab East)</div>
+                            <div class="ml-15">└── Work Area: L12-ZONE-A-SLAB</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-user-check text-site-teal"></i> Operations Approval Workflow Hierarchy</h4>
+                        <div class="bg-slate-50 p-3 rounded-lg border text-[11px] space-y-2">
+                            <div class="flex items-center justify-between p-1.5 bg-white rounded border">
+                                <span>Level 1: <strong>Site Engineer</strong> (DPR Logging & Daily Requests)</span>
+                                <span class="bg-slate-200 text-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold">INSPECTOR</span>
+                            </div>
+                            <div class="flex items-center justify-between p-1.5 bg-white rounded border">
+                                <span>Level 2: <strong>Construction Manager</strong> (Readiness Verification & JMR Signoff)</span>
+                                <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold">REVIEWER</span>
+                            </div>
+                            <div class="flex items-center justify-between p-1.5 bg-white rounded border">
+                                <span>Level 3: <strong>Project Manager / Director</strong> (Commercial & Billing Handover)</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] px-1.5 py-0.5 rounded font-bold">APPROVER</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: LOOK-AHEAD PLANNING & ACTIVITY REGISTER -->
+        <section id="tab-lookahead" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">3. 3-Week Look-Ahead Construction Plan</h2>
+                        <p class="text-xs text-slate-500">Map activities to WBS, BOQ codes, target dates, and IFC drawing references.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openLookaheadModal()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add Look-Ahead Activity
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Activity Code</th>
+                                <th class="p-2.5">WBS Work Area</th>
+                                <th class="p-2.5">Activity Description</th>
+                                <th class="p-2.5">Approved Drawing Ref</th>
+                                <th class="p-2.5">BOQ Ref</th>
+                                <th class="p-2.5">Target Start / End</th>
+                                <th class="p-2.5">Target Quantity</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lookahead-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Look-Ahead Activity Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: READINESS REGISTER & CONSTRAINT LOG -->
+        <section id="tab-readiness" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">4. Activity Readiness Check Register & Constraint Log</h2>
+                        <p class="text-xs text-slate-500">6-Point Readiness Check: IFC Drawings, Materials, Site Access, Labour, Equipment, Permits/NOCs.</p>
+                    </div>
+                    <span class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-300">
+                        <i class="fa-solid fa-lock text-site-amber"></i> Live Blocker Filter Enabled
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Activity Code</th>
+                                <th class="p-2.5">Description</th>
+                                <th class="p-2.5 text-center">6-Point Check</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5">Primary Blocker Category</th>
+                                <th class="p-2.5">Constraint Explanation & Owner</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="readiness-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Readiness Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: DAILY PROGRESS REPORT (DPR) & LABOUR -->
+        <section id="tab-dpr" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">5. Daily Progress Report (DPR) & Labour Deployment Log</h2>
+                        <p class="text-xs text-slate-500">Track daily executed quantities, trade-wise attendance (200+ scale), shifts, and delay reasons.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openDPRModal()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Log Today's DPR
+                        </button>
+                        <button onclick="exportDPRCSV()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium px-3 py-2 rounded-lg shadow flex items-center gap-1">
+                            <i class="fa-solid fa-file-csv"></i> Export DPR CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">DPR Date</th>
+                                <th class="p-2.5">Activity / Area</th>
+                                <th class="p-2.5">Trade Deployment</th>
+                                <th class="p-2.5">Work Hours</th>
+                                <th class="p-2.5">Qty Executed</th>
+                                <th class="p-2.5">Site Supervisor</th>
+                                <th class="p-2.5">Delay / Bottleneck</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dpr-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic DPR Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: EQUIPMENT & FUEL LOG -->
+        <section id="tab-equipment" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">6. Site Equipment, Machinery & Fuel Consumption Register</h2>
+                        <p class="text-xs text-slate-500">Monitor tower cranes, concrete pumps, total stations, site pickups, operating hours, breakdown downtime, and diesel fuel.</p>
+                    </div>
+                    <button onclick="openEquipmentModal()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Register Machinery Log
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Equipment Code</th>
+                                <th class="p-2.5">Machinery Description</th>
+                                <th class="p-2.5">Operating Location</th>
+                                <th class="p-2.5">Operated Hours</th>
+                                <th class="p-2.5">Downtime (Hrs)</th>
+                                <th class="p-2.5">Diesel Consumed (L)</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="equipment-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Equipment Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 7: MATERIALS & REQUISITIONS -->
+        <section id="tab-materials" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">7. Site Materials Coordination, Requisitions & Wastage Reconciliation</h2>
+                        <p class="text-xs text-slate-500">Track ready-mix concrete, steel rebar, blockwork, site requisitions, stock on hand, and wastage %.</p>
+                    </div>
+                    <button onclick="openMaterialModal()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> Add Material Requisition
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">Material Description</th>
+                                <th class="p-2.5">Category</th>
+                                <th class="p-2.5">Requested Qty</th>
+                                <th class="p-2.5">Site Stock Received</th>
+                                <th class="p-2.5">Consumed Qty</th>
+                                <th class="p-2.5">Wastage %</th>
+                                <th class="p-2.5">QA/QC Batch Inspection</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materials-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Material Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 8: WORK MEASUREMENT & BILLING HANDOVER -->
+        <section id="tab-measurements" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">8. Location-Wise Work Measurement Sheet (JMR) & QS Billing Handover</h2>
+                        <p class="text-xs text-slate-500">Joint Measurement Records (JMR) verified by QA/QC and handed over to Quantity Surveying for monthly Interim Payment Certificates (IPC).</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openMeasurementModal()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Add JMR Measurement Record
+                        </button>
+                        <button onclick="exportMeasurementCSV()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium px-3 py-2 rounded-lg shadow flex items-center gap-1">
+                            <i class="fa-solid fa-file-csv"></i> Export Measurement Sheet CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="bg-slate-800 text-white font-semibold">
+                            <tr>
+                                <th class="p-2.5">JMR Ref #</th>
+                                <th class="p-2.5">BOQ Item Code</th>
+                                <th class="p-2.5">Work Description</th>
+                                <th class="p-2.5">Location / Zone</th>
+                                <th class="p-2.5">Accepted Qty</th>
+                                <th class="p-2.5">Unit Rate (AED)</th>
+                                <th class="p-2.5">Total Value (AED)</th>
+                                <th class="p-2.5">QS Handover Status</th>
+                                <th class="p-2.5 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="measurements-table-body" class="divide-y divide-slate-200">
+                            <!-- Dynamic Measurement Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 9: CROSS-DEPARTMENTAL COLLABORATION TRIGGERS -->
+        <section id="tab-crossdept" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap justify-between items-center gap-3 pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">9. Cross-Departmental Collaboration Interface & Triggers</h2>
+                        <p class="text-xs text-slate-500">Real-time touchpoints between Site Operations, Engineering, QA/QC, HSE, and QS/Finance.</p>
+                    </div>
+                    <button onclick="simulateCrossDeptTrigger()" class="bg-site-teal hover:bg-site-tealHover text-white text-xs font-bold px-3 py-2 rounded-lg shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-site-amber"></i> Simulate Cross-Dept Notification
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="border rounded-xl p-4 bg-slate-50 space-y-3">
+                        <h4 class="font-bold text-slate-800 border-b pb-1.5 flex items-center gap-2">
+                            <i class="fa-solid fa-compass-drafting text-site-blue"></i> 1. Site Operations ↔ Engineering
+                        </h4>
+                        <div class="space-y-2 text-[11px]">
+                            <div class="p-2 bg-white rounded border flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold block">New Revision Released: DWG-SHJ-STR-L12-04 (Rev B)</span>
+                                    <span class="text-slate-500">Core Reinforcement change at Zone A</span>
+                                </div>
+                                <span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold">INFO SYNCED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-xl p-4 bg-slate-50 space-y-3">
+                        <h4 class="font-bold text-slate-800 border-b pb-1.5 flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-check text-site-teal"></i> 2. Site Operations ↔ QA/QC Inspection
+                        </h4>
+                        <div class="space-y-2 text-[11px]">
+                            <div class="p-2 bg-white rounded border flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold block">RFI Requested: RFI-SHJ-QAQC-0412</span>
+                                    <span class="text-slate-500">L12 Pour 2 Concrete Pre-pour Inspection</span>
+                                </div>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold">VERIFIED</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-xl p-4 bg-slate-50 space-y-3">
+                        <h4 class="font-bold text-slate-800 border-b pb-1.5 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-site-amber"></i> 3. Site Operations ↔ HSE Safety Controls
+                        </h4>
+                        <div class="space-y-2 text-[11px]">
+                            <div class="p-2 bg-white rounded border flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold block">Hot Work Permit Granted: PERMIT-HW-992</span>
+                                    <span class="text-slate-500">Slab Edge Welding Zone B (Fire Watch Active)</span>
+                                </div>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-bold">PERMIT ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-xl p-4 bg-slate-50 space-y-3">
+                        <h4 class="font-bold text-slate-800 border-b pb-1.5 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-emerald-600"></i> 4. Site Operations ↔ QS & Commercial
+                        </h4>
+                        <div class="space-y-2 text-[11px]">
+                            <div class="p-2 bg-white rounded border flex justify-between items-center">
+                                <div>
+                                    <span class="font-bold block">Quantity Verified: JMR-SHJ-1042</span>
+                                    <span class="text-slate-500">420 m³ Concrete Accepted → Transferred to IPC #14</span>
+                                </div>
+                                <span class="bg-indigo-100 text-indigo-800 text-[10px] px-2 py-0.5 rounded font-bold">BILLING HANDOVER</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 10: VIRTUAL SITE DOCUMENT & FOLDER DIRECTORY -->
+        <section id="tab-folders" class="tab-content hidden space-y-5">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex justify-between items-center pb-2 border-b">
+                    <div>
+                        <h2 class="text-base font-bold text-site-900">10. Virtual Site Operations Project Directory Tree</h2>
+                        <p class="text-xs text-slate-500">Directory structure for <span id="folder-active-name" class="font-bold text-site-teal">Active Site</span> following lifecycle: Draft → Submitted → Under Review → Approved / Returned → Closed.</p>
+                    </div>
+                    <button onclick="window.print()" class="bg-site-900 hover:bg-slate-800 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Print Site Operations Report
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono text-xs space-y-2">
+                    <div class="flex items-center text-site-900 font-bold text-sm">
+                        <i class="fa-solid fa-folder-open text-amber-500 mr-2"></i> 📁 [<span id="folder-root-dir">Aljada_Block_C_Site_Operations</span>]
+                    </div>
+
+                    <div class="ml-5 space-y-2 border-l-2 border-slate-300 pl-3 text-xs text-slate-700 font-sans">
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 01_Lookahead_Plans_and_Schedules
+                            </div>
+                            <div class="ml-5 text-slate-500 space-y-0.5 mt-0.5">
+                                <div>📄 3_Week_Lookahead_Plan_W42.pdf [APPROVED]</div>
+                                <div>📄 Master_Construction_Baseline_Rev3.mpp [APPROVED]</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 02_Readiness_and_Constraints
+                            </div>
+                            <div class="ml-5 text-slate-500 space-y-0.5 mt-0.5">
+                                <div>📄 Activity_Readiness_Checklist_Register.csv [ACTIVE]</div>
+                                <div>📄 Site_Blocker_and_Constraint_Log.pdf [UNDER REVIEW]</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 03_Daily_Progress_Reports_DPR
+                            </div>
+                            <div class="ml-5 text-slate-500 space-y-0.5 mt-0.5">
+                                <div>📄 Daily_Progress_Report_2026-10-30.pdf [APPROVED]</div>
+                                <div>📄 Labour_Trade_Deployment_Log.csv [APPROVED]</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 04_Equipment_and_Machinery
+                            </div>
+                            <div class="ml-5 text-slate-500 space-y-0.5 mt-0.5">
+                                <div>📄 Tower_Crane_TC01_Maintenance_Log.pdf [CLOSED]</div>
+                                <div>📄 Equipment_Fuel_Consumption_Register.csv [APPROVED]</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-bold text-slate-800 flex items-center gap-1.5 font-mono">
+                                <i class="fa-solid fa-folder text-amber-400"></i> 📂 05_Measurements_and_Billing_Handover
+                            </div>
+                            <div class="ml-5 text-slate-500 space-y-0.5 mt-0.5">
+                                <div>📄 Joint_Measurement_Record_JMR_1042.pdf [APPROVED]</div>
+                                <div>📄 Quantity_Surveyor_Billing_Handover_Sheet.csv [SUBMITTED]</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DIALOGS -->
+    <!-- Modal: New Site Project -->
+    <div id="modalNewProject" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Create New Sharjah Construction Site</h3>
+                <button onclick="closeModal('modalNewProject')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Project Name</label>
+                    <input type="text" id="m-proj-name" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-site-teal outline-none" placeholder="e.g. Muwaileh Commercial Tower">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Built-Up Area (BUA Sq.Ft)</label>
+                    <input type="number" id="m-proj-bua" class="w-full border rounded-lg p-2 font-bold" placeholder="e.g. 300000">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Peak Manpower Scale</label>
+                    <input type="number" id="m-proj-peak" class="w-full border rounded-lg p-2 font-bold text-site-blue" placeholder="e.g. 220">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalNewProject')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveNewProjectModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Create Site</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Look-Ahead Activity -->
+    <div id="modalLookahead" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Add Look-Ahead Activity</h3>
+                <button onclick="closeModal('modalLookahead')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Activity Code</label>
+                    <input type="text" id="m-act-code" class="w-full border rounded-lg p-2 font-mono" placeholder="e.g. W42-ACT-109">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">WBS Location</label>
+                    <input type="text" id="m-act-wbs" class="w-full border rounded-lg p-2" placeholder="e.g. L12 Zone B">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-semibold text-slate-600 mb-1">Activity Description</label>
+                    <input type="text" id="m-act-desc" class="w-full border rounded-lg p-2" placeholder="e.g. Column Steel & Formwork Level 12">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Approved Drawing Ref</label>
+                    <input type="text" id="m-act-dwg" class="w-full border rounded-lg p-2 font-mono" placeholder="DWG-SHJ-STR-L12-05">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">BOQ Item Ref</label>
+                    <input type="text" id="m-act-boq" class="w-full border rounded-lg p-2 font-mono" placeholder="BOQ-3.02">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Target Dates</label>
+                    <input type="text" id="m-act-dates" class="w-full border rounded-lg p-2" placeholder="01 Nov - 05 Nov 2026">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Target Quantity</label>
+                    <input type="text" id="m-act-qty" class="w-full border rounded-lg p-2 font-bold" placeholder="280 m²">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalLookahead')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveLookaheadModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Save Activity</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add DPR -->
+    <div id="modalDPR" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Log Daily Progress Report (DPR)</h3>
+                <button onclick="closeModal('modalDPR')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">DPR Date</label>
+                    <input type="date" id="m-dpr-date" class="w-full border rounded-lg p-2 font-bold">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Activity / Area</label>
+                    <input type="text" id="m-dpr-act" class="w-full border rounded-lg p-2" placeholder="L12 Slab Concrete Pour 2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Trade Deployment</label>
+                    <input type="text" id="m-dpr-trades" class="w-full border rounded-lg p-2" placeholder="12 Masons, 18 Carpenters, 24 Fixers">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Worked Hours</label>
+                    <input type="text" id="m-dpr-hrs" class="w-full border rounded-lg p-2" placeholder="10 Hrs (Shift 1)">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Quantity Executed Today</label>
+                    <input type="text" id="m-dpr-qty" class="w-full border rounded-lg p-2 font-bold text-site-teal" placeholder="420 m³">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Site Supervisor Name</label>
+                    <input type="text" id="m-dpr-sup" class="w-full border rounded-lg p-2" placeholder="Eng. Rajesh V.">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-semibold text-slate-600 mb-1">Delays / Remarks / Bottlenecks</label>
+                    <input type="text" id="m-dpr-delay" class="w-full border rounded-lg p-2 text-rose-700" placeholder="None / Ready-mix pump breakdown 30 mins">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalDPR')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveDPRModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Save DPR Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Equipment -->
+    <div id="modalEquipment" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Register Machinery / Equipment Log</h3>
+                <button onclick="closeModal('modalEquipment')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Equipment Code</label>
+                    <input type="text" id="m-eq-code" class="w-full border rounded-lg p-2 font-mono" placeholder="EQ-TC-01">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Description</label>
+                    <input type="text" id="m-eq-desc" class="w-full border rounded-lg p-2" placeholder="Liebherr 12 Ton Tower Crane">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Location</label>
+                    <input type="text" id="m-eq-loc" class="w-full border rounded-lg p-2" placeholder="Core Sector A">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Operated Hours</label>
+                    <input type="number" id="m-eq-hrs" class="w-full border rounded-lg p-2 font-bold" placeholder="9.5">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Downtime (Hrs)</label>
+                    <input type="number" id="m-eq-down" class="w-full border rounded-lg p-2 font-bold text-rose-600" placeholder="0">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Diesel Consumed (L)</label>
+                    <input type="number" id="m-eq-fuel" class="w-full border rounded-lg p-2 font-bold text-site-amber" placeholder="180">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Status</label>
+                    <select id="m-eq-status" class="w-full border rounded-lg p-2 font-semibold">
+                        <option value="Active / Operational">Active / Operational</option>
+                        <option value="Breakdown / Repair">Breakdown / Repair</option>
+                        <option value="Idle / Standby">Idle / Standby</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalEquipment')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveEquipmentModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Save Equipment Log</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add Material Requisition -->
+    <div id="modalMaterial" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Add Material Requisition</h3>
+                <button onclick="closeModal('modalMaterial')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Material Description</label>
+                    <input type="text" id="m-mat-desc" class="w-full border rounded-lg p-2" placeholder="Ready-Mix Concrete C50/60">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Category</label>
+                    <select id="m-mat-cat" class="w-full border rounded-lg p-2">
+                        <option value="Concrete & Aggregates">Concrete & Aggregates</option>
+                        <option value="Steel Rebar">Steel Rebar</option>
+                        <option value="Blockwork & Mortar">Blockwork & Mortar</option>
+                        <option value="MEP Piping & Fittings">MEP Piping & Fittings</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Requested Qty</label>
+                    <input type="text" id="m-mat-req" class="w-full border rounded-lg p-2 font-bold" placeholder="450 m³">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Site Stock Received</label>
+                    <input type="text" id="m-mat-rec" class="w-full border rounded-lg p-2 font-bold text-emerald-700" placeholder="420 m³">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Consumed Qty</label>
+                    <input type="text" id="m-mat-con" class="w-full border rounded-lg p-2 font-bold" placeholder="420 m³">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Wastage %</label>
+                    <input type="number" step="0.1" id="m-mat-waste" class="w-full border rounded-lg p-2 font-bold text-site-amber" placeholder="1.2">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">QA/QC Batch Check</label>
+                    <select id="m-mat-qa" class="w-full border rounded-lg p-2 font-semibold">
+                        <option value="Accepted / Cube Passed">Accepted / Cube Passed</option>
+                        <option value="Testing Pending">Testing Pending</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalMaterial')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveMaterialModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Save Requisition</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add JMR Measurement -->
+    <div id="modalMeasurement" class="fixed inset-0 modal-bg flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-800">Add Joint Measurement Record (JMR)</h3>
+                <button onclick="closeModal('modalMeasurement')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">JMR Reference Ref #</label>
+                    <input type="text" id="m-jmr-ref" class="w-full border rounded-lg p-2 font-mono" placeholder="JMR-SHJ-1043">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">BOQ Item Code</label>
+                    <input type="text" id="m-jmr-boq" class="w-full border rounded-lg p-2 font-mono" placeholder="BOQ-3.02">
+                </div>
+                <div class="col-span-2">
+                    <label class="block font-semibold text-slate-600 mb-1">Work Description</label>
+                    <input type="text" id="m-jmr-desc" class="w-full border rounded-lg p-2" placeholder="Level 12 Core Wall Concrete Pour">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Location / Zone</label>
+                    <input type="text" id="m-jmr-loc" class="w-full border rounded-lg p-2" placeholder="L12 Zone A Core">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Accepted Qty</label>
+                    <input type="number" id="m-jmr-qty" class="w-full border rounded-lg p-2 font-bold" placeholder="420" onchange="calcJMRTotal()">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Unit Rate (AED)</label>
+                    <input type="number" id="m-jmr-rate" class="w-full border rounded-lg p-2 font-bold text-site-teal" placeholder="450" onchange="calcJMRTotal()">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Total Value (AED)</label>
+                    <input type="text" id="m-jmr-total" readonly class="w-full border bg-slate-100 rounded-lg p-2 font-extrabold text-emerald-700" placeholder="AED 189,000">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">QS Handover Status</label>
+                    <select id="m-jmr-status" class="w-full border rounded-lg p-2 font-semibold">
+                        <option value="Handed Over to QS (IPC #14)">Handed Over to QS (IPC #14)</option>
+                        <option value="Pending QA/QC Signature">Pending QA/QC Signature</option>
+                        <option value="Draft / Site Verification">Draft / Site Verification</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button onclick="closeModal('modalMeasurement')" class="px-3.5 py-1.5 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">Cancel</button>
+                <button onclick="saveMeasurementModal()" class="px-3.5 py-1.5 bg-site-teal text-white rounded-lg text-xs font-semibold">Save Measurement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT STATE ENGINE & INTERACTION LOGIC -->
+    <script>
+        // Core ERP State populated with Sharjah Enterprise Project Data (200+ Scale)
+        let siteProjects = [
+            {
+                id: "site-proj-shj-200",
+                name: "Aljada Residential Tower - Block C",
+                code: "PRJ-SHJ-200",
+                location: "Aljada, Sharjah, UAE",
+                currency: "AED",
+                bua: 350000,
+                peakLabour: 220,
+                shifts: "6_DAYS_DAY_NIGHT",
+                lookahead: [
+                    { id: 101, actCode: "W42-ACT-108", wbs: "L12 Zone A Core", desc: "Level 12 Slab Concrete Pour 2", dwg: "DWG-SHJ-STR-L12-04", boq: "BOQ-3.02", dates: "28 Oct - 30 Oct 2026", qty: "420 m³" },
+                    { id: 102, actCode: "W42-ACT-109", wbs: "L12 Zone B Slab", desc: "Level 12 Slab Formwork & Rebar Fixing", dwg: "DWG-SHJ-STR-L12-05", boq: "BOQ-3.01", dates: "01 Nov - 05 Nov 2026", qty: "580 m²" },
+                    { id: 103, actCode: "W42-ACT-110", wbs: "L11 MEP Shafts", desc: "Plumbing Riser Pipe Installation", dwg: "DWG-SHJ-MEP-L11-02", boq: "BOQ-5.12", dates: "02 Nov - 06 Nov 2026", qty: "120 m" }
+                ],
+                readiness: [
+                    { id: 1, actCode: "W42-ACT-108", desc: "L12 Slab Concrete Pour 2", checkCount: "6/6", status: "READY", blocker: "None", notes: "All IFC drawings, rebar, ready-mix booked, RFI clear." },
+                    { id: 2, actCode: "W42-ACT-109", desc: "L12 Zone B Formwork & Rebar", checkCount: "4/6", status: "BLOCKED", blocker: "Missing IFC Drawings", notes: "Awaiting Consultant Rev B architectural clearance." },
+                    { id: 3, actCode: "W42-ACT-110", desc: "L11 MEP Shaft Riser Piping", checkCount: "3/6", status: "BLOCKED", blocker: "Material Shortages", notes: "3-inch uPVC riser pipes pending delivery from supplier." }
+                ],
+                dpr: [
+                    { id: 1, date: "2026-10-30", act: "L12 Slab Concrete Pour 2", trades: "18 Masons, 24 Fixers, 12 Labourers", hrs: "10 Hrs (Day)", qty: "420 m³", sup: "Eng. Rajesh V.", delay: "Pump pipeline clogged 20 mins - Cleared" },
+                    { id: 2, date: "2026-10-29", act: "L12 Slab Rebar Inspection", trades: "30 Steel Fixers, 4 Foremen", hrs: "10 Hrs (Day)", qty: "38 Ton Rebar", sup: "Eng. Tariq M.", delay: "None" }
+                ],
+                equipment: [
+                    { id: 1, code: "EQ-TC-01", desc: "Liebherr 12 Ton Tower Crane", loc: "Core Zone A", hrs: 9.5, downtime: 0.5, fuel: 180, status: "Active / Operational" },
+                    { id: 2, code: "EQ-CP-02", desc: "Putzmeister Concrete Pump", loc: "Ground Yard", hrs: 6.0, downtime: 0.0, fuel: 140, status: "Active / Operational" },
+                    { id: 3, code: "EQ-TS-04", desc: "Leica Total Station TS07", loc: "L12 Survey Grid", hrs: 8.0, downtime: 0.0, fuel: 0, status: "Active / Operational" }
+                ],
+                materials: [
+                    { id: 1, desc: "Ready-Mix Concrete C50/60", cat: "Concrete & Aggregates", req: "450 m³", rec: "420 m³", con: "420 m³", waste: 0.8, qa: "Accepted / Cube Passed" },
+                    { id: 2, desc: "High Yield Steel Rebar T16-T32", cat: "Steel Rebar", req: "50 MT", rec: "50 MT", con: "38 MT", waste: 1.1, qa: "Accepted / Cube Passed" }
+                ],
+                measurements: [
+                    { id: 1, refNo: "JMR-SHJ-1042", boq: "BOQ-3.02", desc: "L12 Concrete Slab Pour 2", loc: "L12 Zone A Core", qty: 420, rate: 450, total: 189000, status: "Handed Over to QS (IPC #14)" },
+                    { id: 2, refNo: "JMR-SHJ-1041", boq: "BOQ-3.01", desc: "L11 Concrete Slab Structural", loc: "L11 Complete", qty: 950, rate: 450, total: 427500, status: "Handed Over to QS (IPC #14)" }
+                ]
+            }
+        ];
+
+        let currentSiteProjectId = "site-proj-shj-200";
+        let scurveChart = null;
+        let readinessChart = null;
+
+        window.onload = function() {
+            loadERPFromStorage();
+            renderProjectSelect();
+            loadActiveSiteProjectData();
+            initCharts();
+        };
+
+        function getActiveProject() {
+            return siteProjects.find(p => p.id === currentSiteProjectId) || siteProjects[0];
+        }
+
+        function saveState() {
+            localStorage.setItem("sharjah_site_erp_state_2026", JSON.stringify(siteProjects));
+        }
+
+        function loadERPFromStorage() {
+            const saved = localStorage.getItem("sharjah_site_erp_state_2026");
+            if (saved) {
+                try { siteProjects = JSON.parse(saved); } catch(e) { console.error("Storage parse error", e); }
+            }
+        }
+
+        function renderProjectSelect() {
+            const select = document.getElementById("projectSelect");
+            select.innerHTML = siteProjects.map(p => `<option value="${p.id}">${p.name} (${p.code})</option>`).join("");
+            select.value = currentSiteProjectId;
+        }
+
+        function switchProject(id) {
+            currentSiteProjectId = id;
+            loadActiveSiteProjectData();
+        }
+
+        function loadActiveSiteProjectData() {
+            const p = getActiveProject();
+
+            document.getElementById("headerProjectBadge").innerText = `${p.name} (${p.peakLabour}+ Scale)`;
+            document.getElementById("cfg-name").value = p.name;
+            document.getElementById("cfg-code").value = p.code;
+            document.getElementById("cfg-location").value = p.location;
+            document.getElementById("cfg-bua").value = p.bua;
+            document.getElementById("cfg-peakLabour").value = p.peakLabour;
+            document.getElementById("cfg-shifts").value = p.shifts || "6_DAYS_DAY_NIGHT";
+
+            renderLookaheadTable();
+            renderReadinessTable();
+            renderDPRTable();
+            renderEquipmentTable();
+            renderMaterialsTable();
+            renderMeasurementsTable();
+            renderDashboardKPIs();
+            updateFolderDirectoryNames();
+        }
+
+        function saveProjectConfig() {
+            const p = getActiveProject();
+            p.name = document.getElementById("cfg-name").value;
+            p.code = document.getElementById("cfg-code").value;
+            p.location = document.getElementById("cfg-location").value;
+            p.bua = parseFloat(document.getElementById("cfg-bua").value) || 0;
+            p.peakLabour = parseInt(document.getElementById("cfg-peakLabour").value) || 200;
+            p.shifts = document.getElementById("cfg-shifts").value;
+
+            saveState();
+            renderProjectSelect();
+            loadActiveSiteProjectData();
+            alert("Sharjah Project Configuration Saved!");
+        }
+
+        function renderLookaheadTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("lookahead-table-body");
+            tbody.innerHTML = p.lookahead.map((l, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-mono font-bold text-site-teal">${l.actCode}</td>
+                    <td class="p-2 font-semibold text-slate-700">${l.wbs}</td>
+                    <td class="p-2 font-bold text-slate-800">${l.desc}</td>
+                    <td class="p-2 font-mono">${l.dwg}</td>
+                    <td class="p-2 font-mono text-site-blue">${l.boq}</td>
+                    <td class="p-2 text-slate-600">${l.dates}</td>
+                    <td class="p-2 font-bold text-slate-900">${l.qty}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteLookahead(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openLookaheadModal() { document.getElementById("modalLookahead").classList.remove("hidden"); }
+        function saveLookaheadModal() {
+            const p = getActiveProject();
+            const actCode = document.getElementById("m-act-code").value || "W42-ACT-100";
+            const wbs = document.getElementById("m-act-wbs").value || "L12 Zone C";
+            const desc = document.getElementById("m-act-desc").value || "Construction Activity";
+            const dwg = document.getElementById("m-act-dwg").value || "DWG-SHJ-STR-100";
+            const boq = document.getElementById("m-act-boq").value || "BOQ-3.00";
+            const dates = document.getElementById("m-act-dates").value || "01 Nov - 05 Nov 2026";
+            const qty = document.getElementById("m-act-qty").value || "100 m²";
+
+            p.lookahead.push({ id: Date.now(), actCode, wbs, desc, dwg, boq, dates, qty });
+            saveState();
+            closeModal('modalLookahead');
+            renderLookaheadTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteLookahead(idx) {
+            const p = getActiveProject();
+            p.lookahead.splice(idx, 1);
+            saveState();
+            renderLookaheadTable();
+            renderDashboardKPIs();
+        }
+
+        function renderReadinessTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("readiness-table-body");
+            tbody.innerHTML = p.readiness.map((r, idx) => {
+                const isBlocked = r.status === "BLOCKED";
+                const badge = isBlocked ?
+                    `<span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded-full font-bold">BLOCKED</span>` :
+                    `<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">READY</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b ${isBlocked ? 'bg-rose-50/40' : ''}">
+                        <td class="p-2 font-mono font-bold text-site-teal">${r.actCode}</td>
+                        <td class="p-2 font-bold text-slate-800">${r.desc}</td>
+                        <td class="p-2 text-center font-bold font-mono">${r.checkCount}</td>
+                        <td class="p-2">${badge}</td>
+                        <td class="p-2">
+                            <select onchange="updateReadiness(${idx}, 'blocker', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold ${isBlocked ? 'text-rose-700 bg-white' : ''}">
+                                <option value="None" ${r.blocker === 'None' ? 'selected' : ''}>None (All Ready)</option>
+                                <option value="Missing IFC Drawings" ${r.blocker === 'Missing IFC Drawings' ? 'selected' : ''}>Missing IFC Drawings</option>
+                                <option value="Material Shortages" ${r.blocker === 'Material Shortages' ? 'selected' : ''}>Material Shortages</option>
+                                <option value="Pending Inspection" ${r.blocker === 'Pending Inspection' ? 'selected' : ''}>Pending Inspection</option>
+                                <option value="Access Restrictions" ${r.blocker === 'Access Restrictions' ? 'selected' : ''}>Access Restrictions</option>
+                                <option value="Unresolved Safety Requirement" ${r.blocker === 'Unresolved Safety Requirement' ? 'selected' : ''}>Unresolved Safety Requirement</option>
+                            </select>
+                        </td>
+                        <td class="p-2"><input type="text" value="${r.notes}" onchange="updateReadiness(${idx}, 'notes', this.value)" class="border rounded px-2 py-1 text-xs w-full"></td>
+                        <td class="p-2 text-center">
+                            <button onclick="toggleReadinessStatus(${idx})" class="text-xs bg-slate-800 text-white px-2 py-1 rounded hover:bg-slate-700 font-medium">Toggle Ready</button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function updateReadiness(idx, field, val) {
+            const p = getActiveProject();
+            p.readiness[idx][field] = val;
+            if (field === 'blocker') {
+                p.readiness[idx].status = val === "None" ? "READY" : "BLOCKED";
+            }
+            saveState();
+            renderReadinessTable();
+            renderDashboardKPIs();
+        }
+
+        function toggleReadinessStatus(idx) {
+            const p = getActiveProject();
+            const r = p.readiness[idx];
+            if (r.status === "READY") {
+                r.status = "BLOCKED";
+                r.blocker = "Missing IFC Drawings";
+            } else {
+                r.status = "READY";
+                r.blocker = "None";
+            }
+            saveState();
+            renderReadinessTable();
+            renderDashboardKPIs();
+        }
+
+        function renderDPRTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("dpr-table-body");
+            tbody.innerHTML = p.dpr.map((d, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-mono font-bold">${d.date}</td>
+                    <td class="p-2 font-bold text-slate-800">${d.act}</td>
+                    <td class="p-2 text-slate-700">${d.trades}</td>
+                    <td class="p-2 text-slate-600">${d.hrs}</td>
+                    <td class="p-2 font-bold text-site-teal">${d.qty}</td>
+                    <td class="p-2 font-medium">${d.sup}</td>
+                    <td class="p-2 text-rose-700 font-medium">${d.delay}</td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteDPR(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openDPRModal() {
+            document.getElementById("m-dpr-date").value = new Date().toISOString().split('T')[0];
+            document.getElementById("modalDPR").classList.remove("hidden");
+        }
+
+        function saveDPRModal() {
+            const p = getActiveProject();
+            const date = document.getElementById("m-dpr-date").value || new Date().toISOString().split('T')[0];
+            const act = document.getElementById("m-dpr-act").value || "Site Concreting";
+            const trades = document.getElementById("m-dpr-trades").value || "10 Masons, 15 Fixers";
+            const hrs = document.getElementById("m-dpr-hrs").value || "10 Hrs";
+            const qty = document.getElementById("m-dpr-qty").value || "100 m³";
+            const sup = document.getElementById("m-dpr-sup").value || "Eng. Supervisor";
+            const delay = document.getElementById("m-dpr-delay").value || "None";
+
+            p.dpr.unshift({ id: Date.now(), date, act, trades, hrs, qty, sup, delay });
+            saveState();
+            closeModal('modalDPR');
+            renderDPRTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteDPR(idx) {
+            const p = getActiveProject();
+            p.dpr.splice(idx, 1);
+            saveState();
+            renderDPRTable();
+            renderDashboardKPIs();
+        }
+
+        function renderEquipmentTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("equipment-table-body");
+            tbody.innerHTML = p.equipment.map((e, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-mono font-bold text-site-teal">${e.code}</td>
+                    <td class="p-2 font-bold text-slate-800">${e.desc}</td>
+                    <td class="p-2">${e.loc}</td>
+                    <td class="p-2 font-bold">${e.hrs} Hrs</td>
+                    <td class="p-2 font-bold text-rose-600">${e.downtime} Hrs</td>
+                    <td class="p-2 font-bold text-site-amber">${e.fuel} L</td>
+                    <td class="p-2">
+                        <select onchange="updateEquipment(${idx}, 'status', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                            <option value="Active / Operational" ${e.status === 'Active / Operational' ? 'selected' : ''}>Active / Operational</option>
+                            <option value="Breakdown / Repair" ${e.status === 'Breakdown / Repair' ? 'selected' : ''}>Breakdown / Repair</option>
+                            <option value="Idle / Standby" ${e.status === 'Idle / Standby' ? 'selected' : ''}>Idle / Standby</option>
+                        </select>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteEquipment(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openEquipmentModal() { document.getElementById("modalEquipment").classList.remove("hidden"); }
+        function saveEquipmentModal() {
+            const p = getActiveProject();
+            const code = document.getElementById("m-eq-code").value || "EQ-001";
+            const desc = document.getElementById("m-eq-desc").value || "Site Machinery";
+            const loc = document.getElementById("m-eq-loc").value || "Ground Yard";
+            const hrs = parseFloat(document.getElementById("m-eq-hrs").value) || 8;
+            const downtime = parseFloat(document.getElementById("m-eq-down").value) || 0;
+            const fuel = parseFloat(document.getElementById("m-eq-fuel").value) || 100;
+            const status = document.getElementById("m-eq-status").value;
+
+            p.equipment.push({ id: Date.now(), code, desc, loc, hrs, downtime, fuel, status });
+            saveState();
+            closeModal('modalEquipment');
+            renderEquipmentTable();
+            renderDashboardKPIs();
+        }
+
+        function updateEquipment(idx, field, val) {
+            const p = getActiveProject();
+            p.equipment[idx][field] = val;
+            saveState();
+            renderEquipmentTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteEquipment(idx) {
+            const p = getActiveProject();
+            p.equipment.splice(idx, 1);
+            saveState();
+            renderEquipmentTable();
+            renderDashboardKPIs();
+        }
+
+        function renderMaterialsTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("materials-table-body");
+            tbody.innerHTML = p.materials.map((m, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-bold text-slate-800">${m.desc}</td>
+                    <td class="p-2 text-slate-600">${m.cat}</td>
+                    <td class="p-2 font-bold">${m.req}</td>
+                    <td class="p-2 font-bold text-emerald-700">${m.rec}</td>
+                    <td class="p-2 font-bold">${m.con}</td>
+                    <td class="p-2 font-bold text-site-amber">${m.waste}%</td>
+                    <td class="p-2">
+                        <select onchange="updateMaterial(${idx}, 'qa', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                            <option value="Accepted / Cube Passed" ${m.qa === 'Accepted / Cube Passed' ? 'selected' : ''}>Accepted / Cube Passed</option>
+                            <option value="Testing Pending" ${m.qa === 'Testing Pending' ? 'selected' : ''}>Testing Pending</option>
+                            <option value="Rejected" ${m.qa === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                        </select>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteMaterial(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function openMaterialModal() { document.getElementById("modalMaterial").classList.remove("hidden"); }
+        function saveMaterialModal() {
+            const p = getActiveProject();
+            const desc = document.getElementById("m-mat-desc").value || "Site Material";
+            const cat = document.getElementById("m-mat-cat").value;
+            const req = document.getElementById("m-mat-req").value || "100 m³";
+            const rec = document.getElementById("m-mat-rec").value || "100 m³";
+            const con = document.getElementById("m-mat-con").value || "100 m³";
+            const waste = parseFloat(document.getElementById("m-mat-waste").value) || 1.0;
+            const qa = document.getElementById("m-mat-qa").value;
+
+            p.materials.push({ id: Date.now(), desc, cat, req, rec, con, waste, qa });
+            saveState();
+            closeModal('modalMaterial');
+            renderMaterialsTable();
+            renderDashboardKPIs();
+        }
+
+        function updateMaterial(idx, field, val) {
+            const p = getActiveProject();
+            p.materials[idx][field] = val;
+            saveState();
+            renderMaterialsTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteMaterial(idx) {
+            const p = getActiveProject();
+            p.materials.splice(idx, 1);
+            saveState();
+            renderMaterialsTable();
+            renderDashboardKPIs();
+        }
+
+        function renderMeasurementsTable() {
+            const p = getActiveProject();
+            const tbody = document.getElementById("measurements-table-body");
+            tbody.innerHTML = p.measurements.map((j, idx) => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-2 font-mono font-bold text-site-teal">${j.refNo}</td>
+                    <td class="p-2 font-mono text-site-blue">${j.boq}</td>
+                    <td class="p-2 font-bold text-slate-800">${j.desc}</td>
+                    <td class="p-2">${j.loc}</td>
+                    <td class="p-2 font-bold">${j.qty}</td>
+                    <td class="p-2 font-bold text-site-teal">AED ${j.rate}</td>
+                    <td class="p-2 font-extrabold text-emerald-700">AED ${j.total.toLocaleString()}</td>
+                    <td class="p-2">
+                        <select onchange="updateMeasurement(${idx}, 'status', this.value)" class="border rounded px-1.5 py-1 text-xs font-semibold">
+                            <option value="Handed Over to QS (IPC #14)" ${j.status === 'Handed Over to QS (IPC #14)' ? 'selected' : ''}>Handed Over to QS (IPC #14)</option>
+                            <option value="Pending QA/QC Signature" ${j.status === 'Pending QA/QC Signature' ? 'selected' : ''}>Pending QA/QC Signature</option>
+                            <option value="Draft / Site Verification" ${j.status === 'Draft / Site Verification' ? 'selected' : ''}>Draft / Site Verification</option>
+                        </select>
+                    </td>
+                    <td class="p-2 text-center">
+                        <button onclick="deleteMeasurement(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        function calcJMRTotal() {
+            const q = parseFloat(document.getElementById("m-jmr-qty").value) || 0;
+            const r = parseFloat(document.getElementById("m-jmr-rate").value) || 0;
+            document.getElementById("m-jmr-total").value = `AED ${(q * r).toLocaleString()}`;
+        }
+
+        function openMeasurementModal() { document.getElementById("modalMeasurement").classList.remove("hidden"); }
+        function saveMeasurementModal() {
+            const p = getActiveProject();
+            const refNo = document.getElementById("m-jmr-ref").value || "JMR-100";
+            const boq = document.getElementById("m-jmr-boq").value || "BOQ-3.00";
+            const desc = document.getElementById("m-jmr-desc").value || "Structural Concrete Work";
+            const loc = document.getElementById("m-jmr-loc").value || "Level 12";
+            const qty = parseFloat(document.getElementById("m-jmr-qty").value) || 0;
+            const rate = parseFloat(document.getElementById("m-jmr-rate").value) || 0;
+            const status = document.getElementById("m-jmr-status").value;
+
+            p.measurements.push({ id: Date.now(), refNo, boq, desc, loc, qty, rate, total: qty * rate, status });
+            saveState();
+            closeModal('modalMeasurement');
+            renderMeasurementsTable();
+            renderDashboardKPIs();
+        }
+
+        function updateMeasurement(idx, field, val) {
+            const p = getActiveProject();
+            p.measurements[idx][field] = val;
+            saveState();
+            renderMeasurementsTable();
+            renderDashboardKPIs();
+        }
+
+        function deleteMeasurement(idx) {
+            const p = getActiveProject();
+            p.measurements.splice(idx, 1);
+            saveState();
+            renderMeasurementsTable();
+            renderDashboardKPIs();
+        }
+
+        function renderDashboardKPIs() {
+            const p = getActiveProject();
+            const blocked = p.readiness.filter(r => r.status === "BLOCKED").length;
+            const totalValue = p.measurements.reduce((sum, j) => sum + j.total, 0);
+
+            document.getElementById("kpi-blocked-count").innerText = blocked;
+            document.getElementById("kpi-verified-qty").innerText = `AED ${(totalValue / 1000000).toFixed(2)}M`;
+
+            if (blocked > 0) {
+                document.getElementById("dashboardAlertBanner").classList.remove("hidden");
+                document.getElementById("dashboardAlertText").innerText = `${blocked} site activities are currently blocked due to missing drawings, material shortages, or pending inspections.`;
+            } else {
+                document.getElementById("dashboardAlertBanner").classList.add("hidden");
+            }
+
+            updateCharts();
+        }
+
+        function updateFolderDirectoryNames() {
+            const p = getActiveProject();
+            const sanitized = p.name.replace(/[^a-zA-Z0-9]/g, "_");
+            document.getElementById("folder-active-name").innerText = p.name;
+            document.getElementById("folder-root-dir").innerText = sanitized;
+        }
+
+        function initCharts() {
+            const ctx1 = document.getElementById('chart-progress-scurve').getContext('2d');
+            scurveChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Week 38', 'Week 39', 'Week 40', 'Week 41', 'Week 42 (Current)'],
+                    datasets: [
+                        { label: 'Planned Target S-Curve (%)', data: [65, 70, 75, 80, 85], borderColor: '#cbd5e1', backgroundColor: 'transparent', borderWidth: 2, borderDash: [5, 5] },
+                        { label: 'Actual Physical Progress (%)', data: [64, 69, 74, 79, 82.5], borderColor: '#0d9488', backgroundColor: 'rgba(13, 148, 136, 0.1)', fill: true, borderWidth: 3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('chart-readiness-pie').getContext('2d');
+            readinessChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ready for Execution', 'Blocked (Missing Drawings)', 'Blocked (Material Shortages)'],
+                    datasets: [{
+                        data: [5, 2, 1],
+                        backgroundColor: ['#059669', '#e11d48', '#d97706']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updateCharts() {
+            if (!scurveChart || !readinessChart) return;
+            const p = getActiveProject();
+            const readyCount = p.readiness.filter(r => r.status === "READY").length;
+            const dwgBlocked = p.readiness.filter(r => r.blocker === "Missing IFC Drawings").length;
+            const matBlocked = p.readiness.filter(r => r.blocker === "Material Shortages" || r.blocker === "Pending Inspection").length;
+
+            readinessChart.data.datasets[0].data = [readyCount || 1, dwgBlocked || 0, matBlocked || 0];
+            scurveChart.update();
+            readinessChart.update();
+        }
+
+        function simulateCrossDeptTrigger() {
+            alert("⚡ Cross-Departmental Notification Simulated:\n\n1. Engineering: Sent updated Rev B drawing to Site Operations.\n2. QA/QC: Received RFI-0412 for Level 12 Pour 2.\n3. QS: Updated Interim Payment Certificate (IPC #14) with JMR-1042 accepted quantity.");
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active-tab'));
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('btn-' + tabId).classList.add('active-tab');
+        }
+
+        function openNewProjectModal() { document.getElementById("modalNewProject").classList.remove("hidden"); }
+        function saveNewProjectModal() {
+            const name = document.getElementById("m-proj-name").value || "New Sharjah Site";
+            const bua = parseFloat(document.getElementById("m-proj-bua").value) || 300000;
+            const peak = parseInt(document.getElementById("m-proj-peak").value) || 200;
+
+            const newProj = {
+                id: "site-proj-" + Date.now(),
+                name: name,
+                code: "PRJ-SHJ-" + Math.floor(Math.random() * 1000),
+                location: "Sharjah, UAE",
+                currency: "AED",
+                bua: bua,
+                peakLabour: peak,
+                shifts: "6_DAYS_DAY_NIGHT",
+                lookahead: [],
+                readiness: [],
+                dpr: [],
+                equipment: [],
+                materials: [],
+                measurements: []
+            };
+
+            siteProjects.push(newProj);
+            currentSiteProjectId = newProj.id;
+            saveState();
+            closeModal('modalNewProject');
+            renderProjectSelect();
+            loadActiveSiteProjectData();
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+        function exportDPRCSV() {
+            const p = getActiveProject();
+            let csv = "DPR Date,Activity,Trades Deployed,Hours,Qty Executed,Supervisor,Delay Reason\n";
+            p.dpr.forEach(d => {
+                csv += `"${d.date}","${d.act}","${d.trades}","${d.hrs}","${d.qty}","${d.sup}","${d.delay}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${p.code}_DPR_Export.csv`);
+            a.click();
+        }
+
+        function exportMeasurementCSV() {
+            const p = getActiveProject();
+            let csv = "JMR Ref,BOQ Ref,Description,Location,Accepted Qty,Unit Rate AED,Total Value AED,Status\n";
+            p.measurements.forEach(j => {
+                csv += `"${j.refNo}","${j.boq}","${j.desc}","${j.loc}",${j.qty},${j.rate},${j.total},"${j.status}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${p.code}_Measurement_Sheets_JMR.csv`);
+            a.click();
+        }
+
+        function exportERPJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(siteProjects, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", "Sharjah_Site_Operations_ERP_Backup.json");
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function importERPJSON(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        siteProjects = imported;
+                        currentSiteProjectId = siteProjects[0].id;
+                        saveState();
+                        renderProjectSelect();
+                        loadActiveSiteProjectData();
+                    }
+                } catch(err) {
+                    alert("Invalid JSON backup file format!");
+                }
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>

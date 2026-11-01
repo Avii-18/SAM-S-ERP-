@@ -1,0 +1,2499 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharjah Construction Commercial & Quantity Surveying Unified Suite (AED)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Commercial & QTO Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        comm: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#16a34a',
+                            600: '#15803d',
+                            700: '#166534',
+                            800: '#14532d',
+                            900: '#0f172a'
+                        },
+                        qto: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            accent: '#0284c7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scroll::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .main-module-btn.active {
+            background-color: #15803d;
+            color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .sub-tab-btn.active {
+            border-bottom-color: #15803d;
+            color: #15803d;
+            font-weight: 700;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; font-size: 10pt; }
+            .shadow-lg, .shadow-md, .shadow-sm { box-shadow: none !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col select-none">
+
+    <!-- GLOBAL HEADER NAVIGATION -->
+    <header class="bg-slate-900 text-white shadow-xl no-print sticky top-0 z-40 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-comm-600 to-emerald-500 p-2.5 rounded-xl text-white shadow-lg shadow-comm-600/30">
+                    <i class="fa-solid fa-calculator text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-2">
+                        <span>Sharjah Commercial & QS Suite</span>
+                        <span class="text-[10px] font-bold bg-comm-700 text-comm-100 px-2 py-0.5 rounded-full border border-comm-500">UAE / AED v26.06</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Integrated Commercial Controls, Estimation, Quantity Takeoff & BOQ Budgeting OS</p>
+                </div>
+            </div>
+
+            <!-- Global Suite Module Switcher Buttons -->
+            <div class="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 space-x-1">
+                <button onclick="switchModule('comm')" id="mod-btn-comm" class="main-module-btn active px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-amber-400"></i>
+                    <span>1. Commercial & Estimation</span>
+                </button>
+                <button onclick="switchModule('qto')" id="mod-btn-qto" class="main-module-btn px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-cyan-400"></i>
+                    <span>2. Quantity Takeoff (QTO) & Tracker</span>
+                </button>
+            </div>
+
+            <!-- Universal Action Toolbar -->
+            <div class="flex items-center space-x-2">
+                <button onclick="exportUnifiedJSON()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700 flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-download text-comm-500"></i> <span>Backup JSON</span>
+                </button>
+                <label class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-semibold border border-slate-700 cursor-pointer flex items-center space-x-1.5 transition">
+                    <i class="fa-solid fa-upload text-comm-500"></i> <span>Restore</span>
+                    <input type="file" id="importUnifiedFileInput" onchange="importUnifiedJSON(event)" class="hidden" accept=".json">
+                </label>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 transition shadow">
+                    <i class="fa-solid fa-print"></i> <span>Print Report</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE LAYOUT CONTAINER -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+
+        <!-- UNIFIED SIDEBAR -->
+        <aside class="w-full md:w-64 flex-shrink-0 space-y-4 no-print">
+            <!-- Active Commercial Project Selector Card -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Commercial Project</label>
+                    <button onclick="openNewProjectModal()" class="text-xs text-comm-600 font-bold hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> New
+                    </button>
+                </div>
+                <select id="projectSelector" onchange="switchProject(this.value)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-800 bg-slate-50 focus:ring-2 focus:ring-comm-500 focus:outline-none cursor-pointer">
+                    <!-- Dynamic Project Options -->
+                </select>
+                <div id="projectMetaBadge" class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1">
+                    <!-- Dynamic Metadata -->
+                </div>
+            </div>
+
+            <!-- Virtual Folder Structure Tree -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-3 bg-slate-900 text-white flex items-center justify-between">
+                    <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-folder-tree text-comm-500"></i> Directory Navigation
+                    </span>
+                    <button onclick="switchTab('comm-config')" class="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-slate-300">
+                        <i class="fa-solid fa-gear"></i> Config
+                    </button>
+                </div>
+                <div class="p-2 space-y-1 text-xs" id="virtualFolderTree">
+                    <!-- Dynamic Folder Items -->
+                </div>
+            </div>
+
+            <!-- Sidebar Takeoff Mode Badge -->
+            <div id="sidebarModeCard" class="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs shadow-sm">
+                <!-- Dynamic Engine Status -->
+            </div>
+        </aside>
+
+        <!-- MAIN DISPLAY WORKSPACE -->
+        <main class="flex-1 min-w-0 space-y-6">
+
+            <!-- ================= MODULE 1: COMMERCIAL DEPARTMENT TOOL ================= -->
+            <div id="module-comm-wrapper" class="space-y-6">
+                <!-- Commercial Navigation Tabs -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 no-print overflow-hidden">
+                    <div class="flex border-b border-slate-200 overflow-x-auto text-xs sm:text-sm custom-scroll">
+                        <button onclick="switchTab('comm-dashboard')" id="tab-comm-dashboard" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap active">
+                            <i class="fa-solid fa-chart-pie"></i><span>Executive Dashboard</span>
+                        </button>
+                        <button onclick="switchTab('comm-tendering')" id="tab-comm-tendering" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-gavel"></i><span>Tendering</span>
+                        </button>
+                        <button onclick="switchTab('comm-boq')" id="tab-comm-boq" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-list-ol"></i><span>QS & Master BOQ</span>
+                        </button>
+                        <button onclick="switchTab('comm-budget')" id="tab-comm-budget" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-scale-balanced"></i><span>Budget Control</span>
+                        </button>
+                        <button onclick="switchTab('comm-contract')" id="tab-comm-contract" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-file-signature"></i><span>Contracts & IPC Billing</span>
+                        </button>
+                        <button onclick="switchTab('comm-variations')" id="tab-comm-variations" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-code-compare"></i><span>Variation Orders</span>
+                        </button>
+                        <button onclick="switchTab('comm-config')" id="tab-comm-config" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-sliders"></i><span>Project Controls Setup</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.1: Executive Commercial Dashboard -->
+                <div id="content-comm-dashboard" class="sub-tab-content space-y-6">
+                    <div id="benchmarkNoticeBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 text-amber-600 mt-0.5">
+                                <i class="fa-solid fa-calculator text-lg"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-xs font-bold text-amber-800 uppercase tracking-wider">Parametric Benchmark Engine Active</h3>
+                                <p class="text-xs text-amber-700 mt-0.5">Detailed drawing quantities omitted. Master BOQ and budget totals derived using standard UAE coefficients per sq.ft BUA.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commercial KPI Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Contract Value</span>
+                            <div id="kpiContractValue" class="text-xl font-black text-slate-900">AED 0</div>
+                            <span id="kpiContractType" class="text-[10px] font-semibold text-slate-500 block">Lump Sum</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Estimated Total Cost</span>
+                            <div id="kpiTotalCost" class="text-xl font-black text-comm-600">AED 0</div>
+                            <span id="kpiCostPerSqft" class="text-[10px] font-semibold text-slate-500 block">AED 0 / sq.ft</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Approved Variations</span>
+                            <div id="kpiApprovedVariations" class="text-xl font-black text-emerald-600">AED 0</div>
+                            <span id="kpiPendingVariations" class="text-[10px] font-semibold text-amber-600 block">AED 0 Pending</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Target Net Margin</span>
+                            <div id="kpiTargetMargin" class="text-xl font-black text-indigo-600">0.0%</div>
+                            <span id="kpiMarginValue" class="text-[10px] font-semibold text-indigo-600 block">AED 0 Margin</span>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase">Billed Progress Claims</span>
+                            <div id="kpiBilledPaid" class="text-xl font-black text-slate-800">AED 0</div>
+                            <span id="kpiRetentionValue" class="text-[10px] font-semibold text-slate-500 block">AED 0 Retained</span>
+                        </div>
+                    </div>
+
+                    <!-- Commercial Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-comm-600"></i> Cost Distribution by Discipline
+                            </h3>
+                            <div class="relative h-64">
+                                <canvas id="disciplineChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-column text-comm-600"></i> Baseline Budget vs. Variations Impact
+                            </h3>
+                            <div class="relative h-64">
+                                <canvas id="budgetVariationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Printable Summary Section -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-4 bg-slate-900 text-white flex justify-between items-center no-print">
+                            <h3 class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-file-contract text-comm-400"></i> Executive Commercial Summary Report
+                            </h3>
+                            <button onclick="window.print()" class="px-3 py-1 bg-comm-600 hover:bg-comm-500 text-white text-xs font-bold rounded-lg">
+                                <i class="fa-solid fa-file-pdf mr-1"></i> Print Executive PDF
+                            </button>
+                        </div>
+                        <div class="p-6 space-y-4 text-xs">
+                            <div class="print-only border-b border-slate-300 pb-4 mb-4">
+                                <h1 class="text-xl font-bold text-slate-900" id="printReportTitle">COMMERCIAL & ESTIMATION SUMMARY REPORT</h1>
+                                <p class="text-xs text-slate-600" id="printReportMeta">Location: Sharjah, UAE | Type: Commercial High-Rise</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <h4 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1">Commercial Profile</h4>
+                                    <ul class="space-y-1.5 text-slate-700">
+                                        <li class="flex justify-between"><span>Contract Delivery Type:</span> <strong id="repContractType">Lump Sum</strong></li>
+                                        <li class="flex justify-between"><span>Currency:</span> <strong id="repCurrency">AED (UAE Dirham)</strong></li>
+                                        <li class="flex justify-between"><span>Built-Up Area (BUA):</span> <strong id="repBUA">150,000 sq.ft</strong></li>
+                                        <li class="flex justify-between"><span>Cost per Sq.Ft BUA:</span> <strong id="repCostSqft" class="text-comm-600">AED 0.00</strong></li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-2">
+                                    <h4 class="font-bold text-slate-800 uppercase tracking-wider border-b border-slate-200 pb-1">Financial Health</h4>
+                                    <ul class="space-y-1.5 text-slate-700">
+                                        <li class="flex justify-between"><span>Baseline Budget:</span> <strong id="repBaselineBudget">AED 0</strong></li>
+                                        <li class="flex justify-between"><span>Approved Variations:</span> <strong id="repApprovedVars" class="text-emerald-600">AED 0</strong></li>
+                                        <li class="flex justify-between"><span>Target Profit Margin:</span> <strong id="repTargetMarginPercent">15.0%</strong></li>
+                                        <li class="flex justify-between"><span>Contingency Reserve:</span> <strong id="repContingency">AED 0</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.2: Tendering Module -->
+                <div id="content-comm-tendering" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-200 pb-3">
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-gavel text-comm-600"></i> Tender Overview & Bid Strategy
+                                </h2>
+                                <p class="text-xs text-slate-500">Track tender deadlines, bid security bonds, client budgets, and win probabilities.</p>
+                            </div>
+                            <button onclick="saveTenderDetails()" class="px-3 py-1.5 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Tender Data
+                            </button>
+                        </div>
+                        <form id="tenderForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Tender Reference # *</label>
+                                <input type="text" id="tndRef" required placeholder="TND-2026-001" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Submission Deadline *</label>
+                                <input type="date" id="tndDeadline" required class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Bid Security Bond (AED) *</label>
+                                <input type="number" id="tndEMD" placeholder="1125000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono font-bold">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Win Probability (%)</label>
+                                <input type="number" id="tndWinProb" min="0" max="100" value="65" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Client Estimated Budget (AED)</label>
+                                <input type="number" id="tndClientBudget" placeholder="10000000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Our Bid Proposal Value (AED)</label>
+                                <input type="number" id="tndBidValue" placeholder="9500000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono font-bold text-comm-600">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Tender Submission Status</label>
+                                <select id="tndStatus" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-semibold">
+                                    <option value="In Progress">In Progress / Review</option>
+                                    <option value="Submitted">Submitted to Client</option>
+                                    <option value="Awarded">Awarded / Won</option>
+                                    <option value="Rejected">Rejected / Lost</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Commercial Lead / QS</label>
+                                <input type="text" id="tndLead" placeholder="Lead Quantity Surveyor" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg">
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Pre-Bid Query Register -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-clipboard-question text-comm-600"></i> Pre-Bid Query Register
+                            </h3>
+                            <button onclick="openPreBidModal()" class="px-3 py-1 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Add Pre-Bid Query
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                        <th class="py-2.5 px-3 w-16">Ref #</th>
+                                        <th class="py-2.5 px-3">Drawing / Spec Clause</th>
+                                        <th class="py-2.5 px-4">Commercial Query</th>
+                                        <th class="py-2.5 px-4">Client Clarification</th>
+                                        <th class="py-2.5 px-3 w-28 text-center">Status</th>
+                                        <th class="py-2.5 px-2 w-16 text-center no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preBidTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.3: QS & Master BOQ -->
+                <div id="content-comm-boq" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3 no-print">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-square-plus text-comm-600"></i> Add Item to Master BOQ
+                            </h3>
+                            <button onclick="generateStandardBOQ('comm')" class="text-xs px-3 py-1 bg-slate-900 text-white rounded-lg hover:bg-slate-800 flex items-center gap-1.5 font-semibold">
+                                <i class="fa-solid fa-wand-magic-sparkles text-comm-400"></i> Auto-Generate Parametric BOQ
+                            </button>
+                        </div>
+                        <form id="boqForm" onsubmit="saveBoqItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 text-xs">
+                            <input type="hidden" id="boqEditId" value="">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Discipline *</label>
+                                <select id="boqDiscipline" required class="w-full px-2 py-1.5 border border-slate-300 rounded-lg font-semibold">
+                                    <option value="Civil & Structural">Civil & Structural</option>
+                                    <option value="MEP Services">MEP Services</option>
+                                    <option value="Architectural Finishes">Architectural Finishes</option>
+                                    <option value="Misc & External">Misc & External Works</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block font-bold text-slate-600 mb-1">Item Description *</label>
+                                <input type="text" id="boqDescription" required placeholder="e.g. M30 Reinforced Concrete Slabs" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Unit *</label>
+                                <input type="text" id="boqUnit" required placeholder="Cu.m / Sq.m / MT" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Quantity *</label>
+                                <input type="number" step="0.01" id="boqQty" required placeholder="0.00" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Unit Rate (AED) *</label>
+                                <input type="number" step="0.01" id="boqRate" required placeholder="0.00" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div class="sm:col-span-5 flex items-center gap-2">
+                                <label class="block font-bold text-slate-600">Drawing Reference:</label>
+                                <input type="text" id="boqDrawingRef" placeholder="STR-DRW-102 Rev C" class="flex-1 px-2 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div class="flex items-end justify-end">
+                                <button type="submit" class="w-full px-3 py-1.5 bg-comm-600 hover:bg-comm-700 text-white rounded-lg font-bold">
+                                    Save BOQ Line
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Master BOQ Table -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="p-3 bg-slate-900 text-white flex justify-between items-center no-print">
+                            <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-list-ol text-comm-400"></i> Master Bill of Quantities (BOQ) Table
+                            </span>
+                            <button onclick="exportBOQCSV()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg font-bold">
+                                <i class="fa-solid fa-file-csv mr-1"></i> Export BOQ CSV
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                        <th class="py-2.5 px-3">Discipline</th>
+                                        <th class="py-2.5 px-4 min-w-[200px]">Work Description</th>
+                                        <th class="py-2.5 px-3 w-16 text-center">Unit</th>
+                                        <th class="py-2.5 px-3 text-right">Quantity</th>
+                                        <th class="py-2.5 px-3 text-right">Unit Rate</th>
+                                        <th class="py-2.5 px-4 text-right">Total Amount (AED)</th>
+                                        <th class="py-2.5 px-3">Drawing Ref</th>
+                                        <th class="py-2.5 px-2 w-16 text-center no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="boqTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-slate-900 text-white font-bold text-xs">
+                                        <td colspan="5" class="py-3 px-4 text-right uppercase">Master BOQ Total Estimation:</td>
+                                        <td id="boqGrandTotal" class="py-3 px-4 text-right font-mono text-comm-400 font-black text-sm">AED 0.00</td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.4: Budget Control -->
+                <div id="content-comm-budget" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-scale-balanced text-comm-600"></i> Master Budget Allocation & Margin Controls
+                                </h2>
+                                <p class="text-xs text-slate-500">Commercial cost baselines, target profitability, and contingency reserves.</p>
+                            </div>
+                            <button onclick="saveBudgetControlData()" class="px-3 py-1.5 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Update Budget Settings
+                            </button>
+                        </div>
+                        <form id="budgetForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Contract Value (AED) *</label>
+                                <input type="number" id="bdgContractVal" required placeholder="45000000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Target Net Margin (%) *</label>
+                                <input type="number" step="0.1" id="bdgMarginPct" required value="15.0" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono font-bold text-comm-600">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Contingency Reserve (AED)</label>
+                                <input type="number" id="bdgContingency" placeholder="300000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Unallocated Overheads (AED)</label>
+                                <input type="number" id="bdgOverhead" placeholder="150000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                        </form>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Allowable Direct Cost Budget</span>
+                                <div id="bdgAllowableCost" class="text-lg font-black text-slate-800 mt-1">AED 0.00</div>
+                                <p class="text-[10px] text-slate-500">Contract Value - Target Margin</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Estimated QS Cost Baseline</span>
+                                <div id="bdgQsEstimated" class="text-lg font-black text-comm-600 mt-1">AED 0.00</div>
+                                <p class="text-[10px] text-slate-500">Derived from BOQ items</p>
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <span class="text-[10px] font-bold text-slate-500 uppercase">Commercial Cost Variance</span>
+                                <div id="bdgCostVariance" class="text-lg font-black text-emerald-600 mt-1">AED 0.00</div>
+                                <p id="bdgVarianceStatus" class="text-[10px] text-emerald-600 font-bold">Within Target Budget</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.5: Contracts & IPC Billing -->
+                <div id="content-comm-contract" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-comm-600"></i> Main Contract Commercial Terms
+                            </h3>
+                            <button onclick="saveContractTerms()" class="px-3 py-1 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Terms
+                            </button>
+                        </div>
+                        <form id="contractTermsForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Contract Start Date</label>
+                                <input type="date" id="ctrStartDate" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Retention Percentage (%)</label>
+                                <input type="number" step="0.5" id="ctrRetentionPct" value="10.0" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Advance Payment Received (AED)</label>
+                                <input type="number" id="ctrAdvanceRec" placeholder="1000000" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Defect Liability Period (Months)</label>
+                                <input type="number" id="ctrDLP" value="12" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg font-mono">
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- IPC Claims Register -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-comm-600"></i> Interim Payment Certificate (IPC) Claims Register
+                            </h3>
+                            <button onclick="openRaBillModal()" class="px-3 py-1 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> Submit IPC Progress Claim
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                        <th class="py-2.5 px-3 w-16">Bill #</th>
+                                        <th class="py-2.5 px-3">Claim Date</th>
+                                        <th class="py-2.5 px-3 text-right">Gross Claimed (AED)</th>
+                                        <th class="py-2.5 px-3 text-right">Retention (AED)</th>
+                                        <th class="py-2.5 px-3 text-right">VAT 5% (AED)</th>
+                                        <th class="py-2.5 px-3 text-right">Net Payable incl. VAT (AED)</th>
+                                        <th class="py-2.5 px-3 w-28 text-center">Status</th>
+                                        <th class="py-2.5 px-2 w-16 text-center no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="raBillTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic IPC Claims -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.6: Variation Orders -->
+                <div id="content-comm-variations" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-code-compare text-comm-600"></i> Variation Orders & Scope Change Register
+                                </h2>
+                                <p class="text-xs text-slate-500">Log client scope variations, extra works, unit rate approvals, and revised totals.</p>
+                            </div>
+                            <button onclick="openVoModal()" class="px-3 py-1 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold no-print flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus"></i> New Variation Claim
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                        <th class="py-2.5 px-3 w-20">VO Ref #</th>
+                                        <th class="py-2.5 px-4 min-w-[200px]">Scope Variation Description</th>
+                                        <th class="py-2.5 px-3 text-right">Claimed (AED)</th>
+                                        <th class="py-2.5 px-3 text-right">Approved (AED)</th>
+                                        <th class="py-2.5 px-3 w-28 text-center">Status</th>
+                                        <th class="py-2.5 px-2 w-16 text-center no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="voTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 1.7: Project Controls Setup -->
+                <div id="content-comm-config" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-5">
+                        <div class="border-b border-slate-200 pb-3">
+                            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-comm-600"></i> Project Configuration & Controls
+                            </h2>
+                            <p class="text-xs text-slate-500">Define building metadata, contract model, BUA specifications, and estimation methods.</p>
+                        </div>
+                        <form id="commConfigForm" onsubmit="saveProjectControlsConfig(event)" class="space-y-5 text-xs">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Project Name *</label>
+                                    <input type="text" id="cfgProjName" required placeholder="Horizon Commercial Center" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold text-slate-900">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Project Code *</label>
+                                    <input type="text" id="cfgProjCode" required placeholder="COMM-2026-01" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Location *</label>
+                                    <input type="text" id="cfgLocation" required placeholder="Sharjah, UAE" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Building Type *</label>
+                                    <select id="cfgProjType" required class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold">
+                                        <option value="Commercial High-Rise">Commercial High-Rise</option>
+                                        <option value="Villa Compound / Low-Rise">Villa Compound / Low-Rise</option>
+                                        <option value="Residential Complex">Residential Complex</option>
+                                        <option value="Industrial Logistics Park">Industrial Logistics Park</option>
+                                        <option value="Mixed-Use Development">Mixed-Use Development</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Built-Up Area (BUA sq.ft) *</label>
+                                    <input type="number" id="cfgArea" required placeholder="150000" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono font-bold">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Contract Type *</label>
+                                    <select id="cfgContractType" required class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold">
+                                        <option value="Lump Sum Turnkey">Lump Sum Turnkey</option>
+                                        <option value="Item Rate Schedule">Item Rate Schedule</option>
+                                        <option value="Cost Plus Fee">Cost Plus Fee</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Currency Symbol *</label>
+                                    <input type="text" id="cfgCurrency" required value="AED " class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono text-center font-bold">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Total Floors</label>
+                                    <input type="number" id="cfgFloors" value="15" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Basement Levels</label>
+                                    <input type="number" id="cfgBasements" min="0" max="6" value="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-700 uppercase mb-1">Finish Tier</label>
+                                    <select id="cfgFinish" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-semibold">
+                                        <option value="Economy">Economy</option>
+                                        <option value="Standard">Standard</option>
+                                        <option value="Luxury">Luxury / High-End</option>
+                                    </select>
+                                </div>
+                                <div class="text-[11px] text-slate-500 self-end pb-2">Location coefficient auto-applied based on Emirate string.</div>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <label class="block font-bold text-slate-800 uppercase text-xs">Estimation & Takeoff Mode *</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <label class="flex items-start p-3 bg-white border border-slate-300 rounded-lg cursor-pointer hover:border-comm-500 transition">
+                                        <input type="radio" name="cfgEstMode" value="DETAILED" class="mt-1 text-comm-600 focus:ring-comm-500">
+                                        <div class="ml-3">
+                                            <span class="block font-bold text-slate-900">Detailed Drawing Takeoff Mode</span>
+                                            <span class="block text-[11px] text-slate-500">Quantities calculated directly from shop drawings & line items.</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-start p-3 bg-white border border-slate-300 rounded-lg cursor-pointer hover:border-comm-500 transition">
+                                        <input type="radio" name="cfgEstMode" value="BENCHMARK" class="mt-1 text-comm-600 focus:ring-comm-500">
+                                        <div class="ml-3">
+                                            <span class="block font-bold text-slate-900">Parametric Benchmark / Co-efficient Engine</span>
+                                            <span class="block text-[11px] text-slate-500">Drawings unavailable; derive rates using standard UAE parametric factors.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="px-5 py-2 bg-comm-600 hover:bg-comm-700 text-white rounded-lg font-bold shadow flex items-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save Commercial Setup
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="mt-6 border-t border-slate-200 pt-4">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase mb-1">
+                                <i class="fa-solid fa-table-list text-comm-600 mr-1"></i> UAE / Sharjah Coefficients Applied by Parametric Engine
+                            </h3>
+                            <div id="uaeCoeffPanel" class="overflow-x-auto custom-scroll text-[11px] mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MODULE 2: QUANTITY TAKEOFF (QTO) & BOQ TRACKER ================= -->
+            <div id="module-qto-wrapper" class="space-y-6 hidden">
+                <!-- QTO Navigation Tabs -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 no-print overflow-hidden">
+                    <div class="flex border-b border-slate-200 overflow-x-auto text-xs sm:text-sm custom-scroll">
+                        <button onclick="switchTab('qto-setup')" id="tab-qto-setup" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap active">
+                            <i class="fa-solid fa-sliders"></i><span>1. Building Config & Specs</span>
+                        </button>
+                        <button onclick="switchTab('qto-boq')" id="tab-qto-boq" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-list-ol"></i><span>2. Quantity Takeoff (BOQ)</span>
+                        </button>
+                        <button onclick="switchTab('qto-tracker')" id="tab-qto-tracker" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-chart-pie"></i><span>3. Cost & Site Tracker</span>
+                        </button>
+                        <button onclick="switchTab('qto-analytics')" id="tab-qto-analytics" class="sub-tab-btn px-4 py-3 border-b-2 border-transparent font-semibold text-slate-600 hover:text-slate-900 flex items-center space-x-2 whitespace-nowrap">
+                            <i class="fa-solid fa-chart-line"></i><span>4. QTO Budget KPI Dashboard</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Executive QTO Banner -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400">QTO Active Project Context</span>
+                        <h2 id="summaryProjectName" class="text-lg font-extrabold text-slate-800">Sharjah Residential Building (G+4)</h2>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                        <div class="border-l-2 border-comm-500 pl-3">
+                            <span class="text-slate-500 block">Total Built-Up Area</span>
+                            <span id="summaryArea" class="font-bold text-slate-700 text-sm">1,200 sq.m</span>
+                        </div>
+                        <div class="border-l-2 border-slate-400 pl-3">
+                            <span class="text-slate-500 block">Structure / Finish</span>
+                            <span id="summaryStructureFinish" class="font-bold text-slate-700 text-sm">RCC Frame (Standard)</span>
+                        </div>
+                        <div class="border-l-2 border-blue-500 pl-3">
+                            <span class="text-slate-500 block">Estimated Budget</span>
+                            <span id="summaryTotalBudget" class="font-bold text-slate-800 text-sm">AED 0.00</span>
+                        </div>
+                        <div class="border-l-2 border-amber-500 pl-3">
+                            <span class="text-slate-500 block">Est. Cost / Unit Area</span>
+                            <span id="summaryUnitCost" class="font-bold text-slate-800 text-sm">AED 0.00 / sq.m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 2.1: Building Configuration & Drawing Specs -->
+                <div id="content-qto-setup" class="sub-tab-content space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                            <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-building text-comm-600"></i>
+                                <span>Building Parameters & Estimation Factors</span>
+                            </h3>
+                            <form id="qtoConfigForm" onsubmit="handleGenerateBOQ(event)" class="space-y-4 text-xs">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Project Name</label>
+                                        <input type="text" id="projectName" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs" placeholder="Oakridge Apartment Complex">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Building Type</label>
+                                        <select id="buildingType" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold">
+                                            <option value="Villa">Villa / Low-Rise Residential</option>
+                                            <option value="Residential">Residential Apartment Building</option>
+                                            <option value="Commercial">Commercial Office / Retail</option>
+                                            <option value="Industrial">Industrial Warehouse</option>
+                                            <option value="Mixed-use">Mixed-use Multi-story</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Built-Up Area</label>
+                                        <div class="flex">
+                                            <input type="number" id="builtArea" min="10" required class="w-full px-3 py-2 border border-slate-300 rounded-l-lg text-xs font-mono" placeholder="1500">
+                                            <select id="areaUnit" class="bg-slate-100 border border-l-0 border-slate-300 px-3 py-2 rounded-r-lg text-xs font-bold text-slate-600">
+                                                <option value="sq.m">sq.m</option>
+                                                <option value="sq.ft">sq.ft</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Number of Floors</label>
+                                        <input type="number" id="numFloors" min="1" max="100" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono" placeholder="4">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Structural System</label>
+                                        <select id="structSystem" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold">
+                                            <option value="RCC Frame">RCC Frame Structure</option>
+                                            <option value="Steel Structure">Structural Steel Frame</option>
+                                            <option value="Load Bearing">Load Bearing Masonry</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Finish Tier Level</label>
+                                        <select id="finishLevel" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold">
+                                            <option value="Economy">Economy Tier (Basic)</option>
+                                            <option value="Standard" selected>Standard Specification</option>
+                                            <option value="Luxury">Luxury / High-End</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Contingency Allowance (%)</label>
+                                        <input type="number" id="contingencyPercent" min="0" max="25" step="0.5" value="5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Emirate / Location</label>
+                                        <select id="emirate" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold">
+                                            <option value="Sharjah" selected>Sharjah (1.00 Base)</option>
+                                            <option value="Dubai">Dubai (1.05)</option>
+                                            <option value="Abu Dhabi">Abu Dhabi (1.07)</option>
+                                            <option value="Ajman">Ajman (0.97)</option>
+                                            <option value="Umm Al Quwain">Umm Al Quwain (0.95)</option>
+                                            <option value="Ras Al Khaimah">Ras Al Khaimah (0.98)</option>
+                                            <option value="Fujairah">Fujairah (1.02)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Basement Levels</label>
+                                        <input type="number" id="numBasements" min="0" max="6" value="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">UAE VAT (%)</label>
+                                        <input type="number" id="vatPercent" min="0" max="25" step="0.5" value="5" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono">
+                                    </div>
+                                    <div>
+                                        <label class="block font-bold text-slate-600 uppercase mb-1">Currency Symbol</label>
+                                        <input type="text" id="currencySymbol" value="AED " class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-mono">
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                                    <p class="text-[11px] text-slate-500"><i class="fa-solid fa-circle-info mr-1 text-qto-accent"></i>Generating will recalculate baseline takeoff quantities.</p>
+                                    <button type="submit" class="px-5 py-2 bg-comm-600 hover:bg-comm-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-2">
+                                        <i class="fa-solid fa-calculator"></i>
+                                        <span>Generate Quantity Takeoff & BOQ</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Drawing Specs Checklist -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center space-x-2">
+                                    <i class="fa-solid fa-draw-polygon text-qto-accent"></i>
+                                    <span>Drawing Specs Checklist</span>
+                                </h3>
+                                <p class="text-xs text-slate-500 mb-4">Verification status of drawings required for accurate takeoff calculations.</p>
+                                <div class="space-y-2.5" id="drawingChecklist">
+                                    <!-- Dynamic Checklist Items -->
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-slate-100 bg-slate-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center text-xs font-medium text-slate-600 mb-1">
+                                    <span>Takeoff Drawing Readiness</span>
+                                    <span id="drawingCheckPercent" class="font-bold text-slate-800">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div id="drawingCheckBar" class="bg-comm-500 h-2 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 2.2: QTO BOQ Table -->
+                <div id="content-qto-boq" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center space-x-3 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:w-64">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                <input type="text" id="boqSearch" onkeyup="filterBOQTable()" placeholder="Search BOQ items..." class="w-full pl-8 pr-3 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none">
+                            </div>
+                            <select id="boqCategoryFilter" onchange="filterBOQTable()" class="px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-600">
+                                <option value="ALL font">All Categories</option>
+                                <option value="Earthwork">Earthwork</option>
+                                <option value="Concrete Works">Concrete Works</option>
+                                <option value="Steel Structure">Steel & Rebar</option>
+                                <option value="Masonry">Masonry & Walls</option>
+                                <option value="Finishes">Finishes & Tiling</option>
+                                <option value="MEP">MEP Services</option>
+                                <option value="Openings">Doors, Windows & Façade</option>
+                                <option value="Waterproofing">Waterproofing & Insulation</option>
+                                <option value="Vertical Transport">Lifts</option>
+                                <option value="External Works">External Works & Utilities</option>
+                                <option value="Preliminaries">Preliminaries & Approvals</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="openAddBOQModal()" class="px-3 py-1.5 bg-comm-600 hover:bg-comm-700 text-white text-xs font-bold rounded-lg flex items-center space-x-1">
+                                <i class="fa-solid fa-plus"></i><span>Add Custom Item</span>
+                            </button>
+                            <button onclick="recalculateBOQTotals()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg flex items-center space-x-1">
+                                <i class="fa-solid fa-rotate"></i><span>Recalculate Totals</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse" id="boqMasterTable">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase text-[10px]">
+                                        <th class="py-3 px-3 w-12 text-center">Item</th>
+                                        <th class="py-3 px-3 min-w-[200px]">Description of Work</th>
+                                        <th class="py-3 px-3 w-28">Category</th>
+                                        <th class="py-3 px-3 w-16 text-center">Unit</th>
+                                        <th class="py-3 px-3 w-28 text-right">Estimated Qty</th>
+                                        <th class="py-3 px-3 w-28 text-right">Unit Rate</th>
+                                        <th class="py-3 px-3 w-32 text-right">Total Amount</th>
+                                        <th class="py-3 px-3 w-20 text-center no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="qtoBoqTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic QTO BOQ Rows -->
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-slate-50 font-bold text-slate-800 border-t-2 border-slate-300">
+                                        <td colspan="4" class="py-3 px-3 text-right uppercase">Subtotal Estimated Cost:</td>
+                                        <td colspan="2" class="py-3 px-3"></td>
+                                        <td id="boqSubtotalCell" class="py-3 px-3 text-right text-sm text-slate-900">AED 0.00</td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                    <tr class="bg-slate-50 font-semibold text-slate-600">
+                                        <td colspan="4" class="py-2 px-3 text-right">Contingency Allowance (<span id="contingencyLabel">5</span>%):</td>
+                                        <td colspan="2" class="py-2 px-3"></td>
+                                        <td id="boqContingencyCell" class="py-2 px-3 text-right font-mono">AED 0.00</td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                    <tr class="bg-comm-50 text-comm-800 font-bold text-sm border-t border-comm-200">
+                                        <td colspan="4" class="py-3 px-3 text-right uppercase">TOTAL BUDGET (EXCL. VAT):</td>
+                                        <td colspan="2" class="py-3 px-3"></td>
+                                        <td id="boqGrandTotalCell" class="py-3 px-3 text-right font-mono text-base text-comm-700">AED 0.00</td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                    <tr class="bg-slate-50 font-semibold text-slate-600">
+                                        <td colspan="4" class="py-2 px-3 text-right">UAE VAT (<span id="vatLabel">5</span>%):</td>
+                                        <td colspan="2" class="py-2 px-3"></td>
+                                        <td id="boqVatCell" class="py-2 px-3 text-right font-mono">AED 0.00</td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                    <tr class="bg-slate-100 text-slate-900 font-bold text-sm border-t border-slate-300">
+                                        <td colspan="4" class="py-3 px-3 text-right uppercase">TOTAL PAYABLE (INCL. VAT):</td>
+                                        <td colspan="2" class="py-3 px-3"></td>
+                                        <td id="boqTotalInclVatCell" class="py-3 px-3 text-right font-mono text-base">AED 0.00</td>
+                                        <td class="no-print"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 2.3: Site Cost & Execution Tracker -->
+                <div id="content-qto-tracker" class="sub-tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex flex-wrap justify-between items-center pb-2 border-b border-slate-100 gap-2">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Cost & Quantity Execution Tracker</h3>
+                                <p class="text-xs text-slate-500">Record executed site quantities to monitor cost variances.</p>
+                            </div>
+                            <button onclick="saveTrackerProgress()" class="px-4 py-2 bg-comm-600 hover:bg-comm-700 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow">
+                                <i class="fa-solid fa-floppy-disk"></i><span>Save Site Progress</span>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto custom-scroll">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                        <th class="py-3 px-3">Item / Description</th>
+                                        <th class="py-3 px-3 w-20 text-center">Unit</th>
+                                        <th class="py-3 px-3 text-right">Budget Qty</th>
+                                        <th class="py-3 px-3 text-right">Actual Executed Qty</th>
+                                        <th class="py-3 px-3 text-right">Actual Spent Rate</th>
+                                        <th class="py-3 px-3 text-right">Actual Spent Total</th>
+                                        <th class="py-3 px-3 text-right">Cost Variance</th>
+                                        <th class="py-3 px-3 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trackerTableBody" class="divide-y divide-slate-200">
+                                    <!-- Dynamic Execution Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-Tab 2.4: QTO Analytics Dashboard -->
+                <div id="content-qto-analytics" class="sub-tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-500 font-bold uppercase">Budget Utilization</span>
+                                <i class="fa-solid fa-wallet text-comm-500"></i>
+                            </div>
+                            <div class="mt-2 flex items-baseline justify-between">
+                                <span id="kpiSpentPercent" class="text-2xl font-black text-slate-800">0.0%</span>
+                                <span id="kpiSpentAmount" class="text-xs font-mono text-slate-500">AED 0.00 Spent</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-500 font-bold uppercase">Net Cost Variance</span>
+                                <i class="fa-solid fa-scale-balanced text-qto-accent"></i>
+                            </div>
+                            <div class="mt-2 flex items-baseline justify-between">
+                                <span id="kpiNetVariance" class="text-2xl font-black text-slate-800">AED 0.00</span>
+                                <span id="kpiVarianceBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">On Budget</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-500 font-bold uppercase">Physical Progress</span>
+                                <i class="fa-solid fa-bars-progress text-amber-500"></i>
+                            </div>
+                            <div class="mt-2 flex items-baseline justify-between">
+                                <span id="kpiPhysicalProgress" class="text-2xl font-black text-slate-800">0.0%</span>
+                                <span class="text-xs text-slate-500">Weighted Qty</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-slate-500 font-bold uppercase">Total BOQ Items</span>
+                                <i class="fa-solid fa-list-check text-slate-400"></i>
+                            </div>
+                            <div class="mt-2 flex items-baseline justify-between">
+                                <span id="kpiTotalItems" class="text-2xl font-black text-slate-800">0</span>
+                                <span class="text-xs text-slate-500">Line Items</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-pie text-comm-600"></i>
+                                <span>BOQ Budget Breakdown by Category</span>
+                            </h3>
+                            <div class="relative h-64">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-2">
+                                <i class="fa-solid fa-chart-column text-qto-accent"></i>
+                                <span>Budget vs. Actual Cost Comparison</span>
+                            </h3>
+                            <div class="relative h-64">
+                                <canvas id="comparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- UNIVERSAL MODALS -->
+    <!-- Modal 1: Create New Project -->
+    <div id="modalNewProject" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-2">Initialize New Commercial Project</h3>
+            <form onsubmit="saveNewProjectModal(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Project Name *</label>
+                    <input type="text" id="mProjName" required placeholder="Marina Office Tower" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Project Code *</label>
+                    <input type="text" id="mProjCode" required placeholder="PRJ-2026-03" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Location</label>
+                        <input type="text" id="mProjLoc" value="Sharjah, UAE" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">BUA (sq.ft)</label>
+                        <input type="number" id="mProjArea" value="120000" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalNewProject')" class="px-3 py-1.5 border rounded-lg text-slate-600 font-bold">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 bg-comm-600 text-white rounded-lg font-bold">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Add Pre-Bid Query -->
+    <div id="modalPreBid" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-2">Pre-Bid Technical / Commercial Query</h3>
+            <form onsubmit="savePreBidQuery(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Drawing / Spec Clause *</label>
+                    <input type="text" id="pbRef" required placeholder="Spec Section 03300 Concrete" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Commercial Query *</label>
+                    <textarea id="pbQuery" required rows="3" placeholder="Clarification regarding third-party rebar testing..." class="w-full px-3 py-1.5 border border-slate-300 rounded-lg"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalPreBid')" class="px-3 py-1.5 border rounded-lg text-slate-600 font-bold">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 bg-comm-600 text-white rounded-lg font-bold">Save Query</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Add IPC Payment Claim -->
+    <div id="modalRaBill" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-2">Submit IPC Progress Claim</h3>
+            <form onsubmit="saveRaBill(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Gross Claim Amount (AED) *</label>
+                    <input type="number" id="raGross" required placeholder="500000" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono font-bold">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Claim Date *</label>
+                    <input type="date" id="raDate" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalRaBill')" class="px-3 py-1.5 border rounded-lg text-slate-600 font-bold">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 bg-comm-600 text-white rounded-lg font-bold">Submit Progress Claim</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Add Variation Order -->
+    <div id="modalVo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="text-base font-bold text-slate-800 border-b border-slate-100 pb-2">Log Variation Order / Scope Change</h3>
+            <form onsubmit="saveVoItem(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="voEditId" value="">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Variation Description *</label>
+                    <input type="text" id="voDesc" required placeholder="Addition of Post-Tensioned Beams" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Claimed Amount (AED) *</label>
+                        <input type="number" id="voClaimed" required placeholder="120000" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Approved Amount (AED)</label>
+                        <input type="number" id="voApproved" placeholder="100000" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Variation Status *</label>
+                    <select id="voStatus" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-semibold">
+                        <option value="Submitted">Submitted / Under Review</option>
+                        <option value="Approved">Approved by Consultant</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalVo')" class="px-3 py-1.5 border rounded-lg text-slate-600 font-bold">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 bg-comm-600 text-white rounded-lg font-bold">Save Variation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Add QTO Custom BOQ Item -->
+    <div id="boqModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 id="modalTitle" class="text-base font-bold text-slate-800 border-b border-slate-100 pb-2">Add Custom BOQ Item</h3>
+            <form id="boqItemForm" onsubmit="saveBOQItem(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="modalItemId">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Item Description *</label>
+                    <input type="text" id="modalDescription" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg" placeholder="Waterproofing membrane application">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Category</label>
+                        <select id="modalCategory" class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-semibold">
+                            <option value="Earthwork">Earthwork</option>
+                            <option value="Concrete Works">Concrete Works</option>
+                            <option value="Steel Structure">Steel & Rebar</option>
+                            <option value="Masonry">Masonry</option>
+                            <option value="Finishes">Finishes</option>
+                            <option value="MEP">MEP</option>
+                            <option value="Openings">Openings</option>
+                            <option value="Waterproofing">Waterproofing & Insulation</option>
+                            <option value="Vertical Transport">Lifts</option>
+                            <option value="External Works">External Works & Utilities</option>
+                            <option value="Preliminaries">Preliminaries & Approvals</option>
+                            <option value="Other">Other Works</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Measurement Unit</label>
+                        <input type="text" id="modalUnit" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg" placeholder="Cu.M / Sq.M / Kg">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Estimated Quantity</label>
+                        <input type="number" id="modalQty" step="0.01" min="0" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Unit Rate (AED)</label>
+                        <input type="number" id="modalRate" step="0.01" min="0" required class="w-full px-3 py-1.5 border border-slate-300 rounded-lg font-mono">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeBOQModal()" class="px-3 py-1.5 border rounded-lg text-slate-600 font-bold">Cancel</button>
+                    <button type="submit" class="px-3 py-1.5 bg-comm-600 text-white rounded-lg font-bold">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APPLICATION JAVASCRIPT ENGINE -->
+    <script>
+        // Global State Objects
+        let projects = [
+            {
+                id: "PRJ-COMM-01",
+                code: "COMM-2026-01",
+                name: "Horizon Commercial Complex",
+                location: "Sharjah, UAE",
+                type: "Commercial High-Rise",
+                areaSqFt: 150000,
+                floors: 18,
+                basements: 2,
+                finish: "Standard",
+                contractType: "Lump Sum Turnkey",
+                currency: "AED ",
+                estMode: "DETAILED"
+            },
+            {
+                id: "PRJ-COMM-02",
+                code: "COMM-2026-02",
+                name: "Apex Logistics Center",
+                location: "Hamriyah Free Zone, Sharjah, UAE",
+                type: "Industrial Logistics Park",
+                areaSqFt: 90000,
+                floors: 2,
+                basements: 0,
+                finish: "Economy",
+                contractType: "Item Rate Schedule",
+                currency: "AED ",
+                estMode: "BENCHMARK"
+            }
+        ];
+
+        let boqItems = [
+            { id: 1, projectId: "PRJ-COMM-01", discipline: "Civil & Structural", category: "Earthwork", description: "Substructure Excavation & Mass Earthworks", unit: "Cu.m", qty: 18500, rate: 32, drawingRef: "STR-01", actualQty: 18500, actualRate: 32 },
+            { id: 2, projectId: "PRJ-COMM-01", discipline: "Civil & Structural", category: "Concrete Works", description: "C40/50 SRC Reinforced Concrete Slabs, Beams & Core Walls", unit: "Cu.m", qty: 21000, rate: 380, drawingRef: "STR-04", actualQty: 21000, actualRate: 380 },
+            { id: 3, projectId: "PRJ-COMM-01", discipline: "MEP Services", category: "MEP", description: "HVAC Chilled Water Piping & Air Handlers", unit: "Lot", qty: 1, rate: 8200000, drawingRef: "MEP-12", actualQty: 1, actualRate: 8200000 },
+            { id: 4, projectId: "PRJ-COMM-01", discipline: "Architectural Finishes", category: "Openings", description: "Unitized Glass Curtain Wall Façade", unit: "Sq.m", qty: 6200, rate: 1650, drawingRef: "ARC-08", actualQty: 6200, actualRate: 1650 }
+        ];
+
+        let tenderMap = {
+            "PRJ-COMM-01": { ref: "TND-2026-88", deadline: "2026-11-15", emd: 1125000, winProb: 75, clientBudget: 48000000, bidValue: 45000000, status: "Awarded", lead: "Sarah Jenkins, Chief QS" }
+        };
+
+        let preBidQueries = [
+            { id: 1, projectId: "PRJ-COMM-01", ref: "Spec Sec 03300", query: "Please confirm if third-party concrete testing (Sharjah Municipality approved lab) and SEWA charges are in contractor scope.", response: "Yes, included in preliminaries.", status: "Closed" }
+        ];
+
+        let budgetMap = {
+            "PRJ-COMM-01": { contractVal: 45000000, marginPct: 10.0, contingency: 1500000, overhead: 900000 }
+        };
+
+        let contractTermsMap = {
+            "PRJ-COMM-01": { startDate: "2026-01-10", retentionPct: 10.0, advanceRec: 4500000, dlp: 12 }
+        };
+
+        let raBills = [
+            { id: 1, projectId: "PRJ-COMM-01", billNo: "IPC-01", gross: 4500000, date: "2026-03-31", status: "Paid" },
+            { id: 2, projectId: "PRJ-COMM-01", billNo: "IPC-02", gross: 5200000, date: "2026-05-30", status: "Under Review" }
+        ];
+
+        let variationOrders = [
+            { id: 1, projectId: "PRJ-COMM-01", ref: "VO-01", description: "Addition of Basement Helipad Structural Support", claimed: 650000, approved: 600000, status: "Approved" },
+            { id: 2, projectId: "PRJ-COMM-01", ref: "VO-02", description: "Upgrade Entrance Lobby Granite Cladding", claimed: 280000, approved: 0, status: "Submitted" }
+        ];
+
+        let projectConfig = {
+            name: "Sharjah Residential Building (G+4)",
+            type: "Residential",
+            emirate: "Sharjah",
+            basements: 1,
+            vatPercent: 5,
+            builtArea: 4500,
+            areaUnit: "sq.m",
+            floors: 5,
+            structSystem: "RCC Frame",
+            finishLevel: "Standard",
+            contingencyPercent: 5.0,
+            currency: "AED ",
+            drawings: [
+                { name: 'Architectural Floor Plans & Elevations', checked: true },
+                { name: 'Structural Column/Beam Layout Drawings', checked: true },
+                { name: 'Substructure Excavation & Footing Details', checked: true },
+                { name: 'MEP Schematic Line Diagrams', checked: false },
+                { name: 'Geotechnical Report (groundwater & soil levels)', checked: false },
+                { name: 'Sharjah Municipality / Civil Defense Approved Drawings', checked: false },
+                { name: 'SEWA NOC & Electrical Schedule', checked: false }
+            ]
+        };
+
+        // Active Navigation Context
+        let activeModule = 'comm';
+        let activeSubTab = 'comm-dashboard';
+        let activeProjectId = "PRJ-COMM-01";
+
+        // Chart Instances
+        let disciplineChartInstance = null;
+        let budgetVarChartInstance = null;
+        let categoryChartInstance = null;
+        let comparisonChartInstance = null;
+
+        // UAE Coefficient Matrix
+        const UAE_COEFF = {
+            vatPct: 5,
+            sqftPerSqm: 10.7639,
+            emirateFactor: { 'Sharjah': 1.00, 'sharjah': 1.00, 'Dubai': 1.05, 'dubai': 1.05, 'Abu Dhabi': 1.07, 'abu dhabi': 1.07, 'Ajman': 0.97, 'ajman': 0.97, 'Umm Al Quwain': 0.95, 'uaq': 0.95, 'Ras Al Khaimah': 0.98, 'rak': 0.98, 'Fujairah': 1.02 },
+            finishFactor: { Economy: 0.80, Standard: 1.00, Luxury: 1.45 },
+            typeMap: { 'Commercial High-Rise': 'Commercial', 'Residential Complex': 'Residential', 'Industrial Logistics Park': 'Industrial', 'Mixed-Use Development': 'Mixed-use', 'Villa Compound / Low-Rise': 'Villa' },
+            type: {
+                'Villa':       { conc: 0.38, rebar: 100, form: 2.6, block: 1.25, plast: 3.4, floor: 0.85, open: 0.16, openRate: 950,  elec: 260, plumb: 150, hvac: 300, fire: 40,  ext: 1.5, steelKgM2: 45 },
+                'Residential': { conc: 0.42, rebar: 125, form: 3.0, block: 1.00, plast: 3.2, floor: 0.88, open: 0.20, openRate: 950,  elec: 240, plumb: 170, hvac: 280, fire: 110, ext: 1.0, steelKgM2: 60 },
+                'Commercial':  { conc: 0.40, rebar: 130, form: 3.1, block: 0.70, plast: 2.6, floor: 0.90, open: 0.30, openRate: 1650, elec: 380, plumb: 110, hvac: 520, fire: 130, ext: 1.0, steelKgM2: 70 },
+                'Industrial':  { conc: 0.28, rebar: 90,  form: 1.6, block: 0.50, plast: 1.8, floor: 0.95, open: 0.06, openRate: 520,  elec: 220, plumb: 60,  hvac: 90,  fire: 120, ext: 1.2, steelKgM2: 45 },
+                'Mixed-use':   { conc: 0.42, rebar: 125, form: 3.0, block: 0.85, plast: 2.9, floor: 0.89, open: 0.25, openRate: 1300, elec: 320, plumb: 140, hvac: 420, fire: 125, ext: 1.0, steelKgM2: 65 }
+            },
+            rate: { excavation: 32, dewateringBasement: 140, dewateringShallow: 20, groundImprove: 45, concrete: 380, rebar: 3.6, formwork: 68, block: 95, plasterPaint: 62, flooring: 165, waterproof: 58, insulation: 48, liftBase: 175000, liftPerFloor: 8500, external: 260, utilities: 18, approvals: 4, prelimPct: 8, structSteel: 8.5 },
+            basementConcPerM2: 0.55, basementRebar: 150, basementDepth: 4.5
+        };
+
+        // Initialize Suite
+        window.onload = function() {
+            loadUnifiedLocalStorage();
+            renderProjectDropdown();
+            renderFolderTree();
+            renderDrawingChecklist();
+            populateConfigForm();
+            populateQTOConfigValues();
+            renderAllViews();
+        };
+
+        // Local Storage System
+        function saveUnifiedLocalStorage() {
+            localStorage.setItem('unified_projects_uae_v1', JSON.stringify(projects));
+            localStorage.setItem('unified_boq_uae_v1', JSON.stringify(boqItems));
+            localStorage.setItem('unified_tender_uae_v1', JSON.stringify(tenderMap));
+            localStorage.setItem('unified_prebid_uae_v1', JSON.stringify(preBidQueries));
+            localStorage.setItem('unified_budget_uae_v1', JSON.stringify(budgetMap));
+            localStorage.setItem('unified_contracts_uae_v1', JSON.stringify(contractTermsMap));
+            localStorage.setItem('unified_rabills_uae_v1', JSON.stringify(raBills));
+            localStorage.setItem('unified_variations_uae_v1', JSON.stringify(variationOrders));
+            localStorage.setItem('unified_qto_config_uae_v1', JSON.stringify(projectConfig));
+            localStorage.setItem('unified_active_proj_uae_v1', activeProjectId);
+        }
+
+        function loadUnifiedLocalStorage() {
+            if (localStorage.getItem('unified_projects_uae_v1')) projects = JSON.parse(localStorage.getItem('unified_projects_uae_v1'));
+            if (localStorage.getItem('unified_boq_uae_v1')) boqItems = JSON.parse(localStorage.getItem('unified_boq_uae_v1'));
+            if (localStorage.getItem('unified_tender_uae_v1')) tenderMap = JSON.parse(localStorage.getItem('unified_tender_uae_v1'));
+            if (localStorage.getItem('unified_prebid_uae_v1')) preBidQueries = JSON.parse(localStorage.getItem('unified_prebid_uae_v1'));
+            if (localStorage.getItem('unified_budget_uae_v1')) budgetMap = JSON.parse(localStorage.getItem('unified_budget_uae_v1'));
+            if (localStorage.getItem('unified_contracts_uae_v1')) contractTermsMap = JSON.parse(localStorage.getItem('unified_contracts_uae_v1'));
+            if (localStorage.getItem('unified_rabills_uae_v1')) raBills = JSON.parse(localStorage.getItem('unified_rabills_uae_v1'));
+            if (localStorage.getItem('unified_variations_uae_v1')) variationOrders = JSON.parse(localStorage.getItem('unified_variations_uae_v1'));
+            if (localStorage.getItem('unified_qto_config_uae_v1')) projectConfig = JSON.parse(localStorage.getItem('unified_qto_config_uae_v1'));
+            if (localStorage.getItem('unified_active_proj_uae_v1')) activeProjectId = localStorage.getItem('unified_active_proj_uae_v1');
+        }
+
+        function getCurrentProject() {
+            return projects.find(p => p.id === activeProjectId) || projects[0];
+        }
+
+        // Module & Navigation Controls
+        function switchModule(modId) {
+            activeModule = modId;
+            document.querySelectorAll('.main-module-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mod-btn-${modId}`).classList.add('active');
+
+            if (modId === 'comm') {
+                document.getElementById('module-comm-wrapper').classList.remove('hidden');
+                document.getElementById('module-qto-wrapper').classList.add('hidden');
+                switchTab('comm-dashboard');
+            } else {
+                document.getElementById('module-comm-wrapper').classList.add('hidden');
+                document.getElementById('module-qto-wrapper').classList.remove('hidden');
+                switchTab('qto-setup');
+            }
+            renderFolderTree();
+        }
+
+        function switchTab(tabId) {
+            activeSubTab = tabId;
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.add('hidden'));
+
+            const btn = document.getElementById(`tab-${tabId}`);
+            const content = document.getElementById(`content-${tabId}`);
+            if (btn) btn.classList.add('active');
+            if (content) content.classList.remove('hidden');
+
+            if (tabId === 'comm-dashboard') renderDashboard();
+            if (tabId === 'comm-tendering') renderTendering();
+            if (tabId === 'comm-boq') renderBOQ();
+            if (tabId === 'comm-budget') renderBudget();
+            if (tabId === 'comm-contract') renderContracts();
+            if (tabId === 'comm-variations') renderVariations();
+            if (tabId === 'comm-config') populateConfigForm();
+
+            if (tabId === 'qto-setup') populateQTOConfigValues();
+            if (tabId === 'qto-boq') renderBOQ();
+            if (tabId === 'qto-tracker') renderTrackerView();
+            if (tabId === 'qto-analytics') renderDashboardCharts();
+        }
+
+        function renderFolderTree() {
+            const container = document.getElementById('virtualFolderTree');
+            container.innerHTML = '';
+
+            const folders = activeModule === 'comm' ? [
+                { id: "comm-dashboard", name: "01_Executive_Dashboard", icon: "fa-chart-pie" },
+                { id: "comm-tendering", name: "02_Tender_&_Bidding_Docs", icon: "fa-gavel" },
+                { id: "comm-boq", name: "03_QS_&_Master_BOQ", icon: "fa-list-ol" },
+                { id: "comm-budget", name: "04_Budget_&_Margin_Controls", icon: "fa-scale-balanced" },
+                { id: "comm-contract", name: "05_Contracts_&_IPC_Billing", icon: "fa-file-signature" },
+                { id: "comm-variations", name: "06_Variation_Orders_Register", icon: "fa-code-compare" },
+                { id: "comm-config", name: "07_Project_Controls_Setup", icon: "fa-sliders" }
+            ] : [
+                { id: "qto-setup", name: "01_Building_Config_&_Specs", icon: "fa-sliders" },
+                { id: "qto-boq", name: "02_Quantity_Takeoff_BOQ", icon: "fa-list-ol" },
+                { id: "qto-tracker", name: "03_Cost_&_Site_Tracker", icon: "fa-chart-pie" },
+                { id: "qto-analytics", name: "04_Budget_KPI_Dashboard", icon: "fa-chart-line" }
+            ];
+
+            folders.forEach(f => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left px-2 py-1.5 rounded-lg flex items-center justify-between text-slate-600 hover:bg-slate-100 font-medium transition";
+                btn.onclick = () => switchTab(f.id);
+                btn.innerHTML = `<span class="truncate"><i class="fa-solid ${f.icon} text-comm-500 mr-2"></i>${f.name}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        function renderProjectDropdown() {
+            const select = document.getElementById('projectSelector');
+            select.innerHTML = '';
+            projects.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `[${p.code}] ${p.name}`;
+                if (p.id === activeProjectId) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            const curr = getCurrentProject();
+            if (curr) {
+                document.getElementById('projectMetaBadge').innerHTML = `
+                    <div class="font-bold text-slate-800 truncate">${curr.name}</div>
+                    <div>${curr.location}</div>
+                    <div class="font-mono text-comm-700 font-bold">${curr.areaSqFt.toLocaleString()} sq.ft | ${curr.contractType}</div>
+                `;
+
+                const card = document.getElementById('sidebarModeCard');
+                if (curr.estMode === 'DETAILED') {
+                    card.className = "p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs shadow-sm";
+                    card.innerHTML = `
+                        <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-list-check text-emerald-600"></i> Detailed Drawing Takeoff</div>
+                        <div class="text-[11px] text-emerald-700 mt-0.5">Derived from shop drawing quantities</div>
+                    `;
+                } else {
+                    card.className = "p-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-xs shadow-sm";
+                    card.innerHTML = `
+                        <div class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-calculator text-amber-600"></i> Benchmark Engine Active</div>
+                        <div class="text-[11px] text-amber-700 mt-0.5">Parametric rate co-efficients applied</div>
+                    `;
+                }
+            }
+        }
+
+        function switchProject(id) {
+            activeProjectId = id;
+            saveUnifiedLocalStorage();
+            renderProjectDropdown();
+            renderAllViews();
+        }
+
+        // Render Views Engine
+        function renderAllViews() {
+            renderDashboard();
+            renderTendering();
+            renderBOQ();
+            renderBudget();
+            renderContracts();
+            renderVariations();
+            renderTrackerView();
+            updateExecutiveSummary();
+        }
+
+        // Commercial Dashboard Render
+        function renderDashboard() {
+            const proj = getCurrentProject();
+            const currSymbol = proj.currency || "AED ";
+
+            const bItems = boqItems.filter(b => b.projectId === activeProjectId);
+            let totalBoq = bItems.reduce((acc, curr) => acc + (curr.qty * curr.rate), 0);
+
+            const vItems = variationOrders.filter(v => v.projectId === activeProjectId);
+            const approvedVars = vItems.filter(v => v.status === 'Approved').reduce((acc, curr) => acc + curr.approved, 0);
+            const pendingVars = vItems.filter(v => v.status === 'Submitted').reduce((acc, curr) => acc + curr.claimed, 0);
+
+            const bdg = budgetMap[activeProjectId] || { contractVal: 12000000, marginPct: 15.0 };
+            const contractVal = bdg.contractVal || totalBoq;
+            const costPerSqft = proj.areaSqFt > 0 ? (totalBoq / proj.areaSqFt).toFixed(2) : 0;
+            const marginVal = (contractVal * (bdg.marginPct / 100));
+
+            const rItems = raBills.filter(r => r.projectId === activeProjectId);
+            const grossBilled = rItems.reduce((acc, curr) => acc + curr.gross, 0);
+
+            document.getElementById('kpiContractValue').innerText = `${currSymbol}${contractVal.toLocaleString()}`;
+            document.getElementById('kpiContractType').innerText = proj.contractType;
+            document.getElementById('kpiTotalCost').innerText = `${currSymbol}${totalBoq.toLocaleString()}`;
+            document.getElementById('kpiCostPerSqft').innerText = `${currSymbol}${costPerSqft} / sq.ft BUA`;
+            document.getElementById('kpiApprovedVariations').innerText = `${currSymbol}${approvedVars.toLocaleString()}`;
+            document.getElementById('kpiPendingVariations').innerText = `${currSymbol}${pendingVars.toLocaleString()} Pending`;
+            document.getElementById('kpiTargetMargin').innerText = `${bdg.marginPct}%`;
+            document.getElementById('kpiMarginValue').innerText = `${currSymbol}${marginVal.toLocaleString()} Margin`;
+            document.getElementById('kpiBilledPaid').innerText = `${currSymbol}${grossBilled.toLocaleString()}`;
+
+            const banner = document.getElementById('benchmarkNoticeBanner');
+            if (proj.estMode === 'BENCHMARK') banner.classList.remove('hidden');
+            else banner.classList.add('hidden');
+
+            renderDisciplineChart(bItems, currSymbol);
+            renderBudgetVariationChart(contractVal, totalBoq, approvedVars, currSymbol);
+
+            document.getElementById('printReportTitle').innerText = `${proj.name.toUpperCase()} - COMMERCIAL REPORT`;
+            document.getElementById('printReportMeta').innerText = `Location: ${proj.location} | Code: ${proj.code} | Type: ${proj.type}`;
+            document.getElementById('repContractType').innerText = proj.contractType;
+            document.getElementById('repCurrency').innerText = `${currSymbol.trim()} (UAE Dirham)`;
+            document.getElementById('repBUA').innerText = `${proj.areaSqFt.toLocaleString()} sq.ft`;
+            document.getElementById('repCostSqft').innerText = `${currSymbol}${costPerSqft}`;
+            document.getElementById('repBaselineBudget').innerText = `${currSymbol}${contractVal.toLocaleString()}`;
+            document.getElementById('repApprovedVars').innerText = `${currSymbol}${approvedVars.toLocaleString()}`;
+            document.getElementById('repTargetMarginPercent').innerText = `${bdg.marginPct}%`;
+        }
+
+        function renderDisciplineChart(items, symbol) {
+            const ctx = document.getElementById('disciplineChart');
+            if (!ctx) return;
+
+            const map = {};
+            items.forEach(i => {
+                const total = i.qty * i.rate;
+                map[i.discipline || i.category] = (map[i.discipline || i.category] || 0) + total;
+            });
+
+            const labels = Object.keys(map).length > 0 ? Object.keys(map) : ["Civil", "MEP", "Finishes"];
+            const data = Object.values(map).length > 0 ? Object.values(map) : [500000, 300000, 200000];
+
+            if (disciplineChartInstance) disciplineChartInstance.destroy();
+
+            disciplineChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#15803d', '#1d4ed8', '#f59e0b', '#64748b', '#a855f7']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+        }
+
+        function renderBudgetVariationChart(contractVal, totalCost, approvedVars, symbol) {
+            const ctx = document.getElementById('budgetVariationChart');
+            if (!ctx) return;
+
+            if (budgetVarChartInstance) budgetVarChartInstance.destroy();
+
+            budgetVarChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Baseline Contract', 'QS Estimate Cost', 'Approved Variations', 'Revised Total'],
+                    datasets: [{
+                        label: 'Financial Value (' + symbol + ')',
+                        data: [contractVal, totalCost, approvedVars, contractVal + approvedVars],
+                        backgroundColor: ['#1e293b', '#15803d', '#10b981', '#1d4ed8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        // Tendering Module
+        function renderTendering() {
+            const t = tenderMap[activeProjectId] || {};
+            if (t.ref) {
+                document.getElementById('tndRef').value = t.ref;
+                document.getElementById('tndDeadline').value = t.deadline;
+                document.getElementById('tndEMD').value = t.emd;
+                document.getElementById('tndWinProb').value = t.winProb;
+                document.getElementById('tndClientBudget').value = t.clientBudget;
+                document.getElementById('tndBidValue').value = t.bidValue;
+                document.getElementById('tndStatus').value = t.status;
+                document.getElementById('tndLead').value = t.lead;
+            }
+
+            const pbList = preBidQueries.filter(p => p.projectId === activeProjectId);
+            const tbody = document.getElementById('preBidTableBody');
+            tbody.innerHTML = '';
+
+            pbList.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-200 text-xs";
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono font-bold text-comm-600">#${p.id}</td>
+                    <td class="py-2.5 px-3 font-semibold text-slate-800">${p.ref}</td>
+                    <td class="py-2.5 px-4 text-slate-700">${p.query}</td>
+                    <td class="py-2.5 px-4 text-slate-700">${p.response || 'Pending Clarification'}</td>
+                    <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold uppercase text-slate-700">${p.status}</span></td>
+                    <td class="py-2.5 px-2 text-center no-print"><button onclick="deletePreBid(${p.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveTenderDetails() {
+            tenderMap[activeProjectId] = {
+                ref: document.getElementById('tndRef').value,
+                deadline: document.getElementById('tndDeadline').value,
+                emd: parseFloat(document.getElementById('tndEMD').value) || 0,
+                winProb: parseInt(document.getElementById('tndWinProb').value) || 0,
+                clientBudget: parseFloat(document.getElementById('tndClientBudget').value) || 0,
+                bidValue: parseFloat(document.getElementById('tndBidValue').value) || 0,
+                status: document.getElementById('tndStatus').value,
+                lead: document.getElementById('tndLead').value
+            };
+            saveUnifiedLocalStorage();
+            alert("Tender details saved.");
+        }
+
+        function openPreBidModal() { openModal('modalPreBid'); }
+        function savePreBidQuery(e) {
+            e.preventDefault();
+            preBidQueries.push({
+                id: Date.now(),
+                projectId: activeProjectId,
+                ref: document.getElementById('pbRef').value,
+                query: document.getElementById('pbQuery').value,
+                response: "",
+                status: "Open"
+            });
+            saveUnifiedLocalStorage();
+            closeModal('modalPreBid');
+            renderTendering();
+        }
+        function deletePreBid(id) {
+            preBidQueries = preBidQueries.filter(p => p.id !== id);
+            saveUnifiedLocalStorage();
+            renderTendering();
+        }
+
+        // BOQ Engine
+        function renderBOQ() {
+            const items = boqItems.filter(b => b.projectId === activeProjectId || !b.projectId);
+            
+            // Commercial BOQ Table
+            const commTbody = document.getElementById('boqTableBody');
+            if (commTbody) {
+                commTbody.innerHTML = '';
+                let grandTotal = 0;
+                items.forEach(b => {
+                    const total = b.qty * b.rate;
+                    grandTotal += total;
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 border-b border-slate-200 text-xs";
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 font-semibold text-comm-700">${b.discipline || b.category}</td>
+                        <td class="py-2.5 px-4 font-bold text-slate-800">${b.description || b.desc}</td>
+                        <td class="py-2.5 px-3 text-center font-mono">${b.unit}</td>
+                        <td class="py-2.5 px-3 text-right font-mono">${b.qty.toLocaleString()}</td>
+                        <td class="py-2.5 px-3 text-right font-mono">AED ${b.rate.toFixed(2)}</td>
+                        <td class="py-2.5 px-4 text-right font-mono font-bold text-slate-900">AED ${total.toLocaleString()}</td>
+                        <td class="py-2.5 px-3 font-mono text-slate-500">${b.drawingRef || 'GEN-01'}</td>
+                        <td class="py-2.5 px-2 text-center no-print">
+                            <button onclick="editBoq(${b.id})" class="text-comm-600 hover:text-comm-800 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteBoq(${b.id})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    commTbody.appendChild(tr);
+                });
+                document.getElementById('boqGrandTotal').innerText = `AED ${grandTotal.toLocaleString()}`;
+            }
+
+            // QTO BOQ Table
+            const qtoTbody = document.getElementById('qtoBoqTableBody');
+            if (qtoTbody) {
+                qtoTbody.innerHTML = '';
+                let subtotal = 0;
+                items.forEach((item, index) => {
+                    const total = item.qty * item.rate;
+                    subtotal += total;
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition border-b border-slate-200 text-xs';
+                    tr.setAttribute('data-category', item.category || item.discipline);
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 text-center text-slate-400 font-mono">${index + 1}</td>
+                        <td class="py-2.5 px-3 font-medium text-slate-800">${item.desc || item.description}</td>
+                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">${item.category || item.discipline}</span></td>
+                        <td class="py-2.5 px-3 text-center font-mono text-slate-500">${item.unit}</td>
+                        <td class="py-2.5 px-3 text-right font-mono">
+                            <input type="number" step="0.01" value="${item.qty}" onchange="updateBOQValue(${item.id}, 'qty', parseFloat(this.value))" class="w-24 text-right px-1.5 py-0.5 border border-slate-300 rounded focus:ring-1 focus:ring-comm-500">
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-mono">
+                            <input type="number" step="0.01" value="${item.rate}" onchange="updateBOQValue(${item.id}, 'rate', parseFloat(this.value))" class="w-24 text-right px-1.5 py-0.5 border border-slate-300 rounded focus:ring-1 focus:ring-comm-500">
+                        </td>
+                        <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800">AED ${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="py-2.5 px-3 text-center no-print">
+                            <button onclick="deleteBoq(${item.id})" class="text-slate-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    `;
+                    qtoTbody.appendChild(tr);
+                });
+
+                const contingencyAmount = subtotal * (projectConfig.contingencyPercent / 100);
+                const grandTotal = subtotal + contingencyAmount;
+                const vatAmt = grandTotal * ((projectConfig.vatPercent || 5) / 100);
+
+                document.getElementById('contingencyLabel').innerText = projectConfig.contingencyPercent;
+                document.getElementById('boqSubtotalCell').innerText = `AED ${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                document.getElementById('boqContingencyCell').innerText = `AED ${contingencyAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                document.getElementById('boqGrandTotalCell').innerText = `AED ${grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                document.getElementById('vatLabel').innerText = projectConfig.vatPercent || 5;
+                document.getElementById('boqVatCell').innerText = `AED ${vatAmt.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                document.getElementById('boqTotalInclVatCell').innerText = `AED ${(grandTotal + vatAmt).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+        }
+
+        function saveBoqItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('boqEditId').value;
+            const itemData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                projectId: activeProjectId,
+                discipline: document.getElementById('boqDiscipline').value,
+                category: document.getElementById('boqDiscipline').value,
+                description: document.getElementById('boqDescription').value,
+                desc: document.getElementById('boqDescription').value,
+                unit: document.getElementById('boqUnit').value,
+                qty: parseFloat(document.getElementById('boqQty').value) || 0,
+                rate: parseFloat(document.getElementById('boqRate').value) || 0,
+                drawingRef: document.getElementById('boqDrawingRef').value || 'GEN-01',
+                actualQty: parseFloat(document.getElementById('boqQty').value) || 0,
+                actualRate: parseFloat(document.getElementById('boqRate').value) || 0
+            };
+
+            if (editId) {
+                const idx = boqItems.findIndex(b => b.id === parseInt(editId));
+                if (idx !== -1) boqItems[idx] = itemData;
+            } else {
+                boqItems.push(itemData);
+            }
+
+            saveUnifiedLocalStorage();
+            document.getElementById('boqEditId').value = '';
+            document.getElementById('boqForm').reset();
+            renderBOQ();
+            renderDashboard();
+        }
+
+        function editBoq(id) {
+            const b = boqItems.find(item => item.id === id);
+            if (!b) return;
+            document.getElementById('boqEditId').value = b.id;
+            document.getElementById('boqDiscipline').value = b.discipline || b.category;
+            document.getElementById('boqDescription').value = b.description || b.desc;
+            document.getElementById('boqUnit').value = b.unit;
+            document.getElementById('boqQty').value = b.qty;
+            document.getElementById('boqRate').value = b.rate;
+            document.getElementById('boqDrawingRef').value = b.drawingRef || '';
+        }
+
+        function deleteBoq(id) {
+            boqItems = boqItems.filter(b => b.id !== id);
+            saveUnifiedLocalStorage();
+            renderBOQ();
+            renderDashboard();
+        }
+
+        function updateBOQValue(id, field, value) {
+            const item = boqItems.find(i => i.id === id);
+            if (item) {
+                item[field] = isNaN(value) ? 0 : value;
+                saveUnifiedLocalStorage();
+                renderBOQ();
+                renderDashboard();
+                updateExecutiveSummary();
+            }
+        }
+
+        function filterBOQTable() {
+            const search = document.getElementById('boqSearch').value.toLowerCase();
+            const category = document.getElementById('boqCategoryFilter').value;
+            const rows = document.querySelectorAll('#qtoBoqTableBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const cat = row.getAttribute('data-category');
+                const matchesSearch = text.includes(search);
+                const matchesCategory = category === 'ALL font' || cat === category;
+                row.style.display = matchesSearch && matchesCategory ? '' : 'none';
+            });
+        }
+
+        // Parametric Generator
+        function generateStandardBOQ(source) {
+            boqItems = boqItems.filter(b => b.projectId && b.projectId !== activeProjectId);
+            const proj = getCurrentProject();
+            const C = UAE_COEFF, R = C.rate;
+            const t = C.type[C.typeMap[proj.type] || 'Commercial'];
+            const areaM2 = (proj.areaSqFt || 100000) / C.sqftPerSqm;
+            const floors = Math.max(1, proj.floors || 1), bsmt = proj.basements || 0;
+            const fin = C.finishFactor[proj.finish] || 1;
+            const loc = C.emirateFactor[proj.location] || 1.0;
+            const footprint = areaM2 / floors;
+            const hf = floors >= 20 ? 1.15 : floors >= 10 ? 1.08 : floors >= 5 ? 1.04 : 1.0;
+            const concPer = t.conc * hf, rebarPer = t.rebar + (floors >= 20 ? 10 : 0);
+            const bConc = bsmt * footprint * C.basementConcPerM2;
+            const L = v => Math.round(v * loc), LF = v => Math.round(v * loc * fin);
+
+            const std = [];
+            const add = (discipline, category, description, unit, qty, rate, ref) => std.push({
+                discipline, category, description, desc: description, unit, qty: Math.max(0, Math.round(qty)), rate, drawingRef: ref, actualQty: Math.max(0, Math.round(qty)), actualRate: rate
+            });
+
+            add('Misc & External', 'Preliminaries', 'Authority approvals & NOCs (Sharjah Municipality, Civil Defense, SEWA) and testing allowance', 'Lot', 1, L(areaM2 * R.approvals), 'GEN-01');
+            add('Civil & Structural', 'Earthwork', 'Site clearing, bulk excavation, disposal to approved dump & compacted backfill', 'Cu.m', footprint * (1.5 + C.basementDepth * bsmt) * 1.15, L(R.excavation), 'STR-01');
+            add('Civil & Structural', 'Earthwork', 'Dewatering (high groundwater / coastal soils) & shoring allowance', 'Lot', 1, L(footprint * (bsmt > 0 ? R.dewateringBasement * bsmt : R.dewateringShallow)), 'STR-01');
+            add('Civil & Structural', 'Concrete Works', 'C40/50 SRC Reinforced Concrete Slabs, Beams & Core Walls', 'Cu.m', areaM2 * concPer + bConc, L(R.concrete), 'STR-05');
+            add('Civil & Structural', 'Steel Structure', 'Reinforcement Grade B500B (BS 4449), cut, bend & fix', 'Kg', areaM2 * concPer * rebarPer + bConc * C.basementRebar, +(R.rebar * loc).toFixed(2), 'STR-06');
+            add('Civil & Structural', 'Concrete Works', 'Formwork to structural faces', 'Sq.m', areaM2 * t.form + bsmt * footprint * 3.5, L(R.formwork), 'STR-07');
+            add('Architectural Finishes', 'Masonry', 'Hollow / solid block walls (150/200 mm) incl. mortar & lintels', 'Sq.m', areaM2 * t.block, L(R.block), 'ARC-02');
+            add('Architectural Finishes', 'Finishes', 'Internal & external plaster and paint', 'Sq.m', areaM2 * t.plast, LF(R.plasterPaint), 'ARC-03');
+            add('Architectural Finishes', 'Finishes', 'Porcelain / ceramic tiles incl. screed & skirting', 'Sq.m', areaM2 * t.floor, LF(R.flooring), 'ARC-05');
+            add('Architectural Finishes', 'Waterproofing', 'Waterproofing: roof, wet areas, podium & basement tanking', 'Sq.m', footprint + areaM2 * 0.12 + bsmt * footprint * 1.6, L(R.waterproof), 'ARC-06');
+            add('Architectural Finishes', 'Waterproofing', 'Thermal insulation: roof & external walls', 'Sq.m', footprint + areaM2 * 0.35, L(R.insulation), 'ARC-07');
+            add('Architectural Finishes', 'Openings', proj.type === 'Commercial High-Rise' ? 'Double-glazed unitized glass curtain wall / façade' : 'Aluminium double-glazed windows & glazing', 'Sq.m', areaM2 * t.open, LF(t.openRate), 'ARC-04');
+            add('MEP Services', 'MEP', 'Electrical: LV panels, cable trays, wiring, lighting, earthing & ELV', 'Lot', 1, LF(areaM2 * t.elec), 'MEP-02');
+            add('MEP Services', 'MEP', 'Plumbing, drainage & sanitary fixtures', 'Lot', 1, LF(areaM2 * t.plumb), 'MEP-04');
+            add('MEP Services', 'MEP', 'HVAC: cooling plant, chilled-water / DX system, ductwork & ventilation', 'Lot', 1, LF(areaM2 * t.hvac), 'MEP-12');
+            add('MEP Services', 'MEP', 'Fire fighting, fire alarm & life-safety (Civil Defense approved)', 'Lot', 1, L(areaM2 * t.fire), 'MEP-08');
+
+            const direct = std.reduce((a, i) => a + i.qty * i.rate, 0);
+            add('Misc & External', 'Preliminaries', `Preliminaries & site overheads (${R.prelimPct}% of direct works)`, 'Lot', 1, Math.round(direct * R.prelimPct / 100), 'GEN-02');
+
+            std.forEach((s, index) => {
+                boqItems.push({ id: Date.now() + index, projectId: activeProjectId, discipline: s.discipline, category: s.category, description: s.description, desc: s.description, unit: s.unit, qty: s.qty, rate: s.rate, drawingRef: s.drawingRef, actualQty: s.actualQty, actualRate: s.actualRate });
+            });
+
+            saveUnifiedLocalStorage();
+            renderBOQ();
+            renderDashboard();
+        }
+
+        // Budget Control
+        function renderBudget() {
+            const bdg = budgetMap[activeProjectId] || { contractVal: 0, marginPct: 10.0, contingency: 0, overhead: 0 };
+            document.getElementById('bdgContractVal').value = bdg.contractVal;
+            document.getElementById('bdgMarginPct').value = bdg.marginPct;
+            document.getElementById('bdgContingency').value = bdg.contingency || 0;
+            document.getElementById('bdgOverhead').value = bdg.overhead || 0;
+
+            const bItems = boqItems.filter(b => b.projectId === activeProjectId);
+            const totalBoq = bItems.reduce((acc, curr) => acc + (curr.qty * curr.rate), 0);
+            const allowable = bdg.contractVal * (1 - (bdg.marginPct / 100));
+            const variance = allowable - totalBoq;
+
+            document.getElementById('bdgAllowableCost').innerText = `AED ${allowable.toLocaleString()}`;
+            document.getElementById('bdgQsEstimated').innerText = `AED ${totalBoq.toLocaleString()}`;
+            document.getElementById('bdgCostVariance').innerText = `AED ${variance.toLocaleString()}`;
+
+            if (variance >= 0) {
+                document.getElementById('bdgVarianceStatus').innerText = "Within Target Budget";
+                document.getElementById('bdgVarianceStatus').className = "text-[10px] font-bold text-emerald-600";
+            } else {
+                document.getElementById('bdgVarianceStatus').innerText = "Over Budget - Commercial Review Required";
+                document.getElementById('bdgVarianceStatus').className = "text-[10px] font-bold text-red-600";
+            }
+        }
+
+        function saveBudgetControlData() {
+            budgetMap[activeProjectId] = {
+                contractVal: parseFloat(document.getElementById('bdgContractVal').value) || 0,
+                marginPct: parseFloat(document.getElementById('bdgMarginPct').value) || 0,
+                contingency: parseFloat(document.getElementById('bdgContingency').value) || 0,
+                overhead: parseFloat(document.getElementById('bdgOverhead').value) || 0
+            };
+            saveUnifiedLocalStorage();
+            renderBudget();
+            renderDashboard();
+            alert("Budget settings updated.");
+        }
+
+        // Contracts & IPC Billing
+        function renderContracts() {
+            const c = contractTermsMap[activeProjectId] || { startDate: "2026-01-01", retentionPct: 10.0, advanceRec: 0, dlp: 12 };
+            document.getElementById('ctrStartDate').value = c.startDate;
+            document.getElementById('ctrRetentionPct').value = c.retentionPct;
+            document.getElementById('ctrAdvanceRec').value = c.advanceRec;
+            document.getElementById('ctrDLP').value = c.dlp;
+
+            const rList = raBills.filter(r => r.projectId === activeProjectId);
+            const tbody = document.getElementById('raBillTableBody');
+            tbody.innerHTML = '';
+
+            rList.forEach(r => {
+                const retention = r.gross * (c.retentionPct / 100);
+                const vat = r.gross * (UAE_COEFF.vatPct / 100);
+                const net = r.gross - retention + vat;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-200 text-xs";
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono font-bold text-comm-600">${r.billNo}</td>
+                    <td class="py-2.5 px-3 font-mono">${r.date}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold">AED ${r.gross.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-slate-500">AED ${retention.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-right font-mono text-slate-500">AED ${vat.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-600">AED ${net.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] uppercase bg-slate-100 text-slate-800">${r.status}</span></td>
+                    <td class="py-2.5 px-2 text-center no-print"><button onclick="deleteRaBill(${r.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveContractTerms() {
+            contractTermsMap[activeProjectId] = {
+                startDate: document.getElementById('ctrStartDate').value,
+                retentionPct: parseFloat(document.getElementById('ctrRetentionPct').value) || 0,
+                advanceRec: parseFloat(document.getElementById('ctrAdvanceRec').value) || 0,
+                dlp: parseInt(document.getElementById('ctrDLP').value) || 12
+            };
+            saveUnifiedLocalStorage();
+            alert("Contract terms saved.");
+        }
+
+        function openRaBillModal() { openModal('modalRaBill'); }
+        function saveRaBill(e) {
+            e.preventDefault();
+            const rList = raBills.filter(r => r.projectId === activeProjectId);
+            raBills.push({
+                id: Date.now(),
+                projectId: activeProjectId,
+                billNo: `IPC-${String(rList.length + 1).padStart(2, '0')}`,
+                gross: parseFloat(document.getElementById('raGross').value) || 0,
+                date: document.getElementById('raDate').value,
+                status: "Submitted"
+            });
+            saveUnifiedLocalStorage();
+            closeModal('modalRaBill');
+            renderContracts();
+            renderDashboard();
+        }
+        function deleteRaBill(id) {
+            raBills = raBills.filter(r => r.id !== id);
+            saveUnifiedLocalStorage();
+            renderContracts();
+            renderDashboard();
+        }
+
+        // Variations
+        function renderVariations() {
+            const vList = variationOrders.filter(v => v.projectId === activeProjectId);
+            const tbody = document.getElementById('voTableBody');
+            tbody.innerHTML = '';
+
+            vList.forEach(v => {
+                let badgeClass = "bg-amber-100 text-amber-800";
+                if (v.status === 'Approved') badgeClass = "bg-emerald-100 text-emerald-800";
+                if (v.status === 'Rejected') badgeClass = "bg-red-100 text-red-800";
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-200 text-xs";
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono font-bold text-comm-600">${v.ref}</td>
+                    <td class="py-2.5 px-4 font-semibold text-slate-800">${v.description}</td>
+                    <td class="py-2.5 px-3 text-right font-mono">AED ${v.claimed.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold text-emerald-600">AED ${v.approved.toLocaleString()}</td>
+                    <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] uppercase ${badgeClass}">${v.status}</span></td>
+                    <td class="py-2.5 px-2 text-center no-print">
+                        <button onclick="editVo(${v.id})" class="text-comm-600 hover:text-comm-800 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteVo(${v.id})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openVoModal() {
+            document.getElementById('voEditId').value = '';
+            document.getElementById('voDesc').value = '';
+            document.getElementById('voClaimed').value = '';
+            document.getElementById('voApproved').value = '';
+            openModal('modalVo');
+        }
+
+        function saveVoItem(e) {
+            e.preventDefault();
+            const editId = document.getElementById('voEditId').value;
+            const vList = variationOrders.filter(v => v.projectId === activeProjectId);
+
+            const voData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                projectId: activeProjectId,
+                ref: editId ? variationOrders.find(v => v.id === parseInt(editId)).ref : `VO-${String(vList.length + 1).padStart(2, '0')}`,
+                description: document.getElementById('voDesc').value,
+                claimed: parseFloat(document.getElementById('voClaimed').value) || 0,
+                approved: parseFloat(document.getElementById('voApproved').value) || 0,
+                status: document.getElementById('voStatus').value
+            };
+
+            if (editId) {
+                const idx = variationOrders.findIndex(v => v.id === parseInt(editId));
+                if (idx !== -1) variationOrders[idx] = voData;
+            } else {
+                variationOrders.push(voData);
+            }
+
+            saveUnifiedLocalStorage();
+            closeModal('modalVo');
+            renderVariations();
+            renderDashboard();
+        }
+
+        function editVo(id) {
+            const v = variationOrders.find(item => item.id === id);
+            if (!v) return;
+            document.getElementById('voEditId').value = v.id;
+            document.getElementById('voDesc').value = v.description;
+            document.getElementById('voClaimed').value = v.claimed;
+            document.getElementById('voApproved').value = v.approved;
+            document.getElementById('voStatus').value = v.status;
+            openModal('modalVo');
+        }
+
+        function deleteVo(id) {
+            variationOrders = variationOrders.filter(v => v.id !== id);
+            saveUnifiedLocalStorage();
+            renderVariations();
+            renderDashboard();
+        }
+
+        // Configuration Form Handlers
+        function populateConfigForm() {
+            const proj = getCurrentProject();
+            document.getElementById('cfgProjName').value = proj.name;
+            document.getElementById('cfgProjCode').value = proj.code;
+            document.getElementById('cfgLocation').value = proj.location;
+            document.getElementById('cfgProjType').value = proj.type;
+            document.getElementById('cfgArea').value = proj.areaSqFt;
+            document.getElementById('cfgContractType').value = proj.contractType;
+            document.getElementById('cfgCurrency').value = proj.currency;
+            document.getElementById('cfgFloors').value = proj.floors;
+            document.getElementById('cfgBasements').value = proj.basements || 0;
+            document.getElementById('cfgFinish').value = proj.finish || 'Standard';
+            renderUaeCoeffPanel();
+
+            const radios = document.getElementsByName('cfgEstMode');
+            radios.forEach(r => { if (r.value === proj.estMode) r.checked = true; });
+        }
+
+        function saveProjectControlsConfig(e) {
+            e.preventDefault();
+            const proj = getCurrentProject();
+            proj.name = document.getElementById('cfgProjName').value;
+            proj.code = document.getElementById('cfgProjCode').value;
+            proj.location = document.getElementById('cfgLocation').value;
+            proj.type = document.getElementById('cfgProjType').value;
+            proj.areaSqFt = parseFloat(document.getElementById('cfgArea').value) || 1000;
+            proj.contractType = document.getElementById('cfgContractType').value;
+            proj.currency = document.getElementById('cfgCurrency').value;
+            proj.floors = parseInt(document.getElementById('cfgFloors').value) || 1;
+            proj.basements = parseInt(document.getElementById('cfgBasements').value) || 0;
+            proj.finish = document.getElementById('cfgFinish').value;
+
+            const radios = document.getElementsByName('cfgEstMode');
+            radios.forEach(r => { if (r.checked) proj.estMode = r.value; });
+
+            saveUnifiedLocalStorage();
+            renderProjectDropdown();
+            renderAllViews();
+            switchTab('comm-dashboard');
+        }
+
+        function renderUaeCoeffPanel() {
+            const el = document.getElementById('uaeCoeffPanel'); if (!el) return;
+            const C = UAE_COEFF;
+            let h = '<table class="w-full text-left border-collapse"><thead><tr class="bg-slate-100 text-slate-700 uppercase text-[10px]"><th class="p-1.5">Type</th><th class="p-1.5">Conc m³/m²</th><th class="p-1.5">Rebar kg/m³</th><th class="p-1.5">Formwork m²/m²</th><th class="p-1.5">Block m²/m²</th><th class="p-1.5">Openings m²/m²</th><th class="p-1.5">Electrical AED/m²</th><th class="p-1.5">HVAC AED/m²</th><th class="p-1.5">Fire AED/m²</th></tr></thead><tbody>';
+            Object.entries(C.type).forEach(([k, t]) => { h += `<tr class="border-b border-slate-200 font-mono"><td class="p-1.5 font-sans font-bold">${k}</td><td class="p-1.5">${t.conc}</td><td class="p-1.5">${t.rebar}</td><td class="p-1.5">${t.form}</td><td class="p-1.5">${t.block}</td><td class="p-1.5">${t.open}</td><td class="p-1.5">${t.elec}</td><td class="p-1.5">${t.hvac}</td><td class="p-1.5">${t.fire}</td></tr>`; });
+            h += `</tbody></table><p class="mt-2 text-slate-500 text-[10px]">Indicative Rates (AED): Excavation ${C.rate.excavation}/m³ · Concrete ${C.rate.concrete}/m³ · Rebar ${C.rate.rebar}/kg · VAT ${C.vatPct}%.</p>`;
+            el.innerHTML = h;
+        }
+
+        // QTO Module Specifics
+        function populateQTOConfigValues() {
+            document.getElementById('projectName').value = projectConfig.name;
+            document.getElementById('buildingType').value = projectConfig.type;
+            document.getElementById('builtArea').value = projectConfig.builtArea;
+            document.getElementById('areaUnit').value = projectConfig.areaUnit;
+            document.getElementById('numFloors').value = projectConfig.floors;
+            document.getElementById('structSystem').value = projectConfig.structSystem;
+            document.getElementById('finishLevel').value = projectConfig.finishLevel;
+            document.getElementById('contingencyPercent').value = projectConfig.contingencyPercent;
+            document.getElementById('currencySymbol').value = projectConfig.currency;
+            document.getElementById('emirate').value = projectConfig.emirate || 'Sharjah';
+            document.getElementById('numBasements').value = projectConfig.basements || 0;
+            document.getElementById('vatPercent').value = projectConfig.vatPercent ?? 5;
+        }
+
+        function renderDrawingChecklist() {
+            const container = document.getElementById('drawingChecklist');
+            if (!container) return;
+            container.innerHTML = '';
+            let count = 0;
+
+            projectConfig.drawings.forEach((item, idx) => {
+                if (item.checked) count++;
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-2 rounded-lg border border-slate-200 bg-slate-50 text-xs';
+                div.innerHTML = `
+                    <label class="flex items-center space-x-2 cursor-pointer font-medium text-slate-700">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleDrawingCheck(${idx})" class="rounded border-slate-300 text-comm-600 focus:ring-comm-500 w-4 h-4">
+                        <span>${item.name}</span>
+                    </label>
+                    <span class="font-bold text-[10px] ${item.checked ? 'text-emerald-700' : 'text-amber-700'}">${item.checked ? 'Verified' : 'Pending'}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            const percent = Math.round((count / projectConfig.drawings.length) * 100);
+            document.getElementById('drawingCheckPercent').innerText = `${percent}%`;
+            document.getElementById('drawingCheckBar').style.width = `${percent}%`;
+        }
+
+        function toggleDrawingCheck(idx) {
+            projectConfig.drawings[idx].checked = !projectConfig.drawings[idx].checked;
+            saveUnifiedLocalStorage();
+            renderDrawingChecklist();
+        }
+
+        function handleGenerateBOQ(e) {
+            e.preventDefault();
+            projectConfig.name = document.getElementById('projectName').value;
+            projectConfig.type = document.getElementById('buildingType').value;
+            projectConfig.builtArea = parseFloat(document.getElementById('builtArea').value);
+            projectConfig.areaUnit = document.getElementById('areaUnit').value;
+            projectConfig.floors = parseInt(document.getElementById('numFloors').value);
+            projectConfig.structSystem = document.getElementById('structSystem').value;
+            projectConfig.finishLevel = document.getElementById('finishLevel').value;
+            projectConfig.contingencyPercent = parseFloat(document.getElementById('contingencyPercent').value) || 0;
+            projectConfig.currency = document.getElementById('currencySymbol').value || 'AED ';
+            projectConfig.emirate = document.getElementById('emirate').value;
+            projectConfig.basements = parseInt(document.getElementById('numBasements').value) || 0;
+            projectConfig.vatPercent = parseFloat(document.getElementById('vatPercent').value) || 0;
+
+            generateStandardBOQ('qto');
+            saveUnifiedLocalStorage();
+            renderAllViews();
+            switchTab('qto-boq');
+        }
+
+        function renderTrackerView() {
+            const tbody = document.getElementById('trackerTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            boqItems.forEach(item => {
+                const actualTotal = (item.actualQty || 0) * (item.actualRate || item.rate);
+                const budgetTotal = item.qty * item.rate;
+                const variance = actualTotal - budgetTotal;
+
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-600">Pending</span>`;
+                if (item.actualQty > 0) {
+                    if (variance > 0) {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 text-red-800">Over Budget</span>`;
+                    } else {
+                        statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800">On Track</span>`;
+                    }
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition border-b border-slate-200 text-xs';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3">
+                        <div class="font-bold text-slate-800">${item.desc || item.description}</div>
+                        <div class="text-[10px] text-slate-400">Category: ${item.category || item.discipline}</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-center font-mono text-slate-500">${item.unit}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-medium">${item.qty}</td>
+                    <td class="py-2.5 px-3 text-right font-mono">
+                        <input type="number" step="0.01" value="${item.actualQty || 0}" onchange="updateTrackerValue(${item.id}, 'actualQty', parseFloat(this.value))" class="w-24 text-right px-1.5 py-0.5 border border-slate-300 rounded focus:ring-1 focus:ring-comm-500">
+                    </td>
+                    <td class="py-2.5 px-3 text-right font-mono">
+                        <input type="number" step="0.01" value="${item.actualRate || item.rate}" onchange="updateTrackerValue(${item.id}, 'actualRate', parseFloat(this.value))" class="w-24 text-right px-1.5 py-0.5 border border-slate-300 rounded focus:ring-1 focus:ring-comm-500">
+                    </td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold text-slate-800">AED ${actualTotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="py-2.5 px-3 text-right font-mono font-bold ${variance > 0 ? 'text-red-600' : 'text-emerald-600'}">
+                        ${variance > 0 ? '+' : ''}AED ${variance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">${statusBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTrackerValue(id, field, value) {
+            const item = boqItems.find(i => i.id === id);
+            if (item) {
+                item[field] = isNaN(value) ? 0 : value;
+                saveUnifiedLocalStorage();
+                renderTrackerView();
+                updateExecutiveSummary();
+            }
+        }
+
+        function saveTrackerProgress() {
+            saveUnifiedLocalStorage();
+            alert("Site progress updates saved.");
+        }
+
+        function renderDashboardCharts() {
+            const ctx1 = document.getElementById('categoryChart');
+            const ctx2 = document.getElementById('comparisonChart');
+
+            if (!ctx1 || !ctx2) return;
+
+            const categories = {};
+            let totalSpent = 0;
+            let totalBudget = 0;
+
+            boqItems.forEach(item => {
+                const itemBudget = item.qty * item.rate;
+                const itemSpent = (item.actualQty || 0) * (item.actualRate || item.rate);
+                const cat = item.category || item.discipline;
+                categories[cat] = (categories[cat] || 0) + itemBudget;
+                totalBudget += itemBudget;
+                totalSpent += itemSpent;
+            });
+
+            const catLabels = Object.keys(categories);
+            const catValues = Object.values(categories);
+
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            if (comparisonChartInstance) comparisonChartInstance.destroy();
+
+            categoryChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catValues,
+                        backgroundColor: ['#16a34a', '#2563eb', '#f59e0b', '#dc2626', '#8b5cf6', '#06b6d4', '#64748b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right' } }
+                }
+            });
+
+            comparisonChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Budget vs Actual Cost'],
+                    datasets: [
+                        { label: 'Planned Budget', data: [totalBudget], backgroundColor: '#16a34a' },
+                        { label: 'Actual Spent', data: [totalSpent], backgroundColor: '#2563eb' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const spentPercent = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+            const netVariance = totalSpent - totalBudget;
+
+            document.getElementById('kpiSpentPercent').innerText = `${spentPercent.toFixed(1)}%`;
+            document.getElementById('kpiSpentAmount').innerText = `AED ${totalSpent.toLocaleString()} Spent`;
+            document.getElementById('kpiNetVariance').innerText = `AED ${Math.abs(netVariance).toLocaleString()}`;
+            document.getElementById('kpiTotalItems').innerText = boqItems.length;
+
+            const badge = document.getElementById('kpiVarianceBadge');
+            if (netVariance > 0) {
+                badge.innerText = "Over Budget";
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-800";
+            } else {
+                badge.innerText = "Within Budget";
+                badge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800";
+            }
+        }
+
+        function updateExecutiveSummary() {
+            const subtotal = boqItems.reduce((acc, i) => acc + (i.qty * i.rate), 0);
+            const totalBudget = subtotal * (1 + (projectConfig.contingencyPercent / 100));
+            const unitCost = projectConfig.builtArea > 0 ? totalBudget / projectConfig.builtArea : 0;
+
+            document.getElementById('summaryProjectName').innerText = projectConfig.name;
+            document.getElementById('summaryArea').innerText = `${Number(projectConfig.builtArea).toLocaleString()} ${projectConfig.areaUnit}`;
+            document.getElementById('summaryStructureFinish').innerText = `${projectConfig.structSystem} (${projectConfig.finishLevel})`;
+            document.getElementById('summaryTotalBudget').innerText = `AED ${totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('summaryUnitCost').innerText = `AED ${unitCost.toFixed(2)} / ${projectConfig.areaUnit}`;
+        }
+
+        // QTO Custom BOQ Item Modal
+        function openAddBOQModal() {
+            document.getElementById('modalTitle').innerText = 'Add Custom BOQ Item';
+            document.getElementById('modalItemId').value = '';
+            document.getElementById('modalDescription').value = '';
+            document.getElementById('modalUnit').value = 'Sq.M';
+            document.getElementById('modalQty').value = '100';
+            document.getElementById('modalRate').value = '25';
+            openModal('boqModal');
+        }
+
+        function closeBOQModal() { closeModal('boqModal'); }
+
+        function saveBOQItem(e) {
+            e.preventDefault();
+            const desc = document.getElementById('modalDescription').value;
+            const category = document.getElementById('modalCategory').value;
+            const unit = document.getElementById('modalUnit').value;
+            const qty = parseFloat(document.getElementById('modalQty').value);
+            const rate = parseFloat(document.getElementById('modalRate').value);
+
+            const newId = boqItems.length > 0 ? Math.max(...boqItems.map(i => i.id)) + 1 : 1;
+            boqItems.push({
+                id: newId,
+                projectId: activeProjectId,
+                discipline: category,
+                category: category,
+                description: desc,
+                desc: desc,
+                unit: unit,
+                qty: qty,
+                rate: rate,
+                actualQty: 0,
+                actualRate: rate,
+                drawingRef: "CUSTOM-01"
+            });
+
+            saveUnifiedLocalStorage();
+            renderAllViews();
+            closeBOQModal();
+        }
+
+        function recalculateBOQTotals() {
+            saveUnifiedLocalStorage();
+            renderAllViews();
+        }
+
+        // Modal Helpers
+        function openNewProjectModal() { openModal('modalNewProject'); }
+        function saveNewProjectModal(e) {
+            e.preventDefault();
+            const id = 'PRJ-COMM-' + String(projects.length + 1).padStart(2, '0');
+            const newProj = {
+                id: id,
+                code: document.getElementById('mProjCode').value,
+                name: document.getElementById('mProjName').value,
+                location: document.getElementById('mProjLoc').value,
+                type: "Commercial High-Rise",
+                areaSqFt: parseFloat(document.getElementById('mProjArea').value) || 100000,
+                floors: 12,
+                basements: 1,
+                finish: "Standard",
+                contractType: "Lump Sum Turnkey",
+                currency: "AED ",
+                estMode: "DETAILED"
+            };
+            projects.push(newProj);
+            activeProjectId = id;
+            saveUnifiedLocalStorage();
+            renderProjectDropdown();
+            renderFolderTree();
+            renderAllViews();
+            closeModal('modalNewProject');
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        // Universal Import/Export System
+        function exportUnifiedJSON() {
+            const payload = { projects, boqItems, tenderMap, preBidQueries, budgetMap, contractTermsMap, raBills, variationOrders, projectConfig };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `Sharjah_Commercial_QS_Unified_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        function importUnifiedJSON(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.projects) projects = data.projects;
+                    if (data.boqItems) boqItems = data.boqItems;
+                    if (data.tenderMap) tenderMap = data.tenderMap;
+                    if (data.preBidQueries) preBidQueries = data.preBidQueries;
+                    if (data.budgetMap) budgetMap = data.budgetMap;
+                    if (data.contractTermsMap) contractTermsMap = data.contractTermsMap;
+                    if (data.raBills) raBills = data.raBills;
+                    if (data.variationOrders) variationOrders = data.variationOrders;
+                    if (data.projectConfig) projectConfig = data.projectConfig;
+
+                    saveUnifiedLocalStorage();
+                    renderProjectDropdown();
+                    renderFolderTree();
+                    renderAllViews();
+                    alert("Unified Suite data restored successfully!");
+                } catch (err) {
+                    alert("Invalid JSON data format.");
+                }
+            };
+            reader.readAsText(e.target.files[0]);
+        }
+
+        function exportBOQCSV() {
+            let csv = "data:text/csv;charset=utf-8,Discipline,Description,Unit,Quantity,Rate,Total,Drawing Ref\n";
+            const items = boqItems.filter(b => b.projectId === activeProjectId || !b.projectId);
+            items.forEach(b => {
+                csv += `"${b.discipline || b.category}","${b.description || b.desc}","${b.unit}",${b.qty},${b.rate},${b.qty * b.rate},"${b.drawingRef || ''}"\n`;
+            });
+            const encodedUri = encodeURI(csv);
+            const a = document.createElement("a");
+            a.href = encodedUri;
+            a.download = `Master_BOQ_Report.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+    </script>
+</body>
+</html>

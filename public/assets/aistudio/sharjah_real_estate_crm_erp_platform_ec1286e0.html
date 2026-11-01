@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sharjah BuildCRM - Real Estate CRM & ERP Platform (UAE Compliant)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Font: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+            shj: { gold: '#d97706', red: '#991b1b', blue: '#1e3a8a', dark: '#0f172a' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    
+    /* Speech pulse animation */
+    @keyframes pulse-wave {
+      0%, 100% { height: 8px; }
+      50% { height: 36px; }
+    }
+    .wave-bar { animation: pulse-wave 1.2s infinite ease-in-out; }
+    .wave-bar:nth-child(2) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.4s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.5s; }
+  </style>
+</head>
+<body class="h-full font-sans bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
+
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-30 shrink-0">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
+        <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-bold text-xl flex items-center justify-center w-9 h-9">
+          <i class="fa-solid fa-city"></i>
+        </div>
+        <div>
+          <span class="text-lg font-extrabold tracking-tight text-white">Sharjah<span class="text-amber-400">BuildCRM</span></span>
+          <span class="text-[10px] block text-amber-400/85 uppercase font-semibold tracking-wider -mt-1">UAE Real Estate ERP</span>
+        </div>
+      </div>
+
+      <!-- Sharjah Project Selector -->
+      <div class="hidden md:flex items-center space-x-2 pl-4 border-l border-slate-800">
+        <i class="fa-solid fa-building text-slate-400 text-sm"></i>
+        <select id="projectSelect" onchange="switchProject(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          <option value="all">All Sharjah Projects (Consolidated)</option>
+          <option value="Aljada" selected>Aljada Master Community (Muwaileh)</option>
+          <option value="Tilal City">Tilal City Residential (Emirates Road)</option>
+          <option value="Maryam Island">Maryam Island Waterfront (Al Khan)</option>
+          <option value="Al Majaz Tower">Al Majaz Tower Residences (Corniche)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Search & Quick Action -->
+    <div class="flex items-center space-x-3">
+      <!-- MoHRE Midday Break Compliance Badge -->
+      <div class="hidden lg:flex items-center space-x-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs text-amber-300" title="MoHRE Outdoor Work Ban 12:30 PM - 3:00 PM">
+        <i class="fa-solid fa-sun text-amber-400 animate-pulse"></i>
+        <span>MoHRE Midday Break Active</span>
+      </div>
+
+      <!-- Quick Action Button -->
+      <button onclick="openQuickActionModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg flex items-center space-x-1.5 transition shadow">
+        <i class="fa-solid fa-plus"></i>
+        <span class="hidden md:inline">Quick Action</span>
+      </button>
+
+      <!-- User Profile Badge -->
+      <div class="flex items-center space-x-2 border-l border-slate-800 pl-3">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80" alt="Avatar" class="w-8 h-8 rounded-full border border-amber-500 object-cover">
+        <div class="hidden xl:block text-left">
+          <p class="text-xs font-semibold text-slate-200">Sultan Al-Qassimi</p>
+          <p class="text-[10px] text-amber-400">Sharjah Sales & Operations Director</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN MODULE APP BODY -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- SIDE NAVIGATION BAR -->
+    <aside class="w-16 md:w-56 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0 select-none">
+      <nav class="p-2 space-y-1 overflow-y-auto">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-chart-pie w-5 text-center text-amber-400"></i>
+          <span class="hidden md:inline">Dashboard</span>
+        </button>
+
+        <button onclick="switchTab('leads')" id="nav-leads" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-user-group w-5 text-center text-blue-400"></i>
+          <span class="hidden md:inline">Leads & Enquiries</span>
+        </button>
+
+        <button onclick="switchTab('followups')" id="nav-followups" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-calendar-check w-5 text-center text-emerald-400"></i>
+          <span class="hidden md:inline">Follow-ups & Tasks</span>
+        </button>
+
+        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-building-user w-5 text-center text-indigo-400"></i>
+          <span class="hidden md:inline">Sharjah Unit Inventory</span>
+        </button>
+
+        <button onclick="switchTab('quotations')" id="nav-quotations" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-teal-400"></i>
+          <span class="hidden md:inline">Cost Sheets & Quotes</span>
+        </button>
+
+        <button onclick="switchTab('bookings')" id="nav-bookings" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-file-signature w-5 text-center text-amber-500"></i>
+          <span class="hidden md:inline">Bookings & SPA Contracts</span>
+        </button>
+
+        <button onclick="switchTab('customers')" id="nav-customers" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-address-book w-5 text-center text-purple-400"></i>
+          <span class="hidden md:inline">Customers 360° (Emirates ID)</span>
+        </button>
+
+        <button onclick="switchTab('collections')" id="nav-collections" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-money-bill-transfer w-5 text-center text-emerald-400"></i>
+          <span class="hidden md:inline">Collections & Demands (AED)</span>
+        </button>
+
+        <button onclick="switchTab('handover')" id="nav-handover" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-key w-5 text-center text-orange-400"></i>
+          <span class="hidden md:inline">Baladiya & Key Handover</span>
+        </button>
+
+        <button onclick="switchTab('service')" id="nav-service" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-headset w-5 text-center text-rose-400"></i>
+          <span class="hidden md:inline">Maintenance & Snags</span>
+        </button>
+
+        <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+          <i class="fa-solid fa-chart-line w-5 text-center text-cyan-400"></i>
+          <span class="hidden md:inline">Sharjah Municipality MIS</span>
+        </button>
+      </nav>
+
+      <!-- System Status Footer -->
+      <div class="p-3 border-t border-slate-800 text-[11px] text-slate-500 hidden md:block">
+        <div class="flex items-center space-x-2 text-amber-400 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+          <span>Sharjah ERP Active</span>
+        </div>
+        <p class="mt-1 text-slate-400">Base Currency: AED (د.إ)</p>
+        <p class="text-slate-500 text-[10px]">Baladiya & MoHRE Compliant</p>
+      </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY CONTAINER -->
+    <main class="flex-1 bg-slate-950 overflow-y-auto p-4 md:p-6" id="mainContainer">
+
+      <!-- ================= 1. DASHBOARD MODULE ================= -->
+      <section id="module-dashboard" class="tab-module space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 p-5 rounded-2xl border border-slate-800 shadow-xl">
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+              Sharjah Real Estate Executive Dashboard <span class="bg-amber-500/10 text-amber-400 text-xs px-2.5 py-0.5 rounded-full border border-amber-500/20 font-medium">AED Stream</span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">Real-time metrics for Sharjah inventory, AED collections, and Baladiya / MoHRE compliance.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="exportCRMReport('dashboard')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+              <i class="fa-solid fa-download"></i> Export MIS Sheet
+            </button>
+            <button onclick="openAITelecallerModal()" class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg shadow-amber-600/30">
+              <i class="fa-solid fa-robot text-sm"></i> Launch AI Arabic/English Telecaller
+            </button>
+          </div>
+        </div>
+
+        <!-- Key Metrics Row (AED Currency) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span>Total Enquiries</span>
+              <i class="fa-solid fa-users text-blue-400"></i>
+            </div>
+            <div class="text-2xl font-bold text-white mt-2" id="dash-total-leads">142</div>
+            <p class="text-[10px] text-emerald-400 mt-1"><i class="fa-solid fa-arrow-up"></i> +18% this month</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span>Unassigned Leads</span>
+              <i class="fa-solid fa-user-clock text-amber-400"></i>
+            </div>
+            <div class="text-2xl font-bold text-amber-400 mt-2" id="dash-unassigned">8</div>
+            <p class="text-[10px] text-slate-400 mt-1">Requires manager action</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span>Confirmed Bookings</span>
+              <i class="fa-solid fa-award text-amber-500"></i>
+            </div>
+            <div class="text-2xl font-bold text-amber-400 mt-2" id="dash-bookings">28</div>
+            <p class="text-[10px] text-slate-400 mt-1">Total AED 48.50 M Value</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span>Collections Recd (YTD)</span>
+              <i class="fa-solid fa-coins text-emerald-400"></i>
+            </div>
+            <div class="text-xl font-bold text-white mt-2">AED 29.85 M</div>
+            <p class="text-[10px] text-emerald-400 mt-1">84% of total demanded</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm col-span-2 sm:col-span-1">
+            <div class="flex justify-between text-slate-400 text-xs">
+              <span>Overdue Collections</span>
+              <i class="fa-solid fa-circle-exclamation text-rose-400"></i>
+            </div>
+            <div class="text-xl font-bold text-rose-400 mt-2">AED 2.42 M</div>
+            <p class="text-[10px] text-rose-400 mt-1">12 Pending demands</p>
+          </div>
+        </div>
+
+        <!-- Inventory Summary Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <h2 class="text-sm font-bold text-slate-200 mb-4 flex items-center justify-between">
+              <span>Sharjah Unit Inventory Breakdown</span>
+              <span class="text-xs text-slate-400 font-normal">Aljada & Maryam Island</span>
+            </h2>
+            <div class="h-56 relative flex items-center justify-center">
+              <canvas id="inventoryChart"></canvas>
+            </div>
+            <div class="grid grid-cols-3 text-center border-t border-slate-800 pt-3 mt-2 text-xs">
+              <div>
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span>
+                <span class="text-slate-400">Available</span>
+                <p class="font-bold text-white mt-0.5" id="inv-count-avail">42 Units</p>
+              </div>
+              <div>
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 mr-1"></span>
+                <span class="text-slate-400">On Hold</span>
+                <p class="font-bold text-white mt-0.5" id="inv-count-hold">6 Units</p>
+              </div>
+              <div>
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1"></span>
+                <span class="text-slate-400">Booked/Sold</span>
+                <p class="font-bold text-white mt-0.5" id="inv-count-booked">28 Units</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+            <h2 class="text-sm font-bold text-slate-200 mb-4">Sales Pipeline Conversion Funnel</h2>
+            <div class="space-y-3">
+              <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                  <span>Enquiries / New Leads</span>
+                  <span class="font-semibold text-white">142</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                  <span>Contacted & Qualified</span>
+                  <span class="font-semibold text-white">94</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div class="bg-indigo-500 h-full rounded-full" style="width: 66%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                  <span>Site Visits Completed</span>
+                  <span class="font-semibold text-white">52</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 36%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                  <span>Quotation / Negotiation</span>
+                  <span class="font-semibold text-white">38</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div class="bg-purple-500 h-full rounded-full" style="width: 26%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-slate-300 mb-1">
+                  <span>Bookings Confirmed</span>
+                  <span class="font-semibold text-amber-400 font-bold">28</span>
+                </div>
+                <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                  <div class="bg-amber-500 h-full rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+            <div>
+              <h2 class="text-sm font-bold text-slate-200 mb-3">Sharjah Statutory & Action Notices</h2>
+              <div class="space-y-2.5 text-xs">
+                <div class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
+                  <div class="flex items-center space-x-2.5">
+                    <span class="p-2 bg-amber-500/20 text-amber-400 rounded-lg"><i class="fa-solid fa-sun"></i></span>
+                    <div>
+                      <p class="font-medium text-slate-200">MoHRE Outdoor Work Ban</p>
+                      <p class="text-[10px] text-slate-400">12:30 PM - 3:00 PM (Summer Active)</p>
+                    </div>
+                  </div>
+                  <span class="text-amber-400 font-bold text-[11px]">Enforced</span>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
+                  <div class="flex items-center space-x-2.5">
+                    <span class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg"><i class="fa-solid fa-file-shield"></i></span>
+                    <div>
+                      <p class="font-medium text-slate-200">Sharjah Civil Defense (SCD)</p>
+                      <p class="text-[10px] text-slate-400">Fire safety NOCs approved for Towers</p>
+                    </div>
+                  </div>
+                  <span class="text-emerald-400 font-bold text-[11px]">Cleared</span>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 bg-slate-800/80 rounded-xl border border-slate-700/60">
+                  <div class="flex items-center space-x-2.5">
+                    <span class="p-2 bg-blue-500/20 text-blue-400 rounded-lg"><i class="fa-solid fa-plug"></i></span>
+                    <div>
+                      <p class="font-medium text-slate-200">SEWA Utility Connections</p>
+                      <p class="text-[10px] text-slate-400">Water & Power meter applications</p>
+                    </div>
+                  </div>
+                  <button onclick="switchTab('handover')" class="text-amber-400 font-semibold text-[11px] hover:underline">View</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-amber-950/30 border border-amber-800/40 p-3 rounded-xl mt-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-amber-300"><i class="fa-solid fa-robot mr-1"></i> AI Arabic/English Telecaller</span>
+                <span class="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded font-bold">Ready</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mt-1">Ready to qualify Sharjah real estate buyers in Khaleeji Arabic or English.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. LEADS MODULE ================= -->
+      <section id="module-leads" class="tab-module space-y-6 hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div>
+            <h1 class="text-xl font-bold text-white">Sharjah Leads Management & AI Telecaller</h1>
+            <p class="text-xs text-slate-400">Capture, assign, track, and auto-qualify property enquiries in AED.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openAddLeadModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-user-plus"></i> Add Enquiry
+            </button>
+            <button onclick="openAITelecallerModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-robot"></i> AI Bilingual Call Batch
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Filter Stage</label>
+            <select id="filterStage" onchange="renderLeadsTable()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="All">All Stages</option>
+              <option value="New">New Enquiries</option>
+              <option value="Qualified">Qualified</option>
+              <option value="Visit Scheduled">Visit Scheduled</option>
+              <option value="Negotiation">Negotiation</option>
+              <option value="Converted">Converted</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Lead Source</label>
+            <select id="filterSource" onchange="renderLeadsTable()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="All">All Sources</option>
+              <option value="Website">Website</option>
+              <option value="Property Finder">Property Finder / Bayut</option>
+              <option value="Meta Ads">Facebook / Insta Ads</option>
+              <option value="Broker / Agent">Sharjah Broker</option>
+              <option value="Walk-in">Direct Walk-in</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Assigned Executive</label>
+            <select id="filterExecutive" onchange="renderLeadsTable()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="All">All Executives</option>
+              <option value="Tariq Al-Suwaidi">Tariq Al-Suwaidi</option>
+              <option value="Fatima Al-Marzooqi">Fatima Al-Marzooqi</option>
+              <option value="Zaid Al-Ali">Zaid Al-Ali</option>
+              <option value="Unassigned">Unassigned</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Min Budget (AED)</label>
+            <input type="number" id="filterBudget" oninput="renderLeadsTable()" placeholder="e.g. 800000" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+          </div>
+          <div class="flex items-end">
+            <button onclick="resetLeadFilters()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 py-2 rounded-lg text-xs">
+              <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Lead Table -->
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-lg">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-800/90 text-slate-300 uppercase tracking-wider font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Lead ID & Date</th>
+                  <th class="p-3">Customer Name</th>
+                  <th class="p-3">Contact & Unit Pref</th>
+                  <th class="p-3">Budget (AED)</th>
+                  <th class="p-3">Source</th>
+                  <th class="p-3">Stage</th>
+                  <th class="p-3">Executive</th>
+                  <th class="p-3 text-center">Actions / AI Call / Edit / Delete</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. FOLLOW-UPS & TASKS ================= -->
+      <section id="module-followups" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold text-white">Daily Follow-ups & Sharjah Site Tasks</h1>
+            <p class="text-xs text-slate-400">Manage client interactions, log call outcomes, and update schedule tasks.</p>
+          </div>
+          <button onclick="openAddTaskModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg">
+            + Schedule New Task
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-4">
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+              <h2 class="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-400"></i> Scheduled Follow-ups for Today
+              </h2>
+              <div class="space-y-3" id="followupListContainer">
+                <!-- Javascript rendered -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Log / Call Entry -->
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-4">
+            <h2 class="text-sm font-bold text-slate-200">Quick Interaction Logger</h2>
+            <form id="quickInteractionForm" onsubmit="logQuickInteraction(event)" class="space-y-3 text-xs">
+              <div>
+                <label class="block text-slate-400 mb-1">Select Lead</label>
+                <select id="interactLeadId" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                  <!-- Populated dynamically -->
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Interaction Type</label>
+                <select id="interactType" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                  <option value="Phone Call">Phone Call</option>
+                  <option value="Aljada Site Visit">Aljada Site Visit Completed</option>
+                  <option value="WhatsApp">WhatsApp Sent</option>
+                  <option value="Price Negotiation">Price Negotiation</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Client Feedback / Remarks</label>
+                <textarea id="interactRemarks" rows="3" placeholder="Interested in Aljada 3BR townhouse, asked for 5% payment plan waiver..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200"></textarea>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Next Follow-up Date</label>
+                <input type="date" id="interactNextDate" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              </div>
+              <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 rounded-lg transition">
+                Log Interaction & Update Lead
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. UNIT INVENTORY MODULE ================= -->
+      <section id="module-inventory" class="tab-module space-y-6 hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div>
+            <h1 class="text-xl font-bold text-white">Sharjah Interactive Unit Inventory Grid</h1>
+            <p class="text-xs text-slate-400">View real-time unit availability, AED pricing, hold status, and floor layouts.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div>
+              <select id="inventoryTowerSelect" onchange="renderInventoryGrid()" class="bg-slate-800 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-2">
+                <option value="Aljada Blvd">Aljada Boulevard Tower A (Muwaileh)</option>
+                <option value="Tilal Heights">Tilal Heights Building B</option>
+                <option value="Maryam Waterfront">Maryam Island Waterfront Retail</option>
+              </select>
+            </div>
+            <button onclick="openAddFloorUnitModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group"></i> + Add Floor / Unit
+            </button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex flex-wrap items-center gap-4 bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-xs">
+          <span class="text-slate-400 font-semibold">Status Key:</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span> Available</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span> On Hold</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span> Booked</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-purple-600"></span> Handed Over</span>
+        </div>
+
+        <div id="floorMatrixContainer" class="space-y-4">
+          <!-- Javascript rendered -->
+        </div>
+      </section>
+
+      <!-- ================= 5. QUOTATIONS MODULE ================= -->
+      <section id="module-quotations" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold text-white">Sharjah Cost Sheets & Quotations</h1>
+            <p class="text-xs text-slate-400">Generate commercial offers, calculate Sharjah Municipality fees (4%) & payment milestones in AED.</p>
+          </div>
+          <button onclick="openCreateQuotationModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-calculator"></i> + Create Quotation
+          </button>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-800 text-slate-300 uppercase font-semibold">
+                <tr>
+                  <th class="p-3">Quote ID & Date</th>
+                  <th class="p-3">Customer Name</th>
+                  <th class="p-3">Unit Selected</th>
+                  <th class="p-3">Agreed Base Price (AED)</th>
+                  <th class="p-3">Total Payable (incl Baladiya Fee)</th>
+                  <th class="p-3">Discount</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-center">Actions / Edit / Delete</th>
+                </tr>
+              </thead>
+              <tbody id="quotationsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 6. BOOKINGS & SPA CONTRACTS ================= -->
+      <section id="module-bookings" class="tab-module space-y-6 hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div>
+            <h1 class="text-xl font-bold text-white">Bookings & Sale Purchase Agreement (SPA) Workflow</h1>
+            <p class="text-xs text-slate-400">Convert quotations to confirmed Sharjah bookings, execute SPAs, and manage documents.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openAgreementImportModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5">
+              <i class="fa-solid fa-file-arrow-up"></i> Import SPA Draft (.docx / PDF)
+            </button>
+            <button onclick="openNewBookingModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> New Unit Booking
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-lg">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-800 text-slate-300 uppercase font-semibold">
+                <tr>
+                  <th class="p-3">Booking ID & Date</th>
+                  <th class="p-3">Customer & Co-Applicant</th>
+                  <th class="p-3">Unit Number</th>
+                  <th class="p-3">Agreement Value (AED)</th>
+                  <th class="p-3">Booking Deposit Paid</th>
+                  <th class="p-3">SPA Draft Status</th>
+                  <th class="p-3">Accounts Approval</th>
+                  <th class="p-3 text-center">Actions / Edit / Delete</th>
+                </tr>
+              </thead>
+              <tbody id="bookingsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. CUSTOMERS 360 PROFILE ================= -->
+      <section id="module-customers" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold text-white">Customer 360° Directory (Emirates ID Verified)</h1>
+            <p class="text-xs text-slate-400">View customer profile, linked Sharjah units, Emirates ID, and payment ledger.</p>
+          </div>
+          <button onclick="openAddCustomerModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg">+ Add Customer Profile</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+            <input type="text" placeholder="Search customer name or Emirates ID..." onkeyup="filterCustomerList(this.value)" class="w-full bg-slate-800 border border-slate-700 text-xs text-slate-200 p-2 rounded-lg">
+            <div id="customerListSidebar" class="space-y-2 max-h-[500px] overflow-y-auto">
+              <!-- Javascript rendered -->
+            </div>
+          </div>
+          <div class="lg:col-span-2 bg-slate-900 p-5 rounded-xl border border-slate-800" id="customerDetailPanel">
+            <div class="text-center text-slate-500 py-12">
+              <i class="fa-solid fa-id-card text-4xl mb-2"></i>
+              <p>Select a customer from the left list to view 360° details</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 8. COLLECTIONS & DEMANDS ================= -->
+      <section id="module-collections" class="tab-module space-y-6 hidden">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <div>
+            <h1 class="text-xl font-bold text-white">Collections & Milestone Demands (AED)</h1>
+            <p class="text-xs text-slate-400">Milestone payment tracking in UAE Dirhams, demand notices, and bank receipt verifications.</p>
+          </div>
+          <button onclick="openRecordPaymentModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-receipt"></i> + Record Payment & Attach Slip
+          </button>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-800 text-slate-300 uppercase font-semibold">
+                <tr>
+                  <th class="p-3">Demand / Rec Ref</th>
+                  <th class="p-3">Customer & Unit</th>
+                  <th class="p-3">Milestone Stage</th>
+                  <th class="p-3">Amount (AED)</th>
+                  <th class="p-3">Payment Mode / Txn ID</th>
+                  <th class="p-3">Receipt File</th>
+                  <th class="p-3">Bank Verification</th>
+                  <th class="p-3 text-center">Actions / Edit / Delete</th>
+                </tr>
+              </thead>
+              <tbody id="collectionsTableBody" class="divide-y divide-slate-800 text-slate-200">
+                <!-- Javascript populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 9. HANDOVER & POSSESSION ================= -->
+      <section id="module-handover" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold text-white">Sharjah Municipality (Baladiya) & SEWA Key Handover</h1>
+            <p class="text-xs text-slate-400">Verify Baladiya completion certificates, SEWA utility meters, and Civil Defense clearance before key handover.</p>
+          </div>
+          <button onclick="openAddHandoverModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg">+ Add Handover Unit</button>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800 text-slate-300 uppercase font-semibold">
+              <tr>
+                <th class="p-3">Unit No</th>
+                <th class="p-3">Customer Name</th>
+                <th class="p-3">Baladiya / Dues Clearance</th>
+                <th class="p-3">SEWA Utility Meter</th>
+                <th class="p-3">Civil Defense Inspection</th>
+                <th class="p-3">Possession Status</th>
+                <th class="p-3 text-center">Actions / Edit / Delete</th>
+              </tr>
+            </thead>
+            <tbody id="handoverTableBody" class="divide-y divide-slate-800 text-slate-200">
+              <!-- Javascript populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 10. SERVICE & COMPLAINTS ================= -->
+      <section id="module-service" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+          <div>
+            <h1 class="text-xl font-bold text-white">After-Sales Maintenance & Snag Tickets</h1>
+            <p class="text-xs text-slate-400">Log customer snags, MEP maintenance requests, and assign technical staff.</p>
+          </div>
+          <button onclick="openLogServiceModal()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-3.5 py-2 rounded-lg font-medium">
+            + Raise Service Ticket
+          </button>
+        </div>
+
+        <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800 text-slate-300 uppercase font-semibold">
+              <tr>
+                <th class="p-3">Ticket ID</th>
+                <th class="p-3">Customer & Unit</th>
+                <th class="p-3">Category</th>
+                <th class="p-3">Description</th>
+                <th class="p-3">Assigned Staff</th>
+                <th class="p-3">Status</th>
+                <th class="p-3 text-center">Actions / Edit / Delete</th>
+              </tr>
+            </thead>
+            <tbody id="serviceTableBody" class="divide-y divide-slate-800 text-slate-200">
+              <!-- Javascript populated -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= 11. REPORTS & MIS ================= -->
+      <section id="module-reports" class="tab-module space-y-6 hidden">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+          <h1 class="text-xl font-bold text-white">Sharjah Real Estate MIS & Statutory Reports</h1>
+          <p class="text-xs text-slate-400">Download formatted operational reports for Baladiya audits, sales performance, and broker commissions.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+            <h3 class="font-bold text-slate-200 text-sm"><i class="fa-solid fa-file-csv text-amber-400 mr-2"></i> Lead Source Performance</h3>
+            <p class="text-xs text-slate-400">Conversion breakdown of leads from Property Finder, Bayut, and Sharjah Brokers.</p>
+            <button onclick="exportCRMReport('leads')" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 text-xs px-3 py-1.5 rounded w-full mt-2">Export Lead Summary</button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+            <h3 class="font-bold text-slate-200 text-sm"><i class="fa-solid fa-coins text-emerald-400 mr-2"></i> AED Collection Ageing Report</h3>
+            <p class="text-xs text-slate-400">Outstandings grouped by 30, 60, 90+ days overdue in AED.</p>
+            <button onclick="exportCRMReport('collections')" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs px-3 py-1.5 rounded w-full mt-2">Export Collection Register</button>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+            <h3 class="font-bold text-slate-200 text-sm"><i class="fa-solid fa-handshake text-purple-400 mr-2"></i> Sharjah Broker Payouts</h3>
+            <p class="text-xs text-slate-400">Commission eligibility register and broker ledger (AED 3% standard).</p>
+            <button onclick="exportCRMReport('brokers')" class="bg-slate-800 hover:bg-slate-700 text-purple-400 border border-slate-700 text-xs px-3 py-1.5 rounded w-full mt-2">Export Broker Ledger</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= MODAL 1: AI TELECALLER (ARABIC / ENGLISH UAE ACCENT) ================= -->
+  <div id="aiTelecallerModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="p-4 bg-gradient-to-r from-amber-900 via-slate-900 to-orange-900 border-b border-slate-800 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <div class="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+            <i class="fa-solid fa-robot text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">AI Voice Telecaller - Sharjah Property Buyer Simulation</h3>
+            <p class="text-xs text-amber-300">Auto-Qualifies buyers in Khaleeji Arabic & English (UAE Accents)</p>
+          </div>
+        </div>
+        <button onclick="closeAITelecallerModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Target Lead to Call</label>
+            <select id="aiCallLeadSelect" onchange="loadLeadIntoAICaller()" class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg p-2">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">AI Voice & Language Accent</label>
+            <select id="aiVoiceLanguage" class="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-lg p-2">
+              <option value="ar-AE" selected>Arabic (Khaleeji / UAE Accent - اللهجة الإماراتية)</option>
+              <option value="en-AE">English (Sharjah Professional / UAE Accent)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center space-y-3 relative overflow-hidden">
+          <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800/80 pb-2">
+            <span id="aiCallStatusText" class="text-emerald-400 font-semibold flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Call Ready
+            </span>
+            <span id="aiCallTimer">00:00</span>
+          </div>
+
+          <div class="py-2 flex flex-col items-center justify-center">
+            <div class="w-16 h-16 rounded-full bg-amber-600/30 border-2 border-amber-500 flex items-center justify-center text-amber-300 text-2xl mb-2">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+            <h4 class="font-bold text-white text-sm" id="aiCallTargetName">Select Lead to Call</h4>
+            <p class="text-xs text-slate-400" id="aiCallTargetPhone">+971 50 --</p>
+
+            <div id="aiWaveform" class="flex items-center justify-center gap-1.5 h-10 mt-3 opacity-30">
+              <div class="w-1.5 bg-amber-500 rounded-full wave-bar"></div>
+              <div class="w-1.5 bg-orange-400 rounded-full wave-bar"></div>
+              <div class="w-1.5 bg-amber-400 rounded-full wave-bar"></div>
+              <div class="w-1.5 bg-emerald-400 rounded-full wave-bar"></div>
+              <div class="w-1.5 bg-amber-500 rounded-full wave-bar"></div>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-left text-xs h-36 overflow-y-auto space-y-2 font-mono text-slate-300" id="aiCallTranscript">
+            <p class="text-slate-500 italic">[Click "Start AI Phone Call" to initialize conversation...]</p>
+          </div>
+        </div>
+
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-3 space-y-2 text-xs">
+          <span class="font-bold text-amber-400 block"><i class="fa-solid fa-brain mr-1"></i> AI Extracted Intelligence (Sharjah Property):</span>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-200">
+            <div><span class="text-slate-400">Interest:</span> <span id="aiExtractedInterest" class="font-semibold text-white">--</span></div>
+            <div><span class="text-slate-400">Budget:</span> <span id="aiExtractedBudget" class="font-semibold text-white">--</span></div>
+            <div><span class="text-slate-400">Unit Type:</span> <span id="aiExtractedUnit" class="font-semibold text-white">--</span></div>
+            <div><span class="text-slate-400">Timeline:</span> <span id="aiExtractedTimeline" class="font-semibold text-white">--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-900 border-t border-slate-800 flex justify-between items-center">
+        <button id="btnStartAICall" onclick="startAICallSimulation()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-phone"></i> Start AI Phone Call
+        </button>
+        <button id="btnFeedToCRM" onclick="feedAICallResultToCRM()" disabled class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2">
+          <i class="fa-solid fa-database"></i> Auto-Feed Results to CRM
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: ADD / EDIT LEAD MODAL ================= -->
+  <div id="addLeadModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base" id="leadModalTitle">Add New Sharjah Lead</h3>
+        <button onclick="closeAddLeadModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="leadForm" onsubmit="saveLeadForm(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="leadEditId">
+        <div>
+          <label class="block text-slate-400 mb-1">Customer Full Name</label>
+          <input type="text" id="leadNameInput" placeholder="e.g. Rashid Al-Nuaimi" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Mobile (+971)</label>
+            <input type="text" id="leadMobileInput" placeholder="+971 50 123 4567" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Project Preference</label>
+            <select id="leadProjectInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="Aljada">Aljada Master Community</option>
+              <option value="Tilal City">Tilal City Residential</option>
+              <option value="Maryam Island">Maryam Island Waterfront</option>
+              <option value="Al Majaz Tower">Al Majaz Tower Residences</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Budget (AED)</label>
+            <input type="number" id="leadBudgetInput" placeholder="1200000" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Unit Preference</label>
+            <select id="leadUnitPrefInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="1 BHK Apartment">1 BHK Apartment</option>
+              <option value="2 BHK Apartment">2 BHK Apartment</option>
+              <option value="3 BHK Townhouse">3 BHK Townhouse</option>
+              <option value="4 BHK Villa">4 BHK Villa</option>
+              <option value="Retail Shop">Retail Shop</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Lead Source</label>
+            <select id="leadSourceInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="Property Finder">Property Finder</option>
+              <option value="Bayut">Bayut UAE</option>
+              <option value="Meta Ads">Facebook / Insta Ads</option>
+              <option value="Broker / Agent">Sharjah Broker</option>
+              <option value="Walk-in">Direct Walk-in</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Assigned Executive</label>
+            <select id="leadExecInput" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="Tariq Al-Suwaidi">Tariq Al-Suwaidi</option>
+              <option value="Fatima Al-Marzooqi">Fatima Al-Marzooqi</option>
+              <option value="Zaid Al-Ali">Zaid Al-Ali</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 rounded-lg transition">
+          Save Lead Record
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: UNIT DETAIL & BOOKING ================= -->
+  <div id="unitDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="font-bold text-white text-base" id="modalUnitNo">Unit Detail</h3>
+          <p class="text-xs text-slate-400" id="modalUnitTower">Aljada Blvd • Floor 4</p>
+        </div>
+        <button onclick="closeUnitDetailModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 text-xs bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+        <div><span class="text-slate-400">Configuration:</span> <span id="modalUnitType" class="font-semibold text-white block">2 BHK Apartment</span></div>
+        <div><span class="text-slate-400">Area:</span> <span id="modalUnitArea" class="font-semibold text-white block">1,250 sq. ft.</span></div>
+        <div><span class="text-slate-400">Price / sq.ft:</span> <span id="modalUnitRate" class="font-semibold text-white block">AED 950</span></div>
+        <div><span class="text-slate-400">Total Price:</span> <span id="modalUnitCost" class="font-bold text-amber-400 text-sm block">AED 1,187,500</span></div>
+        <div><span class="text-slate-400">Parking Space:</span> <span id="modalUnitParking" class="font-semibold text-white block">Covered Bay #B-42</span></div>
+        <div><span class="text-slate-400">Current Status:</span> <span id="modalUnitStatus" class="font-bold block text-emerald-400">Available</span></div>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <label class="block text-slate-300 font-semibold">Quick Actions for this Unit</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="holdUnitFromModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold p-2.5 rounded-lg">Put on Hold (24 Hrs)</button>
+          <button onclick="proceedToBookFromUnit()" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-lg font-medium">Create Direct Booking</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 4: RECORD PAYMENT & RECEIPT ================= -->
+  <div id="recordPaymentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-white text-base">Record AED Payment & Upload Bank Receipt</h3>
+        <button onclick="closeRecordPaymentModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form onsubmit="savePaymentEntry(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Customer / Booking Reference</label>
+          <select id="payBookingSelect" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Amount Paid (AED)</label>
+            <input type="number" id="payAmount" placeholder="150000" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Payment Mode</label>
+            <select id="payMode" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+              <option value="UAE Bank Transfer (IBAN)">UAE Bank Transfer (IBAN)</option>
+              <option value="Manager Cheque">Manager Cheque</option>
+              <option value="Credit / Debit Card">Credit / Debit Card</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Transaction Ref / Cheque No</label>
+          <input type="text" id="payTxnRef" placeholder="ADCB-TR-994821" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Attach Bank Advice / Receipt (.pdf / .jpg)</label>
+          <div class="border-2 border-dashed border-slate-700 hover:border-amber-500 rounded-xl p-3 text-center cursor-pointer bg-slate-800/40 relative">
+            <input type="file" id="payReceiptFile" accept="image/*,.pdf" onchange="previewReceiptUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer">
+            <i class="fa-solid fa-cloud-arrow-up text-amber-400 text-2xl mb-1"></i>
+            <p class="text-[11px] text-slate-300">Click or Drag & Drop Bank Slip</p>
+            <p id="receiptFileName" class="text-[10px] text-amber-400 font-mono mt-1"></p>
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 rounded-lg transition">
+          Submit Payment for Accounts Verification
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICATION LOGIC & STATE DATA -->
+  <script>
+    // ================= GLOBAL STATE DATA (SHARJAH UAE) =================
+    let leadsData = [
+      { id: 'LD-2001', name: 'Rashid Al-Nuaimi', mobile: '+971 50 442 1109', email: 'rashid.n@gmail.com', project: 'Aljada', budget: 1450000, unitPref: '3 BHK Townhouse', source: 'Property Finder', stage: 'Qualified', executive: 'Tariq Al-Suwaidi', priority: 'High', nextAction: 'Schedule Site Visit at Aljada Discovery Centre', date: '2026-10-28' },
+      { id: 'LD-2002', name: 'Mariam Al-Qasimi', mobile: '+971 55 881 2290', email: 'mariam.q@outlook.ae', project: 'Maryam Island', budget: 950000, unitPref: '2 BHK Apartment', source: 'Bayut', stage: 'New', executive: 'Unassigned', priority: 'Medium', nextAction: 'AI Bilingual Call Pending', date: '2026-10-30' },
+      { id: 'LD-2003', name: 'John Henderson', mobile: '+971 52 331 9904', email: 'john.h@dubaiholdings.ae', project: 'Tilal City', budget: 2200000, unitPref: '4 BHK Villa', source: 'Broker / Agent', stage: 'Negotiation', executive: 'Fatima Al-Marzooqi', priority: 'High', nextAction: 'Finalize 2% payment plan discount', date: '2026-10-25' },
+      { id: 'LD-2004', name: 'Amina Al-Mazrouei', mobile: '+971 56 112 4433', email: 'amina.m@sharjah.gov.ae', project: 'Al Majaz Tower', budget: 780000, unitPref: '1 BHK Apartment', source: 'Walk-in', stage: 'Visit Scheduled', executive: 'Zaid Al-Ali', priority: 'High', nextAction: 'Corniche showroom visit at 4 PM', date: '2026-10-29' }
+    ];
+
+    let inventoryData = [
+      { unitNo: 'A-101', tower: 'Aljada Blvd', floor: 'Floor 1', type: '2 BHK Apartment', area: 1250, rate: 950, totalAED: 1187500, status: 'Available', parking: 'Bay #B-01' },
+      { unitNo: 'A-102', tower: 'Aljada Blvd', floor: 'Floor 1', type: '2 BHK Apartment', area: 1250, rate: 950, totalAED: 1187500, status: 'Booked', parking: 'Bay #B-02' },
+      { unitNo: 'A-201', tower: 'Aljada Blvd', floor: 'Floor 2', type: '3 BHK Townhouse', area: 1950, rate: 1100, totalAED: 2145000, status: 'Available', parking: 'Bay #B-05' },
+      { unitNo: 'A-202', tower: 'Aljada Blvd', floor: 'Floor 2', type: '3 BHK Townhouse', area: 1950, rate: 1100, totalAED: 2145000, status: 'On Hold', parking: 'Bay #B-06' },
+      { unitNo: 'A-301', tower: 'Aljada Blvd', floor: 'Floor 3', type: '4 BHK Penthouse', area: 3200, rate: 1400, totalAED: 4480000, status: 'Handover', parking: 'Bay #B-10' },
+      { unitNo: 'RET-01', tower: 'Maryam Waterfront', floor: 'Ground Floor', type: 'Retail Shop', area: 850, rate: 2200, totalAED: 1870000, status: 'Available', parking: 'Visitor Bay' }
+    ];
+
+    let quotationsData = [
+      { id: 'QT-901', date: '2026-10-26', customer: 'John Henderson', unit: 'A-201', basePrice: 2145000, totalTax: 2230800, discount: 45000, status: 'Pending Approval' }
+    ];
+
+    let bookingsData = [
+      { id: 'BK-701', date: '2026-10-18', customer: 'Rashid Al-Nuaimi', coApplicant: 'Fatima Al-Nuaimi', unit: 'A-102', agreementVal: 1187500, bookingPaid: 118750, draftStatus: 'Ready for Baladiya Registration', accountsApproved: true },
+      { id: 'BK-702', date: '2026-10-22', customer: 'John Henderson', coApplicant: '--', unit: 'A-301', agreementVal: 4480000, bookingPaid: 450000, draftStatus: 'Under Legal Review', accountsApproved: true }
+    ];
+
+    let collectionsData = [
+      { ref: 'DEM-401', customer: 'Rashid Al-Nuaimi', unit: 'A-102', milestone: 'Booking Deposit (10%)', amount: 118750, mode: 'UAE Bank Transfer (IBAN)', receiptFile: 'adcb_slip_701.pdf', verified: true },
+      { ref: 'DEM-402', customer: 'John Henderson', unit: 'A-301', milestone: 'SPA Signing (10%)', amount: 450000, mode: 'Manager Cheque', receiptFile: 'cheque_img.jpg', verified: false }
+    ];
+
+    let handoverData = [
+      { unit: 'A-301', customer: 'John Henderson', baladiya: 'Certificate Issued', sewa: 'Meter Connected', civDef: 'Approved', status: 'Ready for Key Handover' }
+    ];
+
+    let serviceTickets = [
+      { id: 'TCK-501', customer: 'Rashid Al-Nuaimi', unit: 'A-102', category: 'AC Ducts & Cooling (SEWA)', desc: 'Living room chiller thermostat calibration needed', staff: 'Hassan MEP Tech', status: 'In Progress' }
+    ];
+
+    let currentSelectedUnit = null;
+    let selectedLeadForAICall = null;
+
+    // Currency Formatter for AED
+    function formatAED(amount) {
+      if (!amount) return 'AED 0';
+      return 'AED ' + Number(amount).toLocaleString('en-US');
+    }
+
+    // ================= TAB NAVIGATION =================
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-module').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-slate-800', 'text-white'));
+
+      const targetModule = document.getElementById('module-' + tabId);
+      const targetNav = document.getElementById('nav-' + tabId);
+
+      if (targetModule) targetModule.classList.remove('hidden');
+      if (targetNav) targetNav.classList.add('bg-slate-800', 'text-white');
+
+      if (tabId === 'dashboard') initInventoryChart();
+      if (tabId === 'inventory') renderInventoryGrid();
+      if (tabId === 'leads') renderLeadsTable();
+      if (tabId === 'followups') renderFollowupsList();
+      if (tabId === 'quotations') renderQuotationsTable();
+      if (tabId === 'bookings') renderBookingsTable();
+      if (tabId === 'collections') renderCollectionsTable();
+      if (tabId === 'customers') renderCustomersList();
+      if (tabId === 'handover') renderHandoverTable();
+      if (tabId === 'service') renderServiceTable();
+    }
+
+    // ================= DASHBOARD & CHARTS =================
+    let chartInstance = null;
+    function initInventoryChart() {
+      const ctx = document.getElementById('inventoryChart');
+      if (!ctx) return;
+
+      const avail = inventoryData.filter(i => i.status === 'Available').length;
+      const hold = inventoryData.filter(i => i.status === 'On Hold').length;
+      const booked = inventoryData.filter(i => i.status === 'Booked' || i.status === 'Handover').length;
+
+      document.getElementById('inv-count-avail').innerText = avail + ' Units';
+      document.getElementById('inv-count-hold').innerText = hold + ' Units';
+      document.getElementById('inv-count-booked').innerText = booked + ' Units';
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Available', 'On Hold', 'Booked / Handover'],
+          datasets: [{
+            data: [avail, hold, booked],
+            backgroundColor: ['#22c55e', '#f59e0b', '#6366f1'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '70%'
+        }
+      });
+    }
+
+    // ================= LEADS MANAGEMENT & CRUD =================
+    function renderLeadsTable() {
+      const tbody = document.getElementById('leadsTableBody');
+      const stageFilter = document.getElementById('filterStage').value;
+      const sourceFilter = document.getElementById('filterSource').value;
+      const execFilter = document.getElementById('filterExecutive').value;
+      const budgetFilter = parseFloat(document.getElementById('filterBudget').value) || 0;
+
+      let filtered = leadsData.filter(l => {
+        if (stageFilter !== 'All' && l.stage !== stageFilter) return false;
+        if (sourceFilter !== 'All' && l.source !== sourceFilter) return false;
+        if (execFilter !== 'All' && l.executive !== execFilter) return false;
+        if (budgetFilter > 0 && l.budget < budgetFilter) return false;
+        return true;
+      });
+
+      tbody.innerHTML = '';
+      filtered.forEach(lead => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/50 transition border-b border-slate-800/60";
+        tr.innerHTML = `
+          <td class="p-3">
+            <span class="font-mono text-amber-400 font-bold block">${lead.id}</span>
+            <span class="text-[10px] text-slate-400">${lead.date}</span>
+          </td>
+          <td class="p-3">
+            <span class="font-semibold text-slate-100 block">${lead.name}</span>
+            <span class="text-[10px] text-slate-400">${lead.project}</span>
+          </td>
+          <td class="p-3">
+            <div>${lead.mobile}</div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">${lead.unitPref}</span>
+          </td>
+          <td class="p-3 font-semibold text-amber-400">${formatAED(lead.budget)}</td>
+          <td class="p-3"><span class="text-slate-300">${lead.source}</span></td>
+          <td class="p-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${getStageBadgeClass(lead.stage)}">${lead.stage}</span>
+          </td>
+          <td class="p-3 text-slate-300">${lead.executive}</td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="triggerAICallSingle('${lead.id}')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-[10px] px-2 py-1 rounded shadow">
+              <i class="fa-solid fa-robot mr-1"></i> AI Call
+            </button>
+            <button onclick="editLead('${lead.id}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] px-2 py-1 rounded">Edit</button>
+            <button onclick="deleteLead('${lead.id}')" class="bg-rose-900/60 hover:bg-rose-800 text-rose-300 text-[10px] px-2 py-1 rounded">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function getStageBadgeClass(stage) {
+      switch(stage) {
+        case 'New': return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
+        case 'Qualified': return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        case 'Visit Scheduled': return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        case 'Negotiation': return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+        case 'Converted': return 'bg-teal-500/20 text-teal-300 border border-teal-500/30';
+        default: return 'bg-slate-800 text-slate-400';
+      }
+    }
+
+    function resetLeadFilters() {
+      document.getElementById('filterStage').value = 'All';
+      document.getElementById('filterSource').value = 'All';
+      document.getElementById('filterExecutive').value = 'All';
+      document.getElementById('filterBudget').value = '';
+      renderLeadsTable();
+    }
+
+    function openAddLeadModal() {
+      document.getElementById('leadModalTitle').innerText = 'Add New Sharjah Lead';
+      document.getElementById('leadEditId').value = '';
+      document.getElementById('leadForm').reset();
+      document.getElementById('addLeadModal').classList.remove('hidden');
+    }
+    function closeAddLeadModal() {
+      document.getElementById('addLeadModal').classList.add('hidden');
+    }
+
+    function editLead(id) {
+      const lead = leadsData.find(l => l.id === id);
+      if (!lead) return;
+      document.getElementById('leadModalTitle').innerText = 'Edit Sharjah Lead: ' + lead.id;
+      document.getElementById('leadEditId').value = lead.id;
+      document.getElementById('leadNameInput').value = lead.name;
+      document.getElementById('leadMobileInput').value = lead.mobile;
+      document.getElementById('leadProjectInput').value = lead.project;
+      document.getElementById('leadBudgetInput').value = lead.budget;
+      document.getElementById('leadUnitPrefInput').value = lead.unitPref;
+      document.getElementById('leadSourceInput').value = lead.source;
+      document.getElementById('leadExecInput').value = lead.executive;
+      document.getElementById('addLeadModal').classList.remove('hidden');
+    }
+
+    function saveLeadForm(e) {
+      e.preventDefault();
+      const editId = document.getElementById('leadEditId').value;
+      const name = document.getElementById('leadNameInput').value;
+      const mobile = document.getElementById('leadMobileInput').value;
+      const project = document.getElementById('leadProjectInput').value;
+      const budget = parseFloat(document.getElementById('leadBudgetInput').value);
+      const unitPref = document.getElementById('leadUnitPrefInput').value;
+      const source = document.getElementById('leadSourceInput').value;
+      const executive = document.getElementById('leadExecInput').value;
+
+      if (editId) {
+        const lead = leadsData.find(l => l.id === editId);
+        if (lead) {
+          lead.name = name; lead.mobile = mobile; lead.project = project; lead.budget = budget;
+          lead.unitPref = unitPref; lead.source = source; lead.executive = executive;
+        }
+      } else {
+        leadsData.unshift({
+          id: 'LD-' + Math.floor(2000 + Math.random() * 8000),
+          name: name, mobile: mobile, email: name.toLowerCase().replace(/\s+/g, '') + '@gmail.com',
+          project: project, budget: budget, unitPref: unitPref, source: source, stage: 'New',
+          executive: executive, priority: 'Medium', nextAction: 'Initial call required', date: new Date().toISOString().split('T')[0]
+        });
+      }
+      renderLeadsTable();
+      closeAddLeadModal();
+      alert('Sharjah Lead Saved Successfully!');
+    }
+
+    function deleteLead(id) {
+      if (confirm('Are you sure you want to delete this Sharjah lead record?')) {
+        leadsData = leadsData.filter(l => l.id !== id);
+        renderLeadsTable();
+      }
+    }
+
+    // ================= AI BILINGUAL TELECALLER SIMULATOR =================
+    function openAITelecallerModal() {
+      const select = document.getElementById('aiCallLeadSelect');
+      select.innerHTML = '';
+      leadsData.forEach(lead => {
+        const opt = document.createElement('option');
+        opt.value = lead.id;
+        opt.innerText = `${lead.name} (${lead.mobile}) - ${lead.stage}`;
+        select.appendChild(opt);
+      });
+      document.getElementById('aiTelecallerModal').classList.remove('hidden');
+      loadLeadIntoAICaller();
+    }
+
+    function closeAITelecallerModal() {
+      if (speechSynthesis.speaking) speechSynthesis.cancel();
+      document.getElementById('aiTelecallerModal').classList.add('hidden');
+    }
+
+    function loadLeadIntoAICaller() {
+      const leadId = document.getElementById('aiCallLeadSelect').value;
+      selectedLeadForAICall = leadsData.find(l => l.id === leadId);
+      if (selectedLeadForAICall) {
+        document.getElementById('aiCallTargetName').innerText = selectedLeadForAICall.name;
+        document.getElementById('aiCallTargetPhone').innerText = selectedLeadForAICall.mobile;
+      }
+    }
+
+    function triggerAICallSingle(leadId) {
+      openAITelecallerModal();
+      document.getElementById('aiCallLeadSelect').value = leadId;
+      loadLeadIntoAICaller();
+    }
+
+    function startAICallSimulation() {
+      if (!selectedLeadForAICall) return;
+      document.getElementById('aiCallStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Call In Progress...`;
+      document.getElementById('aiWaveform').classList.remove('opacity-30');
+      document.getElementById('btnStartAICall').disabled = true;
+
+      const lang = document.getElementById('aiVoiceLanguage').value;
+      const transcript = document.getElementById('aiCallTranscript');
+      transcript.innerHTML = `<p class="text-emerald-400">[Connected to ${selectedLeadForAICall.mobile}] Ringing...</p>`;
+
+      const dialogue = lang === 'ar-AE' ? [
+        { speaker: 'AI Agent (مساعد الذكاء الاصطناعي)', text: `السلام عليكم ${selectedLeadForAICall.name}، معاكم مريم من مشروع الجادة بالشارقة. هل أنتو مهتمين بفلل أو شقق في الشارقة؟` },
+        { speaker: selectedLeadForAICall.name, text: `وعليكم السلام. نعم، أدور على تاون هاوس 3 غرف في الجادة بحدود مليون ونص.` },
+        { speaker: 'AI Agent (مساعد الذكاء الاصطناعي)', text: `متاز جداً! عنا وحدات تاون هاوس 3 غرف تبدأ من مليون و450 ألف درهم مع خطة سداد مرنة. تحب نحجز لك زيارة للموقع هذا السبت؟` },
+        { speaker: selectedLeadForAICall.name, text: `إي نعم، زين يوم السبت الساعة 5 العصر.` },
+        { speaker: 'AI Agent (مساعد الذكاء الاصطناعي)', text: `تم الحجز بنجاح! بيستقبلك مدير المبيعات طارق السويدي في مركز مبيعات الجادة. شكراً لك!` }
+      ] : [
+        { speaker: 'AI Agent', text: `Hello Mr. ${selectedLeadForAICall.name}, this is Maryam calling from Aljada Sharjah. Are you looking for apartments or townhouses in Sharjah?` },
+        { speaker: selectedLeadForAICall.name, text: `Hi Maryam. Yes, I am looking for a 3-bed townhouse in Aljada around 1.4 million AED.` },
+        { speaker: 'AI Agent', text: `That's wonderful! Our 3-bedroom townhouses start at AED 1.45 Million with an easy payment plan. Would you like to visit our discovery center this Saturday?` },
+        { speaker: selectedLeadForAICall.name, text: `Yes please schedule it for Saturday at 5 PM.` },
+        { speaker: 'AI Agent', text: `Confirmed! Your site visit is booked with our senior advisor Tariq Al-Suwaidi. Have a great day!` }
+      ];
+
+      let step = 0;
+      function speakStep() {
+        if (step >= dialogue.length) {
+          document.getElementById('aiCallStatusText').innerHTML = `<span class="text-amber-400 font-bold">Call Completed & Auto-Analyzed</span>`;
+          document.getElementById('aiWaveform').classList.add('opacity-30');
+          document.getElementById('btnFeedToCRM').disabled = false;
+          document.getElementById('aiExtractedInterest').innerText = 'High (Townhouse)';
+          document.getElementById('aiExtractedBudget').innerText = 'AED 1.45 M';
+          document.getElementById('aiExtractedUnit').innerText = '3 BR Townhouse';
+          document.getElementById('aiExtractedTimeline').innerText = 'Saturday 5 PM';
+          return;
+        }
+
+        const item = dialogue[step];
+        const p = document.createElement('p');
+        p.innerHTML = `<span class="${item.speaker.includes('AI') ? 'text-amber-400 font-bold' : 'text-slate-200'}">${item.speaker}:</span> ${item.text}`;
+        transcript.appendChild(p);
+        transcript.scrollTop = transcript.scrollHeight;
+
+        if ('speechSynthesis' in window && item.speaker.includes('AI')) {
+          const utterance = new SpeechSynthesisUtterance(item.text);
+          utterance.lang = lang;
+          utterance.rate = 0.95;
+          speechSynthesis.speak(utterance);
+          utterance.onend = () => { step++; setTimeout(speakStep, 1000); };
+        } else {
+          step++;
+          setTimeout(speakStep, 1800);
+        }
+      }
+      setTimeout(speakStep, 1200);
+    }
+
+    function feedAICallResultToCRM() {
+      if (!selectedLeadForAICall) return;
+      selectedLeadForAICall.stage = 'Visit Scheduled';
+      selectedLeadForAICall.budget = 1450000;
+      selectedLeadForAICall.nextAction = 'AI Scheduled Aljada Visit for Saturday';
+      renderLeadsTable();
+      closeAITelecallerModal();
+      alert(`CRM Updated! Lead ${selectedLeadForAICall.name} moved to "Visit Scheduled" stage.`);
+    }
+
+    // ================= INVENTORY GRID & CRUD =================
+    function renderInventoryGrid() {
+      const container = document.getElementById('floorMatrixContainer');
+      const selectedTower = document.getElementById('inventoryTowerSelect').value;
+      const towerUnits = inventoryData.filter(u => u.tower === selectedTower);
+      const floors = [...new Set(towerUnits.map(u => u.floor))];
+
+      container.innerHTML = '';
+      if (floors.length === 0) {
+        container.innerHTML = `<div class="text-center text-slate-500 py-12">No units configured for ${selectedTower}. Click "+ Add Floor / Unit".</div>`;
+        return;
+      }
+
+      floors.forEach(floor => {
+        const floorBlock = document.createElement('div');
+        floorBlock.className = "bg-slate-900 border border-slate-800 rounded-xl p-4";
+        const floorUnits = towerUnits.filter(u => u.floor === floor);
+
+        let unitsHTML = '';
+        floorUnits.forEach(unit => {
+          const colorClass = getUnitStatusColor(unit.status);
+          unitsHTML += `
+            <div onclick="openUnitDetail('${unit.unitNo}')" class="p-3 rounded-xl border ${colorClass} cursor-pointer hover:scale-105 transition shadow-sm text-xs relative group">
+              <div class="flex justify-between items-center font-bold">
+                <span>${unit.unitNo}</span>
+                <span class="text-[10px] uppercase">${unit.status}</span>
+              </div>
+              <p class="text-[11px] mt-1">${unit.type}</p>
+              <p class="font-bold text-white mt-1">${formatAED(unit.totalAED)}</p>
+              <p class="text-[9px] opacity-80 mt-0.5">${unit.area} sqft</p>
+            </div>
+          `;
+        });
+
+        floorBlock.innerHTML = `
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
+            <span class="font-bold text-slate-200 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-amber-400"></i> ${floor}
+            </span>
+            <span class="text-xs text-slate-400">${floorUnits.length} Units</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            ${unitsHTML}
+          </div>
+        `;
+        container.appendChild(floorBlock);
+      });
+    }
+
+    function getUnitStatusColor(status) {
+      switch(status) {
+        case 'Available': return 'bg-emerald-950/60 border-emerald-700/80 text-emerald-300';
+        case 'On Hold': return 'bg-amber-950/60 border-amber-700/80 text-amber-300';
+        case 'Booked': return 'bg-indigo-950/60 border-indigo-700/80 text-indigo-300';
+        case 'Handover': return 'bg-purple-950/60 border-purple-700/80 text-purple-300';
+        default: return 'bg-slate-800 border-slate-700 text-slate-300';
+      }
+    }
+
+    function openUnitDetail(unitNo) {
+      currentSelectedUnit = inventoryData.find(u => u.unitNo === unitNo);
+      if (!currentSelectedUnit) return;
+      document.getElementById('modalUnitNo').innerText = 'Unit ' + currentSelectedUnit.unitNo;
+      document.getElementById('modalUnitTower').innerText = `${currentSelectedUnit.tower} • ${currentSelectedUnit.floor}`;
+      document.getElementById('modalUnitType').innerText = currentSelectedUnit.type;
+      document.getElementById('modalUnitArea').innerText = currentSelectedUnit.area + ' sq. ft.';
+      document.getElementById('modalUnitRate').innerText = 'AED ' + currentSelectedUnit.rate;
+      document.getElementById('modalUnitCost').innerText = formatAED(currentSelectedUnit.totalAED);
+      document.getElementById('modalUnitParking').innerText = currentSelectedUnit.parking;
+      document.getElementById('modalUnitStatus').innerText = currentSelectedUnit.status;
+      document.getElementById('unitDetailModal').classList.remove('hidden');
+    }
+    function closeUnitDetailModal() {
+      document.getElementById('unitDetailModal').classList.add('hidden');
+    }
+
+    function holdUnitFromModal() {
+      if (currentSelectedUnit) {
+        currentSelectedUnit.status = 'On Hold';
+        renderInventoryGrid();
+        closeUnitDetailModal();
+        alert(`Unit ${currentSelectedUnit.unitNo} put on 24-Hour Hold.`);
+      }
+    }
+
+    function openAddFloorUnitModal() {
+      const unitNo = prompt("Enter Unit Number (e.g. A-402):");
+      if (!unitNo) return;
+      const price = parseFloat(prompt("Enter Total Price in AED (e.g. 1250000):") || 1200000);
+      inventoryData.push({
+        unitNo: unitNo, tower: document.getElementById('inventoryTowerSelect').value,
+        floor: 'Floor 4', type: '2 BHK Apartment', area: 1300, rate: 960, totalAED: price, status: 'Available', parking: 'Covered Bay'
+      });
+      renderInventoryGrid();
+      alert(`Unit ${unitNo} added successfully!`);
+    }
+
+    // ================= COLLECTIONS & PAYMENTS =================
+    function renderCollectionsTable() {
+      const tbody = document.getElementById('collectionsTableBody');
+      tbody.innerHTML = '';
+      collectionsData.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/50 border-b border-slate-800";
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-amber-400">${c.ref}</td>
+          <td class="p-3">
+            <span class="font-semibold block text-slate-100">${c.customer}</span>
+            <span class="text-[10px] text-slate-400">Unit ${c.unit}</span>
+          </td>
+          <td class="p-3 text-slate-300">${c.milestone}</td>
+          <td class="p-3 font-bold text-amber-400">${formatAED(c.amount)}</td>
+          <td class="p-3">${c.mode}</td>
+          <td class="p-3"><span class="underline text-indigo-400">${c.receiptFile}</span></td>
+          <td class="p-3">
+            ${c.verified ? `<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">Verified</span>` :
+            `<button onclick="verifyPayment('${c.ref}')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded">Verify Now</button>`}
+          </td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="deleteCollection('${c.ref}')" class="bg-rose-900/60 text-rose-300 text-[10px] px-2 py-1 rounded">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openRecordPaymentModal() {
+      const select = document.getElementById('payBookingSelect');
+      select.innerHTML = '';
+      bookingsData.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.innerText = `${b.customer} (Unit ${b.unit}) - ${b.id}`;
+        select.appendChild(opt);
+      });
+      document.getElementById('recordPaymentModal').classList.remove('hidden');
+    }
+    function closeRecordPaymentModal() {
+      document.getElementById('recordPaymentModal').classList.add('hidden');
+    }
+
+    function previewReceiptUpload(e) {
+      if (e.target.files[0]) {
+        document.getElementById('receiptFileName').innerText = 'Attached: ' + e.target.files[0].name;
+      }
+    }
+
+    function savePaymentEntry(e) {
+      e.preventDefault();
+      const bookingId = document.getElementById('payBookingSelect').value;
+      const amount = parseFloat(document.getElementById('payAmount').value);
+      const mode = document.getElementById('payMode').value;
+      const txn = document.getElementById('payTxnRef').value;
+      const booking = bookingsData.find(b => b.id === bookingId);
+
+      collectionsData.push({
+        ref: 'DEM-' + Math.floor(400 + Math.random() * 600),
+        customer: booking ? booking.customer : 'Sharjah Buyer',
+        unit: booking ? booking.unit : 'A-101',
+        milestone: 'Construction Milestone Payment',
+        amount: amount, mode: `${mode} (${txn})`, receiptFile: 'bank_slip.pdf', verified: false
+      });
+      renderCollectionsTable();
+      closeRecordPaymentModal();
+      alert('Payment receipt recorded and submitted to Accounts team!');
+    }
+
+    function verifyPayment(ref) {
+      const item = collectionsData.find(c => c.ref === ref);
+      if (item) { item.verified = true; renderCollectionsTable(); alert(`Payment reference ${ref} verified.`); }
+    }
+    function deleteCollection(ref) {
+      if (confirm('Delete this collection record?')) {
+        collectionsData = collectionsData.filter(c => c.ref !== ref);
+        renderCollectionsTable();
+      }
+    }
+
+    // ================= OTHER MODULE RENDERERS (QUOTATIONS, BOOKINGS, CUSTOMERS, HANDOVER, SERVICE) =================
+    function renderQuotationsTable() {
+      const tbody = document.getElementById('quotationsTableBody');
+      tbody.innerHTML = '';
+      quotationsData.forEach((q, idx) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+            <td class="p-3 font-mono font-bold text-amber-400">${q.id}</td>
+            <td class="p-3 font-semibold">${q.customer}</td>
+            <td class="p-3">Unit ${q.unit}</td>
+            <td class="p-3">${formatAED(q.basePrice)}</td>
+            <td class="p-3 font-bold text-amber-400">${formatAED(q.totalTax)}</td>
+            <td class="p-3 text-rose-400">${formatAED(q.discount)}</td>
+            <td class="p-3"><span class="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded">${q.status}</span></td>
+            <td class="p-3 text-center space-x-1">
+              <button class="bg-indigo-600 text-white px-2 py-1 rounded text-[10px]">Convert SPA</button>
+              <button onclick="quotationsData.splice(${idx},1); renderQuotationsTable();" class="bg-rose-900/60 text-rose-300 px-2 py-1 rounded text-[10px]">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderBookingsTable() {
+      const tbody = document.getElementById('bookingsTableBody');
+      tbody.innerHTML = '';
+      bookingsData.forEach((b, idx) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+            <td class="p-3 font-mono font-bold text-amber-400">${b.id}</td>
+            <td class="p-3">
+              <span class="font-semibold block">${b.customer}</span>
+              <span class="text-[10px] text-slate-400">Co: ${b.coApplicant}</span>
+            </td>
+            <td class="p-3">Unit ${b.unit}</td>
+            <td class="p-3 font-bold text-amber-400">${formatAED(b.agreementVal)}</td>
+            <td class="p-3">${formatAED(b.bookingPaid)}</td>
+            <td class="p-3"><span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-2 py-0.5 rounded">${b.draftStatus}</span></td>
+            <td class="p-3"><span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> Approved</span></td>
+            <td class="p-3 text-center">
+              <button onclick="bookingsData.splice(${idx},1); renderBookingsTable();" class="bg-rose-900/60 text-rose-300 px-2 py-1 rounded text-[10px]">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderCustomersList() {
+      const sidebar = document.getElementById('customerListSidebar');
+      sidebar.innerHTML = '';
+      bookingsData.forEach((b, idx) => {
+        const item = document.createElement('div');
+        item.className = "p-3 bg-slate-800/80 rounded-xl hover:bg-slate-700/80 cursor-pointer border border-slate-700/60";
+        item.onclick = () => showCustomer360Detail(b);
+        item.innerHTML = `
+          <p class="font-bold text-slate-100">${b.customer}</p>
+          <p class="text-[10px] text-slate-400">Unit ${b.unit} • EID: 784-1990-#######-1</p>
+        `;
+        sidebar.appendChild(item);
+        if (idx === 0) showCustomer360Detail(b);
+      });
+    }
+
+    function showCustomer360Detail(b) {
+      const panel = document.getElementById('customerDetailPanel');
+      panel.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div>
+              <h2 class="text-lg font-bold text-white">${b.customer}</h2>
+              <p class="text-xs text-slate-400">Primary Buyer • Sharjah Resident • Unit ${b.unit}</p>
+            </div>
+            <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold">Emirates ID Verified</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs bg-slate-800/60 p-3 rounded-xl border border-slate-700/60">
+            <div><span class="text-slate-400">SPA Value:</span> <span class="font-bold text-white block">${formatAED(b.agreementVal)}</span></div>
+            <div><span class="text-slate-400">Deposit Paid:</span> <span class="font-bold text-amber-400 block">${formatAED(b.bookingPaid)}</span></div>
+            <div><span class="text-slate-400">Co-Applicant:</span> <span class="font-semibold text-white block">${b.coApplicant}</span></div>
+            <div><span class="text-slate-400">SPA Status:</span> <span class="font-semibold text-indigo-400 block">${b.draftStatus}</span></div>
+          </div>
+          <div class="space-y-2 text-xs">
+            <h3 class="font-bold text-slate-200">Sharjah Baladiya & Legal Document Checklist</h3>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="p-2 bg-slate-800 rounded flex justify-between"><span>Emirates ID</span><span class="text-emerald-400 font-bold">Verified</span></div>
+              <div class="p-2 bg-slate-800 rounded flex justify-between"><span>Passport & Visa</span><span class="text-emerald-400 font-bold">Verified</span></div>
+              <div class="p-2 bg-slate-800 rounded flex justify-between"><span>SPA Signature</span><span class="text-emerald-400 font-bold">Executed</span></div>
+              <div class="p-2 bg-slate-800 rounded flex justify-between"><span>SEWA Utility Form</span><span class="text-amber-400 font-bold">Pending</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHandoverTable() {
+      const tbody = document.getElementById('handoverTableBody');
+      tbody.innerHTML = '';
+      handoverData.forEach((h, idx) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800">
+            <td class="p-3 font-bold text-amber-400">${h.unit}</td>
+            <td class="p-3 font-semibold">${h.customer}</td>
+            <td class="p-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px]">${h.baladiya}</span></td>
+            <td class="p-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px]">${h.sewa}</span></td>
+            <td class="p-3"><span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px]">${h.civDef}</span></td>
+            <td class="p-3 font-semibold text-slate-300">${h.status}</td>
+            <td class="p-3 text-center space-x-1">
+              <button class="bg-amber-600 text-slate-950 font-bold px-2 py-1 rounded text-[10px]">Issue Key NOC</button>
+              <button onclick="handoverData.splice(${idx},1); renderHandoverTable();" class="bg-rose-900/60 text-rose-300 px-2 py-1 rounded text-[10px]">Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderServiceTable() {
+      const tbody = document.getElementById('serviceTableBody');
+      tbody.innerHTML = '';
+      serviceTickets.forEach((t, idx) => {
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800">
+            <td class="p-3 font-mono font-bold text-rose-400">${t.id}</td>
+            <td class="p-3">
+              <span class="font-semibold block">${t.customer}</span>
+              <span class="text-[10px] text-slate-400">Unit ${t.unit}</span>
+            </td>
+            <td class="p-3">${t.category}</td>
+            <td class="p-3 text-slate-300">${t.desc}</td>
+            <td class="p-3">${t.staff}</td>
+            <td class="p-3"><span class="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-0.5 rounded">${t.status}</span></td>
+            <td class="p-3 text-center">
+              <button onclick="serviceTickets.splice(${idx},1); renderServiceTable();" class="bg-slate-800 text-slate-300 px-2 py-1 rounded text-[10px]">Close/Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openQuickActionModal() { switchTab('leads'); openAddLeadModal(); }
+    function openAddTaskModal() { alert('Task scheduler dialog opened.'); }
+    function openCreateQuotationModal() { alert('Cost sheet calculator dialog opened.'); }
+    function openNewBookingModal() { alert('New SPA Booking wizard opened.'); }
+    function openAddCustomerModal() { alert('Customer Emirates ID registration opened.'); }
+    function openAddHandoverModal() { alert('Baladiya handover checklist opened.'); }
+    function openLogServiceModal() { alert('Maintenance ticket form opened.'); }
+    function exportAgreementTemplate() { alert('Exporting Sharjah RERA-compliant SPA document (.docx)...'); }
+    function exportCRMReport(type) { alert(`Exporting Sharjah ${type.toUpperCase()} MIS report in Excel CSV format...`); }
+
+    window.onload = function() {
+      switchTab('dashboard');
+    }
+  </script>
+</body>
+</html>

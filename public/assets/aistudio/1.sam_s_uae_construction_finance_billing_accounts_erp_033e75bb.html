@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAM's UAE Construction Finance, Billing & Accounts ERP (Sharjah Edition)</title>
+  
+  <!-- Tailwind CSS & Lucide Icons & Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #060a14;
+      color: #f1f5f9;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090e1a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-nav {
+      background: rgba(6, 10, 20, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-badge {
+      font-size: 0.68rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-backdrop {
+      background: rgba(2, 6, 15, 0.88);
+      backdrop-filter: blur(10px);
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white; color: black; }
+      .glass-card { background: white; border: 1px solid #ccc; color: black; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP ENTERPRISE NAVBAR -->
+  <header class="glass-nav sticky top-0 z-40 px-6 py-3 flex items-center justify-between no-print">
+    <!-- Brand & Project Selector -->
+    <div class="flex items-center gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-emerald-600 to-cyan-400 p-0.5 shadow-lg shadow-emerald-500/20">
+          <div class="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="building-2" class="w-5 h-5 text-amber-400"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-2">
+            SAM ERP <span id="activeFormatBadge" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Sharjah UAE FIDIC Edition</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 mt-0.5">Construction Finance, Billing, Digital MB & Accounts Suite</p>
+        </div>
+      </div>
+
+      <div class="h-6 w-[1px] bg-slate-800"></div>
+
+      <!-- Active Project Selector -->
+      <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-800">
+        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
+        <div class="text-xs">
+          <span class="text-slate-400 block text-[10px]">ACTIVE PROJECT / SITE</span>
+          <select id="projectSelect" onchange="switchProject(this.value)" class="bg-transparent font-semibold text-slate-200 outline-none cursor-pointer">
+            <!-- Dynamic Options -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Format Selector -->
+      <div class="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-lg border border-slate-800">
+        <i data-lucide="globe" class="w-4 h-4 text-amber-400"></i>
+        <div class="text-xs">
+          <span class="text-slate-400 block text-[10px]">BILLING STANDARD</span>
+          <select id="formatSelector" onchange="switchAccountingFormat(this.value)" class="bg-transparent font-semibold text-amber-400 outline-none cursor-pointer">
+            <option value="UAE_FIDIC">UAE FIDIC & VAT (AED)</option>
+            <option value="INDIAN_GST">Indian CPWD & GST (₹ INR)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Quick Controls -->
+    <div class="flex items-center gap-3">
+      <button onclick="openNewProjectModal()" class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs rounded-xl shadow-lg transition">
+        <i data-lucide="plus" class="w-4 h-4"></i> New Site Profile
+      </button>
+
+      <button onclick="exportFinanceJSON()" title="Export JSON Backup" class="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-800 text-xs transition">
+        <i data-lucide="download" class="w-4 h-4"></i>
+      </button>
+
+      <label title="Import JSON Backup" class="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-lg border border-slate-800 text-xs cursor-pointer transition">
+        <i data-lucide="upload" class="w-4 h-4"></i>
+        <input type="file" id="importFileInput" class="hidden" accept=".json" onchange="importFinanceJSON(event)">
+      </label>
+
+      <div class="h-6 w-[1px] bg-slate-800"></div>
+
+      <!-- User Info -->
+      <div class="flex items-center gap-3">
+        <div class="text-right text-xs">
+          <div class="font-semibold text-slate-200">Tariq Al-Mansoori</div>
+          <div class="text-slate-400">Chief Commercial QS & Finance Lead</div>
+        </div>
+        <div class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-amber-400">
+          TM
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE LAYOUT -->
+  <div class="flex flex-1 overflow-hidden">
+    
+    <!-- LEFT NAVIGATION SIDEBAR (WIREFRAME 14 MODULES) -->
+    <aside class="w-64 glass-card border-r border-slate-800 flex flex-col justify-between shrink-0 no-print">
+      <div class="p-3 space-y-5 overflow-y-auto">
+
+        <!-- Group 1: Executive & Billing -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>1. Commercial & Billing</span>
+            <i data-lucide="receipt" class="w-3.5 h-3.5 text-blue-400"></i>
+          </div>
+          <nav class="space-y-0.5 text-xs">
+            <button onclick="switchTab('tab-dashboard')" id="nav-tab-dashboard" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition active-tab">
+              <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-400"></i>
+              <span>1. Billing Dashboard</span>
+            </button>
+            <button onclick="switchTab('tab-contractor-bills')" id="nav-tab-contractor-bills" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="file-check-2" class="w-4 h-4 text-blue-400"></i>
+              <span>2. Contractor RA / IPC Bills</span>
+            </button>
+            <button onclick="switchTab('tab-mb-book')" id="nav-tab-mb-book" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="ruler" class="w-4 h-4 text-pink-400"></i>
+              <span>3. Digital Measurement (MB)</span>
+            </button>
+            <button onclick="switchTab('tab-boq-master')" id="nav-tab-boq-master" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="list-tree" class="w-4 h-4 text-indigo-400"></i>
+              <span>4. BOQ & Revision Control</span>
+            </button>
+            <button onclick="switchTab('tab-work-orders')" id="nav-tab-work-orders" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="file-signature" class="w-4 h-4 text-purple-400"></i>
+              <span>5. FIDIC Work Orders (WO)</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Group 2: Variations & Cost Control -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>2. Variations & Recoveries</span>
+            <i data-lucide="calculator" class="w-3.5 h-3.5 text-amber-400"></i>
+          </div>
+          <nav class="space-y-0.5 text-xs">
+            <button onclick="switchTab('tab-extra-items')" id="nav-tab-extra-items" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span>6. Extra Items & Variations</span>
+            </button>
+            <button onclick="switchTab('tab-material-recovery')" id="nav-tab-material-recovery" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="scale" class="w-4 h-4 text-cyan-400"></i>
+              <span>7. Material & Advance Rec.</span>
+            </button>
+            <button onclick="switchTab('tab-deductions-engine')" id="nav-tab-deductions-engine" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+              <span>8. Deductions & Bill Abstract</span>
+            </button>
+            <button onclick="switchTab('tab-approval-workflow')" id="nav-tab-approval-workflow" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+              <span>9. Approval Matrix (8-Step)</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Group 3: Accounts & Procurement Integration -->
+        <div>
+          <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2 flex items-center justify-between">
+            <span>3. Financials & Stores</span>
+            <i data-lucide="building" class="w-3.5 h-3.5 text-teal-400"></i>
+          </div>
+          <nav class="space-y-0.5 text-xs">
+            <button onclick="switchTab('tab-payment-ledger')" id="nav-tab-payment-ledger" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="book-open-check" class="w-4 h-4 text-teal-400"></i>
+              <span>10. Payment & Sub Ledger</span>
+            </button>
+            <button onclick="switchTab('tab-cost-complete')" id="nav-tab-cost-complete" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
+              <span>11. Cost-to-Complete & S-Curve</span>
+            </button>
+            <button onclick="switchTab('tab-procurement-integration')" id="nav-tab-procurement-integration" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="truck" class="w-4 h-4 text-amber-400"></i>
+              <span>12. Procurement $\rightarrow$ Accounts</span>
+            </button>
+            <button onclick="switchTab('tab-tax-register')" id="nav-tab-tax-register" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="landmark" class="w-4 h-4 text-sky-400"></i>
+              <span>13. Statutory Tax & VAT</span>
+            </button>
+            <button onclick="switchTab('tab-directory-tree')" id="nav-tab-directory-tree" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-300 hover:bg-slate-800/60 transition">
+              <i data-lucide="folder-tree" class="w-4 h-4 text-purple-400"></i>
+              <span>14. Financial Directory Tree</span>
+            </button>
+          </nav>
+        </div>
+
+      </div>
+
+      <div class="p-3 border-t border-slate-800 text-[11px] text-slate-400 text-center">
+        SAM ERP Sharjah v26.10 • FIDIC Red Book
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN WORKSPACE -->
+    <main class="flex-1 bg-slate-950 p-6 overflow-y-auto">
+
+      <!-- ================= 1. BILLING DASHBOARD TAB ================= -->
+      <section id="tab-dashboard" class="tab-content space-y-6">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="layout-dashboard" class="text-emerald-400"></i> Executive Commercial Billing Dashboard
+            </h2>
+            <p class="text-xs text-slate-400">Real-time certified work values, retention holds, advance balances & contractor payables</p>
+          </div>
+          <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 transition">
+            <i class="fa-solid fa-print mr-1"></i> Print Commercial Overview
+          </button>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Contract Baseline Value</span>
+            <div id="kpi-contract-val" class="text-lg font-bold font-mono text-white">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">Approved Scope</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Certified Work To-Date</span>
+            <div id="kpi-certified-val" class="text-lg font-bold font-mono text-emerald-400">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">Gross IPC Certified</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Paid to Contractors</span>
+            <div id="kpi-paid-val" class="text-lg font-bold font-mono text-blue-400">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">Disbursed Funds</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Retention Funds Held</span>
+            <div id="kpi-retention-val" class="text-lg font-bold font-mono text-rose-400">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">10% FIDIC Holdback</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Mobilisation Adv. Balance</span>
+            <div id="kpi-advance-val" class="text-lg font-bold font-mono text-amber-400">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">Unrecovered Advance</span>
+          </div>
+          <div class="glass-card p-4 rounded-xl space-y-1">
+            <span class="text-slate-400 block uppercase font-medium text-[10px]">Outstanding Payables</span>
+            <div id="kpi-outstanding-val" class="text-lg font-bold font-mono text-cyan-400">AED 0.00</div>
+            <span class="text-[10px] text-slate-500">Net Unpaid Certified</span>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-xs uppercase text-slate-300 flex items-center gap-2">
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i> Cash Flow Cumulative Outturn S-Curve
+              </h3>
+              <span class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800">Monthly AED Trend</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-cashflow-curve"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-xs uppercase text-slate-300 flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i> Budget Category Allocation
+              </h3>
+              <span class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800">Split %</span>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-cost-breakdown"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Contractors Billing Overview Table -->
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-200">Contractor Billing Summary Register</h3>
+            <span class="text-xs text-slate-400">Live Trade Subcontracts</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Contractor & Scope</th>
+                  <th class="p-3">TRN Number</th>
+                  <th class="p-3 text-right">Order Value</th>
+                  <th class="p-3 text-right">Cumulative Certified</th>
+                  <th class="p-3 text-right">Retention (10%)</th>
+                  <th class="p-3 text-right">Net Paid</th>
+                  <th class="p-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-contractor-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 2. CONTRACTOR RA / IPC BILLS TAB ================= -->
+      <section id="tab-contractor-bills" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-check-2" class="text-blue-400"></i> Contractor RA Bills & Payment Applications
+            </h2>
+            <p class="text-xs text-slate-400">Running Account (RA) claims, FIDIC Interim Certificates (IPC), retention & VAT calculation</p>
+          </div>
+          <button onclick="openModal('modal-new-bill')" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-blue-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Raise New RA / IPC Claim
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 font-semibold uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Bill Ref #</th>
+                  <th class="p-3">Contractor Name</th>
+                  <th class="p-3">Claim Date</th>
+                  <th class="p-3 text-right">Gross Work Done</th>
+                  <th class="p-3 text-right">Retention (10%)</th>
+                  <th class="p-3 text-right">Adv. Recovery</th>
+                  <th class="p-3 text-right">5% UAE VAT</th>
+                  <th class="p-3 text-right">Net Payable</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bills-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Bills -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 3. DIGITAL MEASUREMENT BOOK (MB) TAB ================= -->
+      <section id="tab-mb-book" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="ruler" class="text-pink-400"></i> Digital Measurement Book (MB Register)
+            </h2>
+            <p class="text-xs text-slate-400">Itemized L $\times$ B $\times$ H measurements linked to Tower, Floor, Zone & Pour Cards</p>
+          </div>
+          <button onclick="openModal('modal-new-mb')" class="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-pink-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Log New Measurement
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">MB Sheet #</th>
+                  <th class="p-3">Location / Grid Zone</th>
+                  <th class="p-3">BOQ Item Description</th>
+                  <th class="p-3 text-right">Nos</th>
+                  <th class="p-3 text-right">Length (m)</th>
+                  <th class="p-3 text-right">Width (m)</th>
+                  <th class="p-3 text-right">Height (m)</th>
+                  <th class="p-3 text-right">Calculated Qty</th>
+                  <th class="p-3">Inspection Ref</th>
+                  <th class="p-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="mb-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic MB Entries -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4. BOQ & REVISION CONTROL TAB ================= -->
+      <section id="tab-boq-master" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="list-tree" class="text-indigo-400"></i> BOQ Master & Revision Control Engine
+            </h2>
+            <p class="text-xs text-slate-400">Bill of Quantities baselines, WBS cost codes & revision variations (Rev 00 $\rightarrow$ Rev 02)</p>
+          </div>
+          <button onclick="openModal('modal-new-boq')" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-indigo-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add BOQ Line Item
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">WBS Code</th>
+                  <th class="p-3">BOQ Item Description</th>
+                  <th class="p-3">Unit</th>
+                  <th class="p-3 text-right">Unit Rate (<span class="currency-label">AED</span>)</th>
+                  <th class="p-3 text-right">Rev 00 Original Qty</th>
+                  <th class="p-3 text-right">Rev 01 Adjusted Qty</th>
+                  <th class="p-3 text-right">Total Budget (<span class="currency-label">AED</span>)</th>
+                  <th class="p-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="boq-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic BOQ Items -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 5. FIDIC WORK ORDERS TAB ================= -->
+      <section id="tab-work-orders" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="file-signature" class="text-purple-400"></i> FIDIC Subcontract Work Orders (WO)
+            </h2>
+            <p class="text-xs text-slate-400">Contractual terms, supply matrices, mobilization terms & defect liability period (DLP)</p>
+          </div>
+          <button onclick="openModal('modal-new-wo')" class="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-purple-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Issue FIDIC Work Order
+          </button>
+        </div>
+
+        <div id="wo-list-container" class="space-y-4">
+          <!-- Dynamic WO Cards -->
+        </div>
+      </section>
+
+      <!-- ================= 6. EXTRA ITEMS & VARIATIONS TAB ================= -->
+      <section id="tab-extra-items" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="sparkles" class="text-amber-400"></i> Extra Items & Rate Analysis Engine
+            </h2>
+            <p class="text-xs text-slate-400">Derive custom non-BOQ variation rates: Material + Labour + Equipment + OH (10%) + Profit (10%)</p>
+          </div>
+          <button onclick="openModal('modal-new-variation')" class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-amber-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Log New Variation Item
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Variation Ref #</th>
+                  <th class="p-3">Item Description</th>
+                  <th class="p-3 text-right">Material Cost</th>
+                  <th class="p-3 text-right">Labour Cost</th>
+                  <th class="p-3 text-right">Plant/Equip</th>
+                  <th class="p-3 text-right">OH & Profit (20%)</th>
+                  <th class="p-3 text-right">Approved Rate</th>
+                  <th class="p-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="variations-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Variations -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 7. MATERIAL & ADVANCE RECOVERY TAB ================= -->
+      <section id="tab-material-recovery" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="scale" class="text-cyan-400"></i> Material Usage & Advance Recovery Ledger
+            </h2>
+            <p class="text-xs text-slate-400">Tracking Client-supplied steel/concrete/block issuance vs theoretical consumption & recovery rates</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 bg-slate-900/60 font-semibold text-xs text-slate-200">
+            Material Issuance & Over-Consumption Recovery Summary
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Material Category</th>
+                  <th class="p-3 text-right">Total Issued Qty</th>
+                  <th class="p-3 text-right">Theoretical Consumption</th>
+                  <th class="p-3 text-right">Allowable Wastage Norm</th>
+                  <th class="p-3 text-right">Excess Consumption</th>
+                  <th class="p-3 text-right">Recovery Rate (<span class="currency-label">AED</span>)</th>
+                  <th class="p-3 text-right">Deduction Value</th>
+                </tr>
+              </thead>
+              <tbody id="material-recovery-table-body" class="divide-y divide-slate-800/60">
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-medium text-slate-200">High Yield Steel Rebar (BS 4449)</td>
+                  <td class="p-3 text-right font-mono">120.0 MT</td>
+                  <td class="p-3 text-right font-mono">115.0 MT</td>
+                  <td class="p-3 text-right font-mono text-cyan-400">2.87 MT (2.5%)</td>
+                  <td class="p-3 text-right font-mono text-rose-400">2.13 MT</td>
+                  <td class="p-3 text-right font-mono">AED 2,800 / MT</td>
+                  <td class="p-3 text-right font-mono font-bold text-rose-400">AED 5,964.00</td>
+                </tr>
+                <tr class="hover:bg-slate-900/40">
+                  <td class="p-3 font-medium text-slate-200">Ready Mix Concrete C40/50 SRC</td>
+                  <td class="p-3 text-right font-mono">820.0 m³</td>
+                  <td class="p-3 text-right font-mono">808.0 m³</td>
+                  <td class="p-3 text-right font-mono text-cyan-400">12.12 m³ (1.5%)</td>
+                  <td class="p-3 text-right font-mono text-emerald-400">0.00 m³</td>
+                  <td class="p-3 text-right font-mono">AED 240 / m³</td>
+                  <td class="p-3 text-right font-mono font-bold text-emerald-400">AED 0.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 8. DEDUCTIONS & BILL ABSTRACT TAB ================= -->
+      <section id="tab-deductions-engine" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="sliders" class="text-rose-400"></i> Deductions Engine & RA Bill Abstract Configurator
+            </h2>
+            <p class="text-xs text-slate-400">Configurable parameters for retention, advance amortization, diesel/water, penalties & 5% VAT</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-slate-800 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label class="block text-slate-400 font-medium mb-1">Standard Retention Holdback (%)</label>
+              <input type="number" value="10" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+            </div>
+            <div>
+              <label class="block text-slate-400 font-medium mb-1">Mobilisation Advance Amortization (%)</label>
+              <input type="number" value="10" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+            </div>
+            <div>
+              <label class="block text-slate-400 font-medium mb-1">Sharjah Municipality Construction Cess (%)</label>
+              <input type="number" value="0.2" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 font-mono">
+            </div>
+          </div>
+          <div class="p-4 bg-slate-900/90 rounded-xl border border-slate-800 text-xs font-mono text-slate-300">
+            <strong>Formula Abstract:</strong> Net Certified = Gross Claim - Retention (10%) - Adv. Rec (10%) - Material Backcharges + MOS Credit (75%) + 5% UAE VAT
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 9. APPROVAL WORKFLOW TAB ================= -->
+      <section id="tab-approval-workflow" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="shield-check" class="text-emerald-400"></i> 8-Step Certification & Approval Workflow Matrix
+            </h2>
+            <p class="text-xs text-slate-400">Sequential sign-off matrix across site QS, PM, Consultant, and Finance Director</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+          <div class="glass-card p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
+            <span class="text-[10px] text-emerald-400 font-mono uppercase">Step 1: Contractor Submission</span>
+            <div class="font-bold text-slate-200">Contractor QS Signoff</div>
+            <div class="text-[10px] text-slate-400">Upload Measurement & Draft Invoice</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
+            <span class="text-[10px] text-emerald-400 font-mono uppercase">Step 2: Site QS Verification</span>
+            <div class="font-bold text-slate-200">Site Quantity Survey Engineer</div>
+            <div class="text-[10px] text-slate-400">Verify Joint Measurement (JMS)</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 space-y-2">
+            <span class="text-[10px] text-emerald-400 font-mono uppercase">Step 3: Project Manager Check</span>
+            <div class="font-bold text-slate-200">Project Manager Operations</div>
+            <div class="text-[10px] text-slate-400">Technical Progress Approval</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 space-y-2">
+            <span class="text-[10px] text-blue-400 font-mono uppercase">Step 4: Consultant QS Certification</span>
+            <div class="font-bold text-slate-200">Khatib & Alami PMC QS</div>
+            <div class="text-[10px] text-slate-400">Issue Interim Payment Cert (IPC)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 10. PAYMENT LEDGER TAB ================= -->
+      <section id="tab-payment-ledger" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="book-open-check" class="text-teal-400"></i> Payment Register & Contractor Sub-Ledger
+            </h2>
+            <p class="text-xs text-slate-400">Certified bills, bank UTR transaction tracking, advance recoveries & closing balances</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">Payment Ref / UTR</th>
+                  <th class="p-3">Contractor Name</th>
+                  <th class="p-3">Disbursement Date</th>
+                  <th class="p-3 text-right">Certified Amount</th>
+                  <th class="p-3 text-right">Recoveries</th>
+                  <th class="p-3 text-right">Net Bank Release</th>
+                  <th class="p-3">Bank Account / Status</th>
+                </tr>
+              </thead>
+              <tbody id="payment-ledger-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Ledger -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 11. COST-TO-COMPLETE TAB ================= -->
+      <section id="tab-cost-complete" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="trending-up" class="text-blue-400"></i> Cost-to-Complete & Physical vs Financial Analytics
+            </h2>
+            <p class="text-xs text-slate-400">Contract Value $\rightarrow$ Certified $\rightarrow$ Uncertified Balance $\rightarrow$ Forecast at Completion</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <span class="text-slate-400 uppercase text-[10px]">Approved Contract Baseline</span>
+            <div id="cost-baseline-val" class="text-xl font-bold font-mono text-white">AED 0.00</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <span class="text-slate-400 uppercase text-[10px]">Financial Execution %</span>
+            <div id="cost-exec-pct" class="text-xl font-bold font-mono text-emerald-400">0.0%</div>
+          </div>
+          <div class="glass-card p-4 rounded-xl border border-slate-800 space-y-2">
+            <span class="text-slate-400 uppercase text-[10px]">Forecast Cost at Completion (EAC)</span>
+            <div id="cost-eac-val" class="text-xl font-bold font-mono text-amber-400">AED 0.00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 12. PROCUREMENT TO ACCOUNTS INTEGRATION TAB ================= -->
+      <section id="tab-procurement-integration" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="truck" class="text-amber-400"></i> Integrated Procurement $\rightarrow$ Accounts Payable Hub
+            </h2>
+            <p class="text-xs text-slate-400">Direct link between Material Requisitions (MR), Yard Stock, Purchase Orders (PO), GRN & Accounts Payable</p>
+          </div>
+          <button onclick="openModal('modal-new-ap-bill')" class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-amber-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Post Supplier Invoice from GRN
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="p-4 border-b border-slate-800 bg-slate-900/60 font-semibold text-xs text-slate-200">
+            Supplier Goods Receipt Notes (GRN) Pending Accounts Ledger Posting
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">GRN #</th>
+                  <th class="p-3">Supplier Name</th>
+                  <th class="p-3">Item Received</th>
+                  <th class="p-3 text-right">Accepted Qty</th>
+                  <th class="p-3 text-right">Invoice Gross (incl VAT)</th>
+                  <th class="p-3">Accounts Status</th>
+                </tr>
+              </thead>
+              <tbody id="procurement-accounts-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Procurement Entries -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 13. STATUTORY TAX REGISTER TAB ================= -->
+      <section id="tab-tax-register" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="landmark" class="text-sky-400"></i> Statutory Tax & 5% UAE VAT Compliance Register
+            </h2>
+            <p class="text-xs text-slate-400">Output VAT on Client Invoices vs Input VAT (ITC) on Supplier Bills for Federal Tax Authority (FTA) filing</p>
+          </div>
+          <button onclick="openModal('modal-new-tax')" class="flex items-center gap-2 px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs rounded-xl shadow-lg shadow-sky-500/20 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> Record VAT Entry
+          </button>
+        </div>
+
+        <div class="glass-card rounded-2xl border border-slate-800 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900 text-slate-400 uppercase text-[10px]">
+                <tr>
+                  <th class="p-3">VAT Period</th>
+                  <th class="p-3">Tax Category</th>
+                  <th class="p-3 text-right">Output Tax Collected</th>
+                  <th class="p-3 text-right">Input Tax Credit (ITC)</th>
+                  <th class="p-3 text-right">Net Tax Payable to FTA</th>
+                  <th class="p-3">Filing Status</th>
+                  <th class="p-3 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tax-table-body" class="divide-y divide-slate-800/60">
+                <!-- Dynamic Tax Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 14. FINANCIAL DIRECTORY TREE TAB ================= -->
+      <section id="tab-directory-tree" class="tab-content space-y-6 hidden">
+        <div class="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i data-lucide="folder-tree" class="text-purple-400"></i> Project Virtual Financial Directory Tree
+            </h2>
+            <p class="text-xs text-slate-400">Automated project document directory for audit compliance and archive export</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl border border-slate-800 font-mono text-xs space-y-3">
+          <div class="flex items-center text-amber-400 font-bold text-sm">
+            <i class="fa-solid fa-folder-open mr-2"></i> 📁 [<span id="folder-root-dir">SHJ_ALJADA_BLOCK_C_FINANCE</span>]
+          </div>
+
+          <div class="ml-6 space-y-3 border-l-2 border-slate-800 pl-4 text-xs text-slate-300 font-sans">
+            <div>
+              <div class="font-bold text-slate-100 font-mono">📂 01_Contract_Baseline_and_BOQ</div>
+              <div class="ml-6 text-slate-400 text-[11px] space-y-0.5 mt-1">
+                <div>📄 Approved_Contract_Agreement_FIDIC.pdf</div>
+                <div>📄 BOQ_Master_Revision_02.xlsx</div>
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-100 font-mono">📂 02_Contractor_RA_Bills_and_IPC</div>
+              <div class="ml-6 text-slate-400 text-[11px] space-y-0.5 mt-1">
+                <div>📄 Certified_IPC_RA01_AlBahar.pdf</div>
+                <div>📄 Digital_Measurement_Book_MB01.xlsx</div>
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-100 font-mono">📂 03_Procurement_Store_GRN_Invoices</div>
+              <div class="ml-6 text-slate-400 text-[11px] space-y-0.5 mt-1">
+                <div>📄 ReadyMix_Concrete_PO_GRN_Receipts.pdf</div>
+                <div>📄 Rebar_Steel_Lab_Test_Certificates.pdf</div>
+              </div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-100 font-mono">📂 04_VAT_and_Statutory_Compliance</div>
+              <div class="ml-6 text-slate-400 text-[11px] space-y-0.5 mt-1">
+                <div>📄 FTA_VAT_Return_Q3_2026.pdf</div>
+                <div>📄 Sharjah_Municipality_Cess_Receipts.pdf</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= ALL INTERACTIVE MODALS ================= -->
+
+  <!-- Modal: New Site Profile -->
+  <div id="modal-new-project" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-md p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="building-2" class="text-emerald-400"></i> Create New Sharjah Project Profile
+        </h3>
+        <button onclick="closeModal('modal-new-project')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewProjectModal(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Project Site Name</label>
+          <input type="text" id="m-proj-name" required placeholder="e.g. Muwaileh Commercial Tower Site 02" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Contract Code / Ref</label>
+          <input type="text" id="m-proj-code" required placeholder="SHJ-PRJ-2026-02" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Approved Contract Baseline (AED)</label>
+          <input type="number" id="m-proj-val" required placeholder="12500000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-project')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg">Create Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New RA Bill -->
+  <div id="modal-new-bill" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="file-check-2" class="text-blue-400"></i> Generate RA Bill / Payment Claim
+        </h3>
+        <button onclick="closeModal('modal-new-bill')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewBill(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Contractor / Subcontractor</label>
+          <input type="text" id="m-bill-contractor" required placeholder="Al-Bahar Structural LLC" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Bill Reference #</label>
+            <input type="text" id="m-bill-ref" required placeholder="RA-002" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Gross Claim Work Value (AED)</label>
+            <input type="number" id="m-bill-gross" required placeholder="450000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-bill')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg">Calculate & Issue RA Claim</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New MB Measurement -->
+  <div id="modal-new-mb" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="ruler" class="text-pink-400"></i> Log Digital Measurement Entry
+        </h3>
+        <button onclick="closeModal('modal-new-mb')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewMB(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Grid Location / Zone</label>
+          <input type="text" id="m-mb-loc" required placeholder="Tower A - Level 12 Slab Axis C1-C8" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Item Description</label>
+          <input type="text" id="m-mb-desc" required placeholder="Concrete Pour C40/50 SRC" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Nos</label>
+            <input type="number" id="m-mb-nos" value="1" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Length</label>
+            <input type="number" step="0.01" id="m-mb-l" value="10" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Width</label>
+            <input type="number" step="0.01" id="m-mb-b" value="5" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Height</label>
+            <input type="number" step="0.01" id="m-mb-h" value="0.3" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-mb')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-pink-600 text-white font-medium rounded-lg">Save Measurement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New BOQ Line -->
+  <div id="modal-new-boq" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="list-tree" class="text-indigo-400"></i> Add BOQ Line Item
+        </h3>
+        <button onclick="closeModal('modal-new-boq')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewBOQ(event)" class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">WBS Code</label>
+            <input type="text" id="m-boq-wbs" required placeholder="WBS-STR-005" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Unit of Measure</label>
+            <input type="text" id="m-boq-unit" required placeholder="m³, MT, m²" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">BOQ Item Description</label>
+          <input type="text" id="m-boq-desc" required placeholder="Internal Blockwork Plastering 20mm" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Unit Rate (AED)</label>
+            <input type="number" id="m-boq-rate" required placeholder="45" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Original Rev 00 Quantity</label>
+            <input type="number" id="m-boq-qty" required placeholder="5000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-boq')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg">Add BOQ Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New FIDIC WO -->
+  <div id="modal-new-wo" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="file-signature" class="text-purple-400"></i> Issue FIDIC Work Order
+        </h3>
+        <button onclick="closeModal('modal-new-wo')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewWO(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Subcontractor Trade Name</label>
+          <input type="text" id="m-wo-sub" required placeholder="Al-Bahar Structural LLC" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Package Title</label>
+          <input type="text" id="m-wo-title" required placeholder="Structural Concrete & Formwork Package" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Order Value (AED excl VAT)</label>
+          <input type="number" id="m-wo-val" required placeholder="2850000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-wo')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-purple-600 text-white font-medium rounded-lg">Issue Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New Variation -->
+  <div id="modal-new-variation" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="sparkles" class="text-amber-400"></i> Log Variation & Rate Analysis
+        </h3>
+        <button onclick="closeModal('modal-new-variation')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewVariation(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Variation Description</label>
+          <input type="text" id="m-var-desc" required placeholder="Additional Basement Waterproofing Injection Grouting" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-slate-400 mb-1">Material Cost</label>
+            <input type="number" id="m-var-mat" value="1000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Labour Cost</label>
+            <input type="number" id="m-var-lab" value="500" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Plant/Equip</label>
+            <input type="number" id="m-var-equ" value="200" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-variation')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-medium rounded-lg">Approve Rate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Post AP Bill from GRN -->
+  <div id="modal-new-ap-bill" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="truck" class="text-amber-400"></i> Post Supplier Bill from GRN
+        </h3>
+        <button onclick="closeModal('modal-new-ap-bill')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewAPBill(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Supplier Company Name</label>
+          <input type="text" id="m-ap-supp" required placeholder="Sharjah National Concrete Co. WLL" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Item Received</label>
+          <input type="text" id="m-ap-item" required placeholder="Ready Mix Concrete C40/50" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Accepted Qty</label>
+            <input type="number" id="m-ap-qty" required placeholder="120" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Invoice Value incl 5% VAT (AED)</label>
+            <input type="number" id="m-ap-val" required placeholder="30240" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-ap-bill')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-amber-600 text-white font-medium rounded-lg">Post to Accounts Payable</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Record VAT Entry -->
+  <div id="modal-new-tax" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl border border-slate-800 w-full max-w-lg p-6 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+          <i data-lucide="landmark" class="text-sky-400"></i> Record VAT Entry
+        </h3>
+        <button onclick="closeModal('modal-new-tax')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="saveNewTax(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">VAT Period</label>
+          <input type="text" id="m-tax-period" required placeholder="Q3 2026 (July-Sept)" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Output Tax Collected (AED)</label>
+            <input type="number" id="m-tax-output" required placeholder="50000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Input Tax Credit (ITC)</label>
+            <input type="number" id="m-tax-input" required placeholder="20000" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 outline-none">
+          </div>
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-new-tax')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-sky-600 text-white font-medium rounded-lg">Post Tax Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- JAVASCRIPT APP LOGIC ENGINE -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Default Seed Projects State
+    let projectsData = [
+      {
+        id: "PRJ-ALJADA",
+        name: "Aljada Residential Towers (Block C - Sharjah)",
+        code: "SHJ-ALJ-2026",
+        format: "UAE_FIDIC",
+        contractVal: 24500000,
+        bills: [
+          { id: "RA-001", contractor: "Al-Bahar Structural Subcontracting LLC", date: "2026-09-25", gross: 1200000, retention: 120000, advRec: 120000, vat: 48000, net: 1008000, status: "Certified" },
+          { id: "RA-002", contractor: "Al-Bahar Structural Subcontracting LLC", date: "2026-10-25", gross: 950000, retention: 95000, advRec: 95000, vat: 38000, net: 798000, status: "Submitted" }
+        ],
+        mb: [
+          { id: "MB-001", loc: "Tower A - Level 08 Slab", desc: "Concrete Pour C40/50 SRC", nos: 1, l: 30, b: 20, h: 0.35, qty: 210, ref: "INSP-CONC-08" },
+          { id: "MB-002", loc: "Tower A - Level 08 Columns", desc: "Rebar Steel 20mm Grade 500B", nos: 48, l: 3.5, b: 1, h: 1, qty: 12.5, ref: "INSP-STEL-08" }
+        ],
+        boq: [
+          { wbs: "WBS-CONC-001", desc: "Ready Mix Concrete C40/50 SRC", unit: "m³", rate: 240, rev0: 8500, rev1: 8500, budget: 2040000 },
+          { wbs: "WBS-STEL-002", desc: "High Yield Rebar Steel Grade 500B", unit: "MT", rate: 2800, rev0: 1200, rev1: 1250, budget: 3500000 }
+        ],
+        wo: [
+          { id: "WO-FIDIC-001", sub: "Al-Bahar Structural LLC", title: "Main Civil & Concrete Subcontract", val: 8500000, cert: 2150000, status: "Active" }
+        ],
+        variations: [
+          { id: "VAR-001", desc: "Extra Raft Waterproofing Injection Grouting", mat: 12000, lab: 5000, equ: 2000, rate: 22800, status: "Approved Consultant" }
+        ],
+        procurementAP: [
+          { grn: "GRN-SHJ-041", supplier: "Sharjah National Concrete Co. WLL", item: "Concrete C40/50 SRC (120 m³)", qty: "120 m³", val: 30240, status: "Posted Accounts" }
+        ],
+        taxes: [
+          { period: "Q3 2026 (July-Sept)", cat: "UAE 5% VAT", output: 108000, input: 45000, net: 63000, status: "Filed & Paid" }
+        ]
+      }
+    ];
+
+    let currentProjectId = "PRJ-ALJADA";
+    let cashflowChart = null;
+    let costChart = null;
+
+    // Window Load Init
+    window.onload = function() {
+      loadStorageData();
+      renderProjectDropdown();
+      loadActiveProject();
+      initCharts();
+    };
+
+    function getActiveProject() {
+      return projectsData.find(p => p.id === currentProjectId) || projectsData[0];
+    }
+
+    function saveStorageData() {
+      localStorage.setItem("sam_erp_sharjah_data_2026", JSON.stringify(projectsData));
+    }
+
+    function loadStorageData() {
+      const saved = localStorage.getItem("sam_erp_sharjah_data_2026");
+      if (saved) {
+        try { projectsData = JSON.parse(saved); } catch(e) { console.error("Storage parse error", e); }
+      }
+    }
+
+    function renderProjectDropdown() {
+      const sel = document.getElementById("projectSelect");
+      sel.innerHTML = projectsData.map(p => `<option value="${p.id}">${p.name}</option>`).join("");
+      sel.value = currentProjectId;
+    }
+
+    function switchProject(id) {
+      currentProjectId = id;
+      loadActiveProject();
+    }
+
+    function switchAccountingFormat(format) {
+      const p = getActiveProject();
+      p.format = format;
+      saveStorageData();
+      loadActiveProject();
+    }
+
+    function loadActiveProject() {
+      const p = getActiveProject();
+      document.getElementById("formatSelector").value = p.format;
+      document.getElementById("activeFormatBadge").innerText = p.format === "UAE_FIDIC" ? "Sharjah UAE FIDIC Edition" : "Indian CPWD GST Standard";
+
+      updateCurrencyLabels(p.format);
+      renderDashboardKPIs();
+      renderBillsTable();
+      renderMBTable();
+      renderBOQTable();
+      renderWOCards();
+      renderVariationsTable();
+      renderProcurementAPTable();
+      renderTaxTable();
+      renderPaymentLedgerTable();
+      updateDirectoryNames();
+    }
+
+    function updateCurrencyLabels(format) {
+      const symbol = format === "UAE_FIDIC" ? "AED" : "₹";
+      document.querySelectorAll(".currency-label").forEach(el => el.innerText = symbol);
+    }
+
+    // --- TAB SWITCHER ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('aside button').forEach(el => el.classList.remove('active-tab', 'bg-slate-800/80', 'text-emerald-400'));
+
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      const btn = document.getElementById('nav-' + tabId);
+      if (btn) btn.classList.add('active-tab', 'bg-slate-800/80', 'text-emerald-400');
+    }
+
+    // --- MODAL CONTROLS ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // --- RENDER FUNCTIONS ---
+
+    function renderDashboardKPIs() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+
+      const totalGrossCertified = p.bills.reduce((sum, b) => sum + (b.gross || 0), 0);
+      const totalPaid = p.bills.filter(b => b.status === "Certified").reduce((sum, b) => sum + (b.net || 0), 0);
+      const totalRetention = p.bills.reduce((sum, b) => sum + (b.retention || 0), 0);
+      const totalAdvRec = p.bills.reduce((sum, b) => sum + (b.advRec || 0), 0);
+      const outstanding = totalGrossCertified - totalPaid;
+
+      document.getElementById("kpi-contract-val").innerText = `${symbol} ${p.contractVal.toLocaleString()}`;
+      document.getElementById("kpi-certified-val").innerText = `${symbol} ${totalGrossCertified.toLocaleString()}`;
+      document.getElementById("kpi-paid-val").innerText = `${symbol} ${totalPaid.toLocaleString()}`;
+      document.getElementById("kpi-retention-val").innerText = `${symbol} ${totalRetention.toLocaleString()}`;
+      document.getElementById("kpi-advance-val").innerText = `${symbol} ${totalAdvRec.toLocaleString()}`;
+      document.getElementById("kpi-outstanding-val").innerText = `${symbol} ${outstanding.toLocaleString()}`;
+
+      // Cost to complete tab metrics
+      document.getElementById("cost-baseline-val").innerText = `${symbol} ${p.contractVal.toLocaleString()}`;
+      const execPct = ((totalGrossCertified / p.contractVal) * 100).toFixed(1);
+      document.getElementById("cost-exec-pct").innerText = `${execPct}%`;
+      document.getElementById("cost-eac-val").innerText = `${symbol} ${p.contractVal.toLocaleString()}`;
+
+      // Contractor Summary Table
+      const contractorBody = document.getElementById("dashboard-contractor-body");
+      contractorBody.innerHTML = p.wo.map(w => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3"><div class="font-bold text-slate-200">${w.sub}</div><div class="text-[10px] text-slate-500">${w.title}</div></td>
+          <td class="p-3 font-mono text-slate-400">100382910400003</td>
+          <td class="p-3 text-right font-mono text-slate-200">${symbol} ${w.val.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-emerald-400">${symbol} ${totalGrossCertified.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-rose-400">${symbol} ${totalRetention.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-blue-400">${symbol} ${totalPaid.toLocaleString()}</td>
+          <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">${w.status}</span></td>
+        </tr>
+      `).join("");
+
+      updateCharts();
+    }
+
+    function renderBillsTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("bills-table-body");
+
+      tbody.innerHTML = p.bills.map((b, idx) => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono font-bold text-blue-400">${b.id}</td>
+          <td class="p-3 font-medium text-slate-200">${b.contractor}</td>
+          <td class="p-3 text-slate-400">${b.date}</td>
+          <td class="p-3 text-right font-mono text-slate-100">${symbol} ${b.gross.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-rose-400">${symbol} ${b.retention.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-amber-400">${symbol} ${b.advRec.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-emerald-400">${symbol} ${b.vat.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono font-bold text-emerald-400">${symbol} ${b.net.toLocaleString()}</td>
+          <td class="p-3"><span class="status-badge ${b.status === 'Certified' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${b.status}</span></td>
+          <td class="p-3 text-center">
+            <button onclick="deleteBill(${idx})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderMBTable() {
+      const tbody = document.getElementById("mb-table-body");
+      const p = getActiveProject();
+
+      tbody.innerHTML = p.mb.map((m, idx) => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono text-pink-400">${m.id}</td>
+          <td class="p-3 text-slate-200">${m.loc}</td>
+          <td class="p-3 text-slate-300">${m.desc}</td>
+          <td class="p-3 text-right font-mono">${m.nos}</td>
+          <td class="p-3 text-right font-mono">${m.l}</td>
+          <td class="p-3 text-right font-mono">${m.b}</td>
+          <td class="p-3 text-right font-mono">${m.h}</td>
+          <td class="p-3 text-right font-mono font-bold text-emerald-400">${m.qty}</td>
+          <td class="p-3 font-mono text-slate-400">${m.ref}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteMB(${idx})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderBOQTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("boq-table-body");
+
+      tbody.innerHTML = p.boq.map((b, idx) => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono text-indigo-400">${b.wbs}</td>
+          <td class="p-3 font-medium text-slate-200">${b.desc}</td>
+          <td class="p-3 text-slate-400">${b.unit}</td>
+          <td class="p-3 text-right font-mono">${symbol} ${b.rate.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-slate-400">${b.rev0}</td>
+          <td class="p-3 text-right font-mono text-amber-400">${b.rev1}</td>
+          <td class="p-3 text-right font-mono font-bold text-emerald-400">${symbol} ${b.budget.toLocaleString()}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteBOQ(${idx})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function renderWOCards() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const container = document.getElementById("wo-list-container");
+
+      container.innerHTML = p.wo.map(w => `
+        <div class="glass-card rounded-2xl border border-slate-800 p-5 space-y-3">
+          <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-sm font-bold text-purple-400">${w.id}</span>
+              <div class="font-semibold text-sm text-slate-100">${w.sub}</div>
+              <span class="status-badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${w.status}</span>
+            </div>
+            <div class="font-mono text-xs text-slate-300">Order Value: <strong class="text-purple-300 text-sm">${symbol} ${w.val.toLocaleString()}</strong></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-800/80">
+            <div><span class="text-slate-400 block text-[10px]">PACKAGE SCOPE</span><p class="text-slate-200 font-medium">${w.title}</p></div>
+            <div><span class="text-slate-400 block text-[10px]">MEASUREMENT NORM</span><p class="text-slate-200 font-medium">POMI Standards</p></div>
+            <div><span class="text-slate-400 block text-[10px]">TERMS</span><p class="text-slate-200 font-medium">10% Retention | 10% Advance Rec</p></div>
+            <div><span class="text-slate-400 block text-[10px]">CERTIFIED TO DATE</span><p class="text-emerald-400 font-mono font-bold">${symbol} ${w.cert.toLocaleString()}</p></div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderVariationsTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("variations-table-body");
+
+      tbody.innerHTML = p.variations.map((v, idx) => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono text-amber-400">${v.id}</td>
+          <td class="p-3 text-slate-200">${v.desc}</td>
+          <td class="p-3 text-right font-mono">${symbol} ${v.mat.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono">${symbol} ${v.lab.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono">${symbol} ${v.equ.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-cyan-400">20% Overhead & Profit</td>
+          <td class="p-3 text-right font-mono font-bold text-amber-400">${symbol} ${v.rate.toLocaleString()}</td>
+          <td class="p-3 text-center"><span class="status-badge bg-emerald-500/10 text-emerald-400">${v.status}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    function renderProcurementAPTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("procurement-accounts-body");
+
+      tbody.innerHTML = p.procurementAP.map(pr => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono text-amber-400">${pr.grn}</td>
+          <td class="p-3 text-slate-200 font-medium">${pr.supplier}</td>
+          <td class="p-3 text-slate-300">${pr.item}</td>
+          <td class="p-3 text-right font-mono">${pr.qty}</td>
+          <td class="p-3 text-right font-mono font-bold text-emerald-400">${symbol} ${pr.val.toLocaleString()}</td>
+          <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">${pr.status}</span></td>
+        </tr>
+      `).join("");
+    }
+
+    function renderTaxTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("tax-table-body");
+
+      tbody.innerHTML = p.taxes.map((t, idx) => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 text-slate-200 font-medium">${t.period}</td>
+          <td class="p-3 text-slate-400">${t.cat}</td>
+          <td class="p-3 text-right font-mono text-slate-100">${symbol} ${t.output.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-emerald-400">${symbol} ${t.input.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono font-bold text-sky-400">${symbol} ${t.net.toLocaleString()}</td>
+          <td class="p-3"><span class="status-badge bg-emerald-500/10 text-emerald-400">${t.status}</span></td>
+          <td class="p-3 text-center"><button onclick="deleteTax(${idx})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPaymentLedgerTable() {
+      const p = getActiveProject();
+      const symbol = p.format === "UAE_FIDIC" ? "AED" : "₹";
+      const tbody = document.getElementById("payment-ledger-table-body");
+
+      tbody.innerHTML = p.bills.map(b => `
+        <tr class="hover:bg-slate-900/40">
+          <td class="p-3 font-mono text-teal-400">UTR-SHJ-2026-9012</td>
+          <td class="p-3 font-medium text-slate-200">${b.contractor}</td>
+          <td class="p-3 text-slate-400">${b.date}</td>
+          <td class="p-3 text-right font-mono">${symbol} ${b.gross.toLocaleString()}</td>
+          <td class="p-3 text-right font-mono text-rose-400">${symbol} ${(b.retention + b.advRec).toLocaleString()}</td>
+          <td class="p-3 text-right font-mono font-bold text-emerald-400">${symbol} ${b.net.toLocaleString()}</td>
+          <td class="p-3"><span class="text-emerald-400 font-medium flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Disbursed (ENBD Bank)</span></td>
+        </tr>
+      `).join("");
+    }
+
+    function updateDirectoryNames() {
+      const p = getActiveProject();
+      document.getElementById("folder-root-dir").innerText = p.code + "_FINANCE";
+    }
+
+    // --- SAVE / ADD FUNCTIONS ---
+
+    function saveNewProjectModal(e) {
+      e.preventDefault();
+      const name = document.getElementById("m-proj-name").value;
+      const code = document.getElementById("m-proj-code").value;
+      const val = parseFloat(document.getElementById("m-proj-val").value) || 10000000;
+
+      const newProj = {
+        id: "PRJ-" + Date.now(),
+        name: name,
+        code: code,
+        format: "UAE_FIDIC",
+        contractVal: val,
+        bills: [],
+        mb: [],
+        boq: [],
+        wo: [],
+        variations: [],
+        procurementAP: [],
+        taxes: []
+      };
+
+      projectsData.push(newProj);
+      currentProjectId = newProj.id;
+      saveStorageData();
+      closeModal("modal-new-project");
+      renderProjectDropdown();
+      loadActiveProject();
+    }
+
+    function saveNewBill(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const contractor = document.getElementById("m-bill-contractor").value;
+      const ref = document.getElementById("m-bill-ref").value;
+      const gross = parseFloat(document.getElementById("m-bill-gross").value) || 0;
+
+      const retention = gross * 0.10;
+      const advRec = gross * 0.10;
+      const vat = (gross - retention - advRec) * 0.05;
+      const net = gross - retention - advRec + vat;
+
+      p.bills.push({
+        id: ref,
+        contractor: contractor,
+        date: new Date().toISOString().split('T')[0],
+        gross: gross,
+        retention: retention,
+        advRec: advRec,
+        vat: vat,
+        net: net,
+        status: "Certified"
+      });
+
+      saveStorageData();
+      closeModal("modal-new-bill");
+      loadActiveProject();
+    }
+
+    function deleteBill(idx) {
+      const p = getActiveProject();
+      p.bills.splice(idx, 1);
+      saveStorageData();
+      loadActiveProject();
+    }
+
+    function saveNewMB(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const loc = document.getElementById("m-mb-loc").value;
+      const desc = document.getElementById("m-mb-desc").value;
+      const nos = parseFloat(document.getElementById("m-mb-nos").value) || 1;
+      const l = parseFloat(document.getElementById("m-mb-l").value) || 0;
+      const b = parseFloat(document.getElementById("m-mb-b").value) || 0;
+      const h = parseFloat(document.getElementById("m-mb-h").value) || 0;
+
+      const qty = nos * l * (b || 1) * (h || 1);
+      const mbId = `MB-${Math.floor(100 + Math.random() * 900)}`;
+
+      p.mb.push({ id: mbId, loc: loc, desc: desc, nos: nos, l: l, b: b, h: h, qty: qty, ref: "INSP-LOG" });
+      saveStorageData();
+      closeModal("modal-new-mb");
+      renderMBTable();
+    }
+
+    function deleteMB(idx) {
+      const p = getActiveProject();
+      p.mb.splice(idx, 1);
+      saveStorageData();
+      renderMBTable();
+    }
+
+    function saveNewBOQ(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const wbs = document.getElementById("m-boq-wbs").value;
+      const desc = document.getElementById("m-boq-desc").value;
+      const unit = document.getElementById("m-boq-unit").value;
+      const rate = parseFloat(document.getElementById("m-boq-rate").value) || 0;
+      const qty = parseFloat(document.getElementById("m-boq-qty").value) || 0;
+
+      p.boq.push({ wbs: wbs, desc: desc, unit: unit, rate: rate, rev0: qty, rev1: qty, budget: rate * qty });
+      saveStorageData();
+      closeModal("modal-new-boq");
+      renderBOQTable();
+    }
+
+    function deleteBOQ(idx) {
+      const p = getActiveProject();
+      p.boq.splice(idx, 1);
+      saveStorageData();
+      renderBOQTable();
+    }
+
+    function saveNewWO(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const sub = document.getElementById("m-wo-sub").value;
+      const title = document.getElementById("m-wo-title").value;
+      const val = parseFloat(document.getElementById("m-wo-val").value) || 0;
+
+      p.wo.push({ id: `WO-FIDIC-${Math.floor(100 + Math.random() * 900)}`, sub: sub, title: title, val: val, cert: 0, status: "Active" });
+      saveStorageData();
+      closeModal("modal-new-wo");
+      renderWOCards();
+    }
+
+    function saveNewVariation(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const desc = document.getElementById("m-var-desc").value;
+      const mat = parseFloat(document.getElementById("m-var-mat").value) || 0;
+      const lab = parseFloat(document.getElementById("m-var-lab").value) || 0;
+      const equ = parseFloat(document.getElementById("m-var-equ").value) || 0;
+
+      const approved = (mat + lab + equ) * 1.20;
+      p.variations.push({ id: `VAR-${Math.floor(100 + Math.random() * 900)}`, desc: desc, mat: mat, lab: lab, equ: equ, rate: approved, status: "Approved Consultant" });
+
+      saveStorageData();
+      closeModal("modal-new-variation");
+      renderVariationsTable();
+    }
+
+    function saveNewAPBill(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const supp = document.getElementById("m-ap-supp").value;
+      const item = document.getElementById("m-ap-item").value;
+      const qty = document.getElementById("m-ap-qty").value;
+      const val = parseFloat(document.getElementById("m-ap-val").value) || 0;
+
+      p.procurementAP.push({ grn: `GRN-SHJ-${Math.floor(100 + Math.random() * 900)}`, supplier: supp, item: item, qty: qty, val: val, status: "Posted Accounts" });
+      saveStorageData();
+      closeModal("modal-new-ap-bill");
+      renderProcurementAPTable();
+    }
+
+    function saveNewTax(e) {
+      e.preventDefault();
+      const p = getActiveProject();
+      const period = document.getElementById("m-tax-period").value;
+      const out = parseFloat(document.getElementById("m-tax-output").value) || 0;
+      const inp = parseFloat(document.getElementById("m-tax-input").value) || 0;
+
+      p.taxes.push({ period: period, cat: "UAE 5% VAT", output: out, input: inp, net: out - inp, status: "Filed & Paid" });
+      saveStorageData();
+      closeModal("modal-new-tax");
+      renderTaxTable();
+    }
+
+    function deleteTax(idx) {
+      const p = getActiveProject();
+      p.taxes.splice(idx, 1);
+      saveStorageData();
+      renderTaxTable();
+    }
+
+    // --- CHARTS INITIALIZATION ---
+    function initCharts() {
+      const ctx1 = document.getElementById('chart-cashflow-curve').getContext('2d');
+      cashflowChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          datasets: [
+            { label: 'Cumulative Client Cash Inflow', data: [1.2, 2.5, 4.2, 6.8, 9.5, 12.8, 16.2, 19.5, 22.1, 24.5], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true },
+            { label: 'Cumulative Subcontractor Outflow', data: [0.9, 1.8, 3.2, 5.1, 7.2, 9.8, 12.5, 15.1, 17.8, 19.8], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      const ctx2 = document.getElementById('chart-cost-breakdown').getContext('2d');
+      costChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Concrete & Steel (45%)', 'Subcontracts (30%)', 'Overheads (10%)', 'UAE VAT/Cess (5%)', 'Margin (10%)'],
+          datasets: [{
+            data: [45, 30, 10, 5, 10],
+            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    }
+
+    function updateCharts() {
+      if (!cashflowChart || !costChart) return;
+      cashflowChart.update();
+      costChart.update();
+    }
+
+    // --- JSON BACKUP EXPORT & IMPORT ---
+    function exportFinanceJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectsData, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", "SAM_Sharjah_UAE_Finance_ERP_Backup.json");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    function importFinanceJSON(event) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            projectsData = imported;
+            currentProjectId = projectsData[0].id;
+            saveStorageData();
+            renderProjectDropdown();
+            loadActiveProject();
+            alert("Backup JSON successfully restored into ERP!");
+          }
+        } catch(err) {
+          alert("Invalid ERP JSON file format!");
+        }
+      };
+      reader.readAsText(event.target.files[0]);
+    }
+  </script>
+</body>
+</html>
